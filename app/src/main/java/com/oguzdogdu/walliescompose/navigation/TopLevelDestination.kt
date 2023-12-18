@@ -16,32 +16,45 @@
 
 package com.oguzdogdu.walliescompose.navigation
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountBox
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.features.home.HomeScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.home.collections.CollectionScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.home.favorites.FavoritesScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.home.settings.SettingsScreenNavigationRoute
 import com.oguzdogdu.walliescompose.navigation.utils.IconResource
-import com.oguzdogdu.walliescompose.navigation.utils.WalliesIcons
 
 enum class TopLevelDestination(
-    val icon: IconResource,
+    val icon: Int,
     val iconTextId: Int,
+    val route: String,
     val titleTextId: Int,
 ) {
     WALLPAPERS(
-        icon = IconResource.fromDrawableResource(WalliesIcons.WallpapersIcon),
+        route = HomeScreenNavigationRoute,
+        icon = R.drawable.wallpaper,
         iconTextId = R.string.wallpapers_title,
         titleTextId = R.string.wallpapers_title,
     ),
     COLLECTIONS(
-        icon = IconResource.fromDrawableResource(WalliesIcons.CollectionsIcon),
+        route = CollectionScreenNavigationRoute,
+        icon = R.drawable.collections,
         iconTextId = R.string.collections_title,
         titleTextId = R.string.collections_title,
     ),
     FAVORITES(
-        icon = IconResource.fromDrawableResource(WalliesIcons.FavoritesIcon),
+        route = FavoritesScreenNavigationRoute,
+        icon = R.drawable.favorite,
         iconTextId = R.string.favorites_title,
         titleTextId = R.string.favorites_title,
     ),
     SETTINGS(
-        icon = IconResource.fromDrawableResource(WalliesIcons.SettingsIcon),
+        route = SettingsScreenNavigationRoute,
+        icon = R.drawable.settings,
         iconTextId = R.string.settings_title,
         titleTextId = R.string.settings_title,
     ),
