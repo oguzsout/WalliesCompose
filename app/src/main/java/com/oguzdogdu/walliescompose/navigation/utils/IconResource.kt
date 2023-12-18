@@ -4,8 +4,10 @@ import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 
 class IconResource private constructor(
     @DrawableRes private val resID: Int?,
@@ -18,6 +20,11 @@ class IconResource private constructor(
             return painterResource(id = resID)
         }
         return rememberVectorPainter(image = imageVector!!)
+    }
+
+    @Composable
+    fun asImageVectorResource(): ImageVector? {
+        return resID?.let { ImageVector.vectorResource(id = it) }
     }
 
     companion object {
