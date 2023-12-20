@@ -1,21 +1,31 @@
 package com.oguzdogdu.walliescompose.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.R.font.googlesansmedium
 
-// Set of Material typography styles to start with
+val regular = FontFamily(Font(R.font.googlesansregular))
+val medium = FontFamily(Font(googlesansmedium))
+val bold = FontFamily(Font(R.font.googlesansbold))
 val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+    bodyMedium = TextStyle(
+        fontFamily = medium,
+        color = Color.Black,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
-    )
-    /* Other default text styles to override
+        fontSize = 12.sp
+    ), titleSmall = TextStyle(
+        fontFamily = medium,
+        color = Color.Unspecified,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp
+    )/* Other default text styles to override
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
