@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WalliesCompose</string>
+    <string name="app_name">Wallies</string>
     <string name="app_logo">App Logo</string>
     <string name="internet_error">There may be a problem with your internet connection. You can check your internet connection and try again.</string>
     <string name="retry_button">Try Again</string>
