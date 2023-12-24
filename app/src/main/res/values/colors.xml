@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -7,4 +7,45 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="background_icon">#24292E</color>
+    <color name="background_main_icon">#27004E</color>
+    <color name="background_app_icon">#F3F3F3</color>
+    <color name="background_search">#E3E4E9</color>
+    <color name="background_tab">#e7ecef</color>
+    <color name="background_button">#9575CD</color>
+    <color name="appbar_title_color" tools:ignore="MissingDefaultResource">#000000</color>
+    <color name="avatar">#7539c6</color>
+
+    <color name="text_gray">#220E2E</color>
+    <color name="light_mid_gray">#E3E4E9</color>
+    <color name="profile_card">#E3E4E9</color>
+    <color name="mid_gray">#D0D3DA</color>
+    <color name="chip_background">#D0D3DA</color>
+    <color name="splash_background">#3490dc</color>
+    <color name="background_dark">#24292E</color>
+    <color name="light_red">#61FF3C2B</color>
+    <color name="main_color">#3b4dc0</color>
+    <color name="dark_blue">#00258f</color>
+    <color name="dim_gray">#6d6a75</color>
+    <color name="orange">#ff8c42</color>
+    <color name="orange_button">#FF9652</color>
+    <color name="light_gray">#e7ecef</color>
+    <color name="white_opacity_25">#40ffffff</color>
+    <color name="transparent">#0fff</color>
+    <color name="primary_blue_25">#400055FF</color>
+    <color name="primary_blue_20">#330055FF</color>
+    <color name="purple_03">#7539c6</color>
+    <color name="background">#F3F3F3</color>
+    <color name="background_tab_second">#F3F3F3</color>
+    <color name="crimson">#8A0927</color>
+    <color name="white_opacity_40">#66ffffff</color>
+    <color name="primary_purple_20">#407E01FD</color>
+    <color name="purple_dark">#27004E</color>
+    <color name="row_color">#E3E4E9</color>
+
+    <!-- Semantic Colors -->
+    <color name="green">#90DB06</color>
+    <color name="blue">#5487F7</color>
+    <color name="yellow">#fdb827</color>
+    <color name="red">#FF3C2B</color>
 </resources>

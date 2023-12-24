@@ -17,31 +17,38 @@
 package com.oguzdogdu.walliescompose.navigation
 
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.navigation.utils.IconResource
-import com.oguzdogdu.walliescompose.navigation.utils.WalliesIcons
+import com.oguzdogdu.walliescompose.features.home.navigation.HomeScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.collections.navigation.CollectionScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.favorites.navigation.FavoritesScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.settings.navigation.SettingsScreenNavigationRoute
 
 enum class TopLevelDestination(
-    val icon: IconResource,
+    val icon: Int,
     val iconTextId: Int,
+    val route: String,
     val titleTextId: Int,
 ) {
     WALLPAPERS(
-        icon = IconResource.fromDrawableResource(WalliesIcons.WallpapersIcon),
+        route = HomeScreenNavigationRoute,
+        icon = R.drawable.wallpaper,
         iconTextId = R.string.wallpapers_title,
         titleTextId = R.string.wallpapers_title,
     ),
     COLLECTIONS(
-        icon = IconResource.fromDrawableResource(WalliesIcons.CollectionsIcon),
+        route = CollectionScreenNavigationRoute,
+        icon = R.drawable.collections,
         iconTextId = R.string.collections_title,
         titleTextId = R.string.collections_title,
     ),
     FAVORITES(
-        icon = IconResource.fromDrawableResource(WalliesIcons.FavoritesIcon),
+        route = FavoritesScreenNavigationRoute,
+        icon = R.drawable.favorite,
         iconTextId = R.string.favorites_title,
         titleTextId = R.string.favorites_title,
     ),
     SETTINGS(
-        icon = IconResource.fromDrawableResource(WalliesIcons.SettingsIcon),
+        route = SettingsScreenNavigationRoute,
+        icon = R.drawable.settings,
         iconTextId = R.string.settings_title,
         titleTextId = R.string.settings_title,
     ),
