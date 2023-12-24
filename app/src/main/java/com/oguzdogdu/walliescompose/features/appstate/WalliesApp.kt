@@ -1,13 +1,11 @@
-package com.oguzdogdu.walliescompose.features.home.appstate
+package com.oguzdogdu.walliescompose.features.appstate
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -20,17 +18,15 @@ import com.oguzdogdu.walliescompose.navigation.WalliesNavHost
 @Composable
 fun WalliesApp(
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass,
-    appState: MainAppState = rememberMainAppState(windowSizeClass = windowSizeClass),
+    appState: MainAppState = rememberMainAppState(),
 ) {
     Scaffold(modifier = modifier, bottomBar = {
-        AnimatedVisibility(visible = appState.shouldShowBottomBar) {
-            AppNavBar(
-                destinations = AppDestinations(appState.topLevelDestinations),
-                onNavigateToDestination = appState::navigateToTopLevelDestination,
-                currentDestination = appState.currentDestination
-            )
-        }
+        AppNavBar(
+            destinations = AppDestinations(appState.topLevelDestinations),
+            onNavigateToDestination = appState::navigateToTopLevelDestination,
+            currentDestination = appState.currentDestination
+        )
+
     }) {
         WalliesNavHost(
             navController = appState.navController, modifier = modifier.padding(it)
@@ -60,8 +56,7 @@ internal fun AppNavBar(
                         painterResource(id = destination.icon),
                         contentDescription = null,
                     )
-                }
-            )
+                })
         }
     }
 }

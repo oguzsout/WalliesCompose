@@ -1,9 +1,10 @@
-package com.oguzdogdu.walliescompose.features.home.collections
+package com.oguzdogdu.walliescompose.features.collections.navigation
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import com.oguzdogdu.walliescompose.features.collections.CollectionsScreenRoute
 
 const val CollectionScreenNavigationRoute = "collection_screen_route"
 
