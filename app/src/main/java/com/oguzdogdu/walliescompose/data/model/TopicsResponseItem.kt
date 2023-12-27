@@ -24,4 +24,4 @@ data class TopicsResponseItem(
 )
 
 fun TopicsResponseItem.toDomainTopics() =
-    Topics(title = slug, titleBackground = previewPhotos?.first()?.urls?.regular)
+    Topics(id = id, title = slug, titleBackground = previewPhotos?.first()?.urls?.regular)

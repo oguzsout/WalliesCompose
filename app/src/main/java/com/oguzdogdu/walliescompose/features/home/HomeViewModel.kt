@@ -2,9 +2,6 @@ package com.oguzdogdu.walliescompose.features.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oguzdogdu.walliescompose.domain.common.onFailure
-import com.oguzdogdu.walliescompose.domain.common.onLoading
-import com.oguzdogdu.walliescompose.domain.common.onSuccess
 import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.onFailure
 import com.oguzdogdu.walliescompose.domain.wrapper.onLoading

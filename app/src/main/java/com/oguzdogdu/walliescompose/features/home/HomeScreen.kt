@@ -32,7 +32,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.features.components.BaseCenteredToolbar
+import com.oguzdogdu.walliescompose.features.component.BaseCenteredToolbar
 import com.oguzdogdu.walliescompose.features.home.state.HomeScreenState
 
 @Composable
@@ -40,21 +40,19 @@ fun HomeScreenRoute(modifier: Modifier = Modifier, viewModel: HomeViewModel = hi
     val homeUiState by viewModel.homeListState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     Scaffold(modifier = modifier, topBar = {
-        BaseCenteredToolbar(
-                    modifier = Modifier,
-                    title = stringResource(id = R.string.app_name),
-                    imageLeft = painterResource(id = R.drawable.ic_default_avatar),
-                    imageRight = painterResource(id = R.drawable.ic_completed),
-                    imageLeftTint = MaterialTheme.colorScheme.secondary,
-                    imageRightTint = MaterialTheme.colorScheme.secondary,
-                    leftClick = {
-                        Toast.makeText(context, "Nav Icon Click", Toast.LENGTH_SHORT).show()
-                    },
-                    rightClick = {
-                        Toast.makeText(context, "Add Click", Toast.LENGTH_SHORT).show()
-                    }
-                )
-            }) {
+        BaseCenteredToolbar(modifier = Modifier,
+            title = stringResource(id = R.string.app_name),
+            imageLeft = painterResource(id = R.drawable.ic_default_avatar),
+            imageRight = painterResource(id = R.drawable.ic_completed),
+            imageLeftTint = MaterialTheme.colorScheme.secondary,
+            imageRightTint = MaterialTheme.colorScheme.secondary,
+            leftClick = {
+                Toast.makeText(context, "Nav Icon Click", Toast.LENGTH_SHORT).show()
+            },
+            rightClick = {
+                Toast.makeText(context, "Add Click", Toast.LENGTH_SHORT).show()
+            })
+    }) {
         Column(modifier = modifier.padding(it)) {
             Text(
                 text = stringResource(id = R.string.topics_title),
@@ -63,12 +61,10 @@ fun HomeScreenRoute(modifier: Modifier = Modifier, viewModel: HomeViewModel = hi
                 modifier = modifier.padding(start = 8.dp, top = 8.dp)
             )
             MainLayout(
-                    modifier = modifier.padding(top = 16.dp),
-                    homeUiState = homeUiState,
-                )
-
+                modifier = modifier.padding(top = 16.dp),
+                homeUiState = homeUiState,
+            )
         }
-
     }
 }
 
@@ -88,17 +84,17 @@ private fun MainLayout(modifier: Modifier, homeUiState: HomeScreenState?) {
                         CircularProgressIndicator()
                     }
 
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 160.dp),
+                    LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 160.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         content = {
-                            items(homeUiState.topics) {
+                            items(homeUiState.topics,key = {
+                                it.id.orEmpty()
+                            }) {
                                 TopicTitleView(imageUrl = it.titleBackground, title = it.title)
 
                             }
-                        }
-                    )
+                        })
                 }
 
                 null -> {
@@ -110,10 +106,9 @@ private fun MainLayout(modifier: Modifier, homeUiState: HomeScreenState?) {
 }
 
 @Composable
-private fun TopicTitleView(imageUrl:String?, title:String?) {
+private fun TopicTitleView(imageUrl: String?, title: String?) {
     Box(
-        modifier = Modifier
-            .wrapContentSize()
+        modifier = Modifier.wrapContentSize()
     ) {
         AsyncImage(
             model = imageUrl,
