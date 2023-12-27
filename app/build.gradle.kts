@@ -82,6 +82,8 @@ dependencies {
     testImplementation (libs.androidx.paging.common)
     implementation (libs.androidx.paging.compose)
 
+    implementation(libs.compose.coil)
+
     implementation (libs.androidx.lifecycle.viewmodel.compose)
     implementation (libs.androidx.lifecycle.viewmodel.ktx)
     implementation (libs.androidx.lifecycle.runtime.compose)

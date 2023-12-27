@@ -1,4 +1,4 @@
-package com.oguzdogdu.walliescompose.features.home.appstate
+package com.oguzdogdu.walliescompose.features.appstate
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.padding
