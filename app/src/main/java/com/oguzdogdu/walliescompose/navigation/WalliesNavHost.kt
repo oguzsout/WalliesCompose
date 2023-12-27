@@ -5,10 +5,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.oguzdogdu.walliescompose.features.home.HomeScreenNavigationRoute
-import com.oguzdogdu.walliescompose.features.home.collections.collectionScreen
-import com.oguzdogdu.walliescompose.features.home.favorites.favoritesScreen
+import com.oguzdogdu.walliescompose.features.collections.collectionScreen
+import com.oguzdogdu.walliescompose.features.favorites.favoritesScreen
 import com.oguzdogdu.walliescompose.features.home.homeScreen
-import com.oguzdogdu.walliescompose.features.home.settings.settingsScreen
+import com.oguzdogdu.walliescompose.features.settings.settingsScreen
 
 @Composable
 fun WalliesNavHost(

@@ -1,4 +1,4 @@
-package com.oguzdogdu.walliescompose.features.home.collections
+package com.oguzdogdu.walliescompose.features.collections
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder

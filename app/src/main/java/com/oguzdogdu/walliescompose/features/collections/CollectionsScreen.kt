@@ -1,4 +1,4 @@
-package com.oguzdogdu.walliescompose.features.home.collections
+package com.oguzdogdu.walliescompose.features.collections
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement

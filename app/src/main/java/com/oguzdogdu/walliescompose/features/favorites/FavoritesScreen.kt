@@ -1,4 +1,4 @@
-package com.oguzdogdu.walliescompose.features.home.favorites
+package com.oguzdogdu.walliescompose.features.favorites
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
