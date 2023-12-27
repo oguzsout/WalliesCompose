@@ -1,4 +1,4 @@
-package com.oguzdogdu.walliescompose.features.home.settings
+package com.oguzdogdu.walliescompose.features.settings
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement

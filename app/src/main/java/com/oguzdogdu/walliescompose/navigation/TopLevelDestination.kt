@@ -16,17 +16,11 @@
 
 package com.oguzdogdu.walliescompose.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AccountBox
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.features.home.HomeScreenNavigationRoute
-import com.oguzdogdu.walliescompose.features.home.collections.CollectionScreenNavigationRoute
-import com.oguzdogdu.walliescompose.features.home.favorites.FavoritesScreenNavigationRoute
-import com.oguzdogdu.walliescompose.features.home.settings.SettingsScreenNavigationRoute
-import com.oguzdogdu.walliescompose.navigation.utils.IconResource
+import com.oguzdogdu.walliescompose.features.collections.CollectionScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.favorites.FavoritesScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.settings.SettingsScreenNavigationRoute
 
 enum class TopLevelDestination(
     val icon: Int,

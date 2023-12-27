@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">WalliesCompose</string>
+    <string name="app_name">Wallies</string>
     <string name="app_logo">Uygulama Logosu</string>
     <string name="internet_error">İnternet bağlantınızda problem olabilir. İnternet bağlantınızı kontrol edip tekrar deneyebilirsiniz.</string>
     <string name="retry_button">Tekrar Dene</string>

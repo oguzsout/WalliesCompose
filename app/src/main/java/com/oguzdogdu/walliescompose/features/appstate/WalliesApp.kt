@@ -1,4 +1,4 @@
-package com.oguzdogdu.walliescompose.features.home.appstate
+package com.oguzdogdu.walliescompose.features.appstate
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.padding
@@ -24,13 +24,12 @@ fun WalliesApp(
     appState: MainAppState = rememberMainAppState(windowSizeClass = windowSizeClass),
 ) {
     Scaffold(modifier = modifier, bottomBar = {
-        AnimatedVisibility(visible = appState.shouldShowBottomBar) {
-            AppNavBar(
+        AppNavBar(
                 destinations = AppDestinations(appState.topLevelDestinations),
                 onNavigateToDestination = appState::navigateToTopLevelDestination,
                 currentDestination = appState.currentDestination
             )
-        }
+
     }) {
         WalliesNavHost(
             navController = appState.navController, modifier = modifier.padding(it)

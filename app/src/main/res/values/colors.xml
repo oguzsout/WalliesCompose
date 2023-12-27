@@ -30,7 +30,7 @@
     <color name="orange">#ff8c42</color>
     <color name="orange_button">#FF9652</color>
     <color name="light_gray">#e7ecef</color>
-    <color name="white_opacity_25">#40ffffff</color>
+    <color name="white_opacity_25">#64000000</color>
     <color name="transparent">#0fff</color>
     <color name="primary_blue_25">#400055FF</color>
     <color name="primary_blue_20">#330055FF</color>
