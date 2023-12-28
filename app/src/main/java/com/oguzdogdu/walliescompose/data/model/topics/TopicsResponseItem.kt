@@ -1,8 +1,8 @@
-package com.oguzdogdu.walliescompose.data.model
+package com.oguzdogdu.walliescompose.data.model.topics
 
 
 import com.google.gson.annotations.SerializedName
-import com.oguzdogdu.walliescompose.domain.model.Topics
+import com.oguzdogdu.walliescompose.domain.model.topics.Topics
 
 data class TopicsResponseItem(
     @SerializedName("cover_photo") val coverPhoto: CoverPhoto?,

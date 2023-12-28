@@ -29,4 +29,5 @@ object WalliesIcons {
     val CollectionsIcon = R.drawable.collections
     val FavoritesIcon = R.drawable.favorite
     val SettingsIcon = R.drawable.settings
+    val SearchIcon = R.drawable.search
 }

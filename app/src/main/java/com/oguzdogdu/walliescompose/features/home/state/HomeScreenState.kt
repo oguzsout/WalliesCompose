@@ -1,15 +1,15 @@
 package com.oguzdogdu.walliescompose.features.home.state
 
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.Stable
-import com.oguzdogdu.walliescompose.domain.model.Topics
+import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
+import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
+import com.oguzdogdu.walliescompose.domain.model.topics.Topics
 
 @Immutable
-sealed interface HomeScreenState {
-    @Immutable
-    data class TopicsTitleList(
-        val loading: Boolean = false,
-        val error: String? = null,
-        val topics: List<Topics> = emptyList()
-    ) : HomeScreenState
-}
+data class HomeScreenState(
+    val loading: Boolean = false,
+    val error: String? = null,
+    val topics: List<Topics> = emptyList(),
+    val popular: List<PopularImage> = emptyList(),
+    val latest: List<LatestImage> = emptyList()
+)
