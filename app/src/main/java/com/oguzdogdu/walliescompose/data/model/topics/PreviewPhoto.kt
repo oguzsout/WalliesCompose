@@ -1,4 +1,4 @@
-package com.oguzdogdu.walliescompose.data.model
+package com.oguzdogdu.walliescompose.data.model.topics
 
 
 import com.google.gson.annotations.SerializedName
