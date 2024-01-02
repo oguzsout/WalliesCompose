@@ -1,14 +1,21 @@
 package com.oguzdogdu.walliescompose.features.home
 
 import android.widget.Toast
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,9 +23,18 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.magnifier
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,6 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -38,8 +55,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.ImageLoader
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.domain.model.topics.Topics
 import com.oguzdogdu.walliescompose.features.component.BaseCenteredToolbar
 import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
 import com.oguzdogdu.walliescompose.features.home.state.HomeScreenState
@@ -55,7 +75,7 @@ fun HomeScreenRoute(modifier: Modifier = Modifier, viewModel: HomeViewModel = hi
     }
     val homeUiState by viewModel.homeListState.collectAsStateWithLifecycle()
 
-    Scaffold(modifier = modifier, topBar = {
+    Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         BaseCenteredToolbar(modifier = Modifier,
             title = stringResource(id = R.string.app_name),
             imageLeft = painterResource(WalliesIcons.DefaultAvatar),
@@ -69,30 +89,24 @@ fun HomeScreenRoute(modifier: Modifier = Modifier, viewModel: HomeViewModel = hi
                 Toast.makeText(context, "Add Click", Toast.LENGTH_SHORT).show()
             })
     }) {
-        Column(
-            modifier = modifier.padding(it),
+        LazyColumn(
+            modifier = modifier
+                .padding(it)
+                .fillMaxHeight()
         ) {
 
-            Text(
-                text = stringResource(id = R.string.topics_title),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = modifier.padding(start = 8.dp, top = 8.dp)
-            )
-            TopicLayoutContainer(
-                modifier = modifier.padding(top = 8.dp),
-                homeUiState = homeUiState,
-            )
+            item {
+                TopicLayoutContainer(modifier = modifier, homeUiState = homeUiState)
+            }
+            item {
+                PopularLayoutContainer(
+                    modifier = modifier, homeUiState = homeUiState
+                )
+            }
 
-            Text(
-                text = stringResource(id = R.string.popular_title),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.error,
-                modifier = modifier.padding(start = 8.dp, top = 16.dp)
-            )
-            PopularLayoutContainer(
-                modifier.padding(top = 8.dp), homeUiState = homeUiState
-            )
+            item {
+                LatestLayoutContainer(modifier = modifier, homeUiState = homeUiState)
+            }
         }
     }
 }
@@ -102,27 +116,29 @@ fun HomeScreenRoute(modifier: Modifier = Modifier, viewModel: HomeViewModel = hi
 private fun TopicLayoutContainer(modifier: Modifier, homeUiState: HomeScreenState) {
     Column(
         modifier = modifier
-            .fillMaxWidth()
+            .wrapContentSize()
             .padding(horizontal = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
     ) {
 
-        if (homeUiState.loading) {
-            CircularProgressIndicator()
+        Text(
+            text = stringResource(id = R.string.topics_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.error,
+            modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
+        )
+
+        LazyVerticalGrid(columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .height(184.dp)
+
+            , horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),) {
+            itemsIndexed(homeUiState.topics, key = { index: Int, item: Topics ->
+                item.id.orEmpty()
+            }) { index, item ->
+                TopicTitleView(imageUrl = item.titleBackground, title = item.title)
+            }
         }
-
-        LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 160.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            content = {
-                items(homeUiState.topics, key = {
-                    it.id.orEmpty()
-                }) {
-                    TopicTitleView(imageUrl = it.titleBackground, title = it.title)
-
-                }
-            })
     }
 
 }
@@ -131,15 +147,16 @@ private fun TopicLayoutContainer(modifier: Modifier, homeUiState: HomeScreenStat
 private fun PopularLayoutContainer(modifier: Modifier, homeUiState: HomeScreenState) {
     Column(
         modifier = modifier
-            .fillMaxWidth()
+            .wrapContentSize()
             .padding(horizontal = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-
-        if (homeUiState.loading) {
-            CircularProgressIndicator()
-        }
+        Text(
+            text = stringResource(id = R.string.popular_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.error,
+            modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
+        )
 
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
             items(homeUiState.popular, key = {
@@ -154,11 +171,39 @@ private fun PopularLayoutContainer(modifier: Modifier, homeUiState: HomeScreenSt
 }
 
 @Composable
+private fun LatestLayoutContainer(modifier: Modifier, homeUiState: HomeScreenState) {
+    Column(
+        modifier = modifier
+            .wrapContentSize()
+            .padding(horizontal = 8.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(id = R.string.latest_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.error,
+            modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
+        )
+
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
+            items(homeUiState.latest, key = {
+                it.id.orEmpty()
+            }) {
+                LatestImageView(imageUrl = it.url)
+
+            }
+        })
+
+    }
+}
+
+@Composable
 private fun TopicTitleView(imageUrl: String?, title: String?) {
     Box(
         modifier = Modifier.wrapContentSize()
     ) {
-        AsyncImage(
+
+        SubcomposeAsyncImage(
             model = imageUrl,
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
@@ -166,6 +211,7 @@ private fun TopicTitleView(imageUrl: String?, title: String?) {
                 .fillMaxWidth()
                 .height(88.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
+            loading = { CircularProgressIndicator(modifier = Modifier.size(8.dp), color = Color.Red)},
         )
 
         Text(
@@ -184,7 +230,7 @@ private fun PopularImageView(imageUrl: String?) {
     Box(
         modifier = Modifier.wrapContentSize()
     ) {
-        AsyncImage(
+        SubcomposeAsyncImage(
             model = imageUrl,
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
@@ -193,6 +239,26 @@ private fun PopularImageView(imageUrl: String?) {
                 .height(210.dp)
                 .width(150.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
+            loading = { CircularProgressIndicator(modifier = Modifier.size(8.dp), color = Color.Red)},
+        )
+    }
+}
+
+@Composable
+private fun LatestImageView(imageUrl: String?) {
+    Box(
+        modifier = Modifier.wrapContentSize()
+    ) {
+        SubcomposeAsyncImage(
+            model = imageUrl,
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(210.dp)
+                .width(150.dp)
+                .clip(CircleShape.copy(all = CornerSize(16.dp))),
+            loading = { CircularProgressIndicator(modifier = Modifier.size(8.dp), color = Color.Red)},
         )
     }
 }
