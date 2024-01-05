@@ -24,10 +24,10 @@ fun BaseCenteredToolbar(
     title: String?,
     imageRight: Painter? = null,
     imageLeft: Painter? = null,
-    imageRightTint: Color,
-    imageLeftTint: Color,
-    leftClick: () -> Unit,
-    rightClick: () -> Unit
+    imageRightTint: Color? = null,
+    imageLeftTint: Color? = null,
+    leftClick: () -> Unit?,
+    rightClick: () -> Unit?
 ) {
     Box(modifier = modifier.wrapContentHeight().fillMaxWidth()){
         CenterAlignedTopAppBar(title = {
@@ -41,12 +41,14 @@ fun BaseCenteredToolbar(
                 leftClick.invoke()
             }) {
                 if (imageLeft != null) {
-                    Icon(
-                        painter = imageLeft,
-                        contentDescription = null,
-                        modifier = modifier.size(24.dp),
-                        tint = imageLeftTint
-                    )
+                    if (imageLeftTint != null) {
+                        Icon(
+                            painter = imageLeft,
+                            contentDescription = null,
+                            modifier = modifier.size(24.dp),
+                            tint = imageLeftTint
+                        )
+                    }
                 }
             }
         }, actions = {
@@ -54,12 +56,14 @@ fun BaseCenteredToolbar(
                 rightClick.invoke()
             }) {
                 if (imageRight != null) {
-                    Icon(
-                        painter = imageRight,
-                        contentDescription = null,
-                        modifier = modifier,
-                        tint = imageRightTint
-                    )
+                    if (imageRightTint != null) {
+                        Icon(
+                            painter = imageRight,
+                            contentDescription = null,
+                            modifier = modifier,
+                            tint = imageRightTint
+                        )
+                    }
                 }
             }
         }, colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
