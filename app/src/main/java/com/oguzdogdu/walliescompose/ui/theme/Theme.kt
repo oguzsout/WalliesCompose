@@ -20,6 +20,7 @@ private val DarkColorScheme = darkColorScheme(
     secondary = PurpleDark,
     tertiary = PurpleDark,
     background = BackgroundDark,
+    tertiaryContainer = RowColorDark
 
 )
 
@@ -27,7 +28,8 @@ private val LightColorScheme = lightColorScheme(
     primary = PurpleLight,
     secondary = PurpleLight,
     tertiary = PurpleLight,
-    background = Background
+    background = Background,
+    tertiaryContainer = RowColor
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
