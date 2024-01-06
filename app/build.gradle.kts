@@ -88,6 +88,8 @@ dependencies {
     testImplementation (libs.androidx.paging.common)
     implementation (libs.androidx.paging.compose)
 
+    implementation(libs.androidx.datastore.preferences)
+
     implementation(libs.compose.coil)
 
     implementation (libs.androidx.lifecycle.viewmodel.compose)
