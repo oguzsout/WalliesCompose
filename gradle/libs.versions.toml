@@ -1,6 +1,7 @@
 [versions]
 accompanist-swiperefresh = "0.28.0"
 agp = "8.2.0"
+datastore-preferences = "1.0.0"
 gson = "2.10.1"
 hilt-android = "2.49"
 hilt-work = "1.1.0"
@@ -23,6 +24,7 @@ work-runtime-ktx = "2.9.0"
 
 [libraries]
 accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanist-swiperefresh" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore-preferences" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hilt-work" }
 androidx-material3-window-size = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "windowsize" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-work" }

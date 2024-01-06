@@ -14,13 +14,15 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.oguzdogdu.walliescompose.features.settings.ThemeValues
 
 private val DarkColorScheme = darkColorScheme(
     primary = PurpleDark,
     secondary = PurpleDark,
     tertiary = PurpleDark,
     background = BackgroundDark,
-    tertiaryContainer = RowColorDark
+    tertiaryContainer = RowColorDark,
+
 
 )
 
@@ -44,19 +46,34 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun WalliesComposeTheme(
+    themeValues: String,
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    val colorScheme = when (themeValues) {
+        ThemeValues.SYSTEM_DEFAULT.title -> {
+            if (darkTheme) {
+                DarkColorScheme
+            } else {
+                LightColorScheme
+            }
+        }
+        ThemeValues.LIGHT_MODE.title -> {
+            LightColorScheme
+        }
+        ThemeValues.DARK_MODE.title -> {
+            DarkColorScheme
         }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        else -> {
+            if (themeValues.isEmpty()) {
+                LightColorScheme
+            } else {
+                return
+            }
+        }
     }
     val view = LocalView.current
     if (!view.isInEditMode) {
