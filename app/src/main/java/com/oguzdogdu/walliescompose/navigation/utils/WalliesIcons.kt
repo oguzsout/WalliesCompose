@@ -30,4 +30,7 @@ object WalliesIcons {
     val FavoritesIcon = R.drawable.favorite
     val SettingsIcon = R.drawable.settings
     val SearchIcon = R.drawable.search
+    val DarkMode = R.drawable.dark_mode
+    val Language = R.drawable.language
+    val Cache = R.drawable.cache
 }
