@@ -46,7 +46,7 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun WalliesComposeTheme(
-    appTheme: String,
+    appTheme: String?,
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
@@ -66,8 +66,20 @@ fun WalliesComposeTheme(
         ThemeValues.DARK_MODE.title -> {
             DarkColorScheme
         }
-
-        else -> return
+        null -> {
+            if (darkTheme) {
+                DarkColorScheme
+            } else {
+                LightColorScheme
+            }
+        }
+        else -> {
+            if (darkTheme) {
+                DarkColorScheme
+            } else {
+                LightColorScheme
+            }
+        }
     }
     val view = LocalView.current
     if (!view.isInEditMode) {
