@@ -2,39 +2,38 @@ package com.oguzdogdu.walliescompose.features.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.oguzdogdu.walliescompose.WalliesApplication
 import com.oguzdogdu.walliescompose.domain.repository.AppSettingsRepository
-import com.oguzdogdu.walliescompose.features.settings.SettingsScreenEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val dataStore: AppSettingsRepository,
+    private val dataStore: AppSettingsRepository, private val application: WalliesApplication
 ) : ViewModel() {
     private val _mainState = MutableStateFlow(MainScreenState())
     val mainState = _mainState.asStateFlow()
 
-    init {
-        getThemeValue()
-    }
-
-    fun handleScreenEvents(event: SettingsScreenEvent) {
+    fun handleScreenEvents(event: MainScreenEvent) {
         when (event) {
-            is SettingsScreenEvent.ThemeChanged -> getThemeValue()
-            else -> {}
+            is MainScreenEvent.ThemeChanged -> {
+                getThemeValue()
+            }
         }
     }
 
-    fun getThemeValue() {
+     private fun getThemeValue() {
         viewModelScope.launch {
-            dataStore.getThemeStrings(key = "theme").collectLatest { value ->
-                _mainState.update { it.copy(getThemeValue = value) }
+            val value = dataStore.getThemeStrings(key = "theme").first()
+            _mainState.update {
+                it.copy(themeValues = value)
             }
+            application.theme.value = value.toString()
         }
     }
 }

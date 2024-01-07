@@ -2,20 +2,11 @@ package com.oguzdogdu.walliescompose.features.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.oguzdogdu.walliescompose.WalliesApplication
 import com.oguzdogdu.walliescompose.domain.repository.AppSettingsRepository
-import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
-import com.oguzdogdu.walliescompose.domain.wrapper.onFailure
-import com.oguzdogdu.walliescompose.domain.wrapper.onLoading
-import com.oguzdogdu.walliescompose.domain.wrapper.onSuccess
-import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
-import com.oguzdogdu.walliescompose.features.home.state.HomeScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
@@ -24,15 +15,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val dataStore: AppSettingsRepository,
+    private val dataStore: AppSettingsRepository
+    , private val application: WalliesApplication
 ) : ViewModel() {
+
     private val _settingsState = MutableStateFlow(SettingsScreenState())
     val settingsState = _settingsState.asStateFlow()
 
     fun handleScreenEvents(event: SettingsScreenEvent) {
         when (event) {
             is SettingsScreenEvent.OpenThemeDialog -> {
-              openTheme(event.open)
+                openTheme(event.open)
             }
 
             is SettingsScreenEvent.SetNewTheme -> setThemeValue(event.value)
@@ -41,9 +34,10 @@ class SettingsViewModel @Inject constructor(
             }
         }
     }
-    private fun openTheme(open:Boolean) {
+
+    private fun openTheme(open: Boolean) {
         viewModelScope.launch {
-      _settingsState.update { it.copy(open) }
+            _settingsState.update { it.copy(open) }
         }
     }
 
@@ -56,6 +50,9 @@ class SettingsViewModel @Inject constructor(
             dataStore.getThemeStrings(key = "theme").collect { value ->
                 _settingsState.updateAndGet {
                     it.copy(getThemeValue = value)
+                }
+                if (value != null) {
+                    application.theme.value = value
                 }
             }
         }

@@ -1,3 +1,5 @@
 package com.oguzdogdu.walliescompose.features.main
 
-data class MainScreenState(val getThemeValue: String? = null,)
+import com.oguzdogdu.walliescompose.features.settings.ThemeValues
+
+data class MainScreenState(val themeValues: String? = null)
