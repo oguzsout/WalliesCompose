@@ -15,7 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.oguzdogdu.walliescompose.ui.theme.bold
+import com.oguzdogdu.walliescompose.ui.theme.medium
+import com.oguzdogdu.walliescompose.ui.theme.regular
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,8 +38,9 @@ fun BaseCenteredToolbar(
         CenterAlignedTopAppBar(title = {
             Text(
                 text = title.orEmpty(),
-                style = MaterialTheme.typography.titleSmall,
-                modifier = modifier
+                color = Color.Unspecified,
+                fontFamily = medium,
+                fontSize = 24.sp
             )
         }, navigationIcon = {
             IconButton(onClick = {
