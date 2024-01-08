@@ -32,12 +32,31 @@ class SettingsViewModel @Inject constructor(
             is SettingsScreenEvent.ThemeChanged -> {
                 getThemeValue()
             }
+
+            is SettingsScreenEvent.LanguageChanged -> getLanguageValue()
+            is SettingsScreenEvent.SetNewLanguage -> setLanguageValue(event.value)
+            is SettingsScreenEvent.OpenLanguageDialog -> openLanguage(event.open)
+            is SettingsScreenEvent.ClearCached -> statusClearCache(event.isCleared)
+        }
+    }
+
+    private fun statusClearCache(cleared:Boolean) {
+        viewModelScope.launch {
+            _settingsState.update {
+                it.copy(cache= cleared)
+            }
         }
     }
 
     private fun openTheme(open: Boolean) {
         viewModelScope.launch {
-            _settingsState.update { it.copy(open) }
+            _settingsState.update { it.copy(openThemeDialog = open) }
+        }
+    }
+
+    private fun openLanguage(open: Boolean) {
+        viewModelScope.launch {
+            _settingsState.update { it.copy(openLanguageDialog = open) }
         }
     }
 
@@ -53,6 +72,23 @@ class SettingsViewModel @Inject constructor(
                 }
                 if (value != null) {
                     application.theme.value = value
+                }
+            }
+        }
+    }
+
+    private fun setLanguageValue(value: String) = runBlocking {
+        dataStore.putLanguageStrings(key = "language", value = value)
+    }
+
+    private fun getLanguageValue() {
+        viewModelScope.launch {
+            dataStore.getLanguageStrings(key = "language").collect { value ->
+                _settingsState.update {
+                    it.copy(getLanguageValue = value)
+                }
+                if (value != null) {
+                    application.language.value = value
                 }
             }
         }

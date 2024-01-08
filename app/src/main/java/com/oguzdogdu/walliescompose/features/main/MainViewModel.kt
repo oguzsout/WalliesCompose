@@ -24,6 +24,10 @@ class MainViewModel @Inject constructor(
             is MainScreenEvent.ThemeChanged -> {
                 getThemeValue()
             }
+
+            MainScreenEvent.LanguageChanged -> {
+                getLanguageValue()
+            }
         }
     }
 
@@ -34,6 +38,15 @@ class MainViewModel @Inject constructor(
                 it.copy(themeValues = value)
             }
             application.theme.value = value.toString()
+        }
+    }
+    private fun getLanguageValue() {
+        viewModelScope.launch {
+            dataStore.getLanguageStrings(key = "language").collect { value ->
+                if (value != null) {
+                    application.language.value = value
+                }
+            }
         }
     }
 }

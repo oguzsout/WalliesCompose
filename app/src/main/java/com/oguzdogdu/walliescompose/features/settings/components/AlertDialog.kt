@@ -24,8 +24,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.oguzdogdu.walliescompose.ui.theme.medium
 
 @Composable
 fun SingleSelectDialog(
@@ -80,7 +82,7 @@ fun SingleSelectDialog(
                             onDismissRequest.invoke(false)
                         }, shape = MaterialTheme.shapes.extraLarge
                     ) {
-                        Text(text = submitButtonText, style = MaterialTheme.typography.titleSmall)
+                        Text(text = submitButtonText, fontFamily = medium, color = Color.White)
                     }
 
                     Button(
@@ -93,7 +95,7 @@ fun SingleSelectDialog(
                         },
                         shape = MaterialTheme.shapes.extraLarge
                     ) {
-                        Text(text = dismissButtonText, style = MaterialTheme.typography.titleSmall)
+                        Text(text = dismissButtonText, fontFamily = medium, color = Color.White)
                     }
                 }
             }

@@ -111,4 +111,7 @@
     <string name="show_all">Tümünü Gör</string>
     <string name="popular_title">Popüler</string>
     <string name="latest_title">En Son</string>
+    <string name="light_mode">Aydınlık Mod</string>
+    <string name="dark_mode">Karanlık Mode</string>
+    <string name="system_default">Sistem Varsayılanı</string>
 </resources>

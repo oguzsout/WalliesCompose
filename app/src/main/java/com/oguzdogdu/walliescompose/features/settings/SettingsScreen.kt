@@ -1,37 +1,61 @@
 package com.oguzdogdu.walliescompose.features.settings
 
+import android.app.Activity
+import android.content.Context
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardElevation
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Shapes
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.features.component.BaseCenteredToolbar
 import com.oguzdogdu.walliescompose.features.settings.components.SingleSelectDialog
 import com.oguzdogdu.walliescompose.util.OptionLists
 import com.oguzdogdu.walliescompose.util.menuRow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -41,13 +65,23 @@ fun SettingsScreenRoute(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val settingsUiState by viewModel.settingsState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val snackState = remember { SnackbarHostState() }
 
     val themes = listOf(
         ThemeValues.LIGHT_MODE.title, ThemeValues.DARK_MODE.title, ThemeValues.SYSTEM_DEFAULT.title
     )
+    val languages = listOf(LanguageValues.English.title, LanguageValues.Turkish.title)
     var themeLocation by remember {
         mutableIntStateOf(0)
     }
+    var languageLocation by remember {
+        mutableIntStateOf(0)
+    }
+    var selectedLanguage by remember {
+        mutableStateOf("")
+    }
+
     LaunchedEffect(key1 = settingsUiState.getThemeValue) {
         viewModel.handleScreenEvents(SettingsScreenEvent.ThemeChanged)
         themeLocation = if (settingsUiState.getThemeValue.isNullOrEmpty()) {
@@ -56,12 +90,24 @@ fun SettingsScreenRoute(
             themes.indexOf(settingsUiState.getThemeValue)
         }
     }
+    LaunchedEffect(key1 = settingsUiState.getLanguageValue) {
+        viewModel.handleScreenEvents(SettingsScreenEvent.LanguageChanged)
+        languageLocation = if (settingsUiState.getLanguageValue.isNullOrEmpty()) {
+            0
+        } else {
+            languages.indexOf(settingsUiState.getLanguageValue)
+        }
+    }
 
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         BaseCenteredToolbar(modifier = Modifier,
             title = stringResource(id = R.string.settings),
             leftClick = {},
             rightClick = {})
+    }, snackbarHost = {
+        SnackbarHost(
+            hostState = snackState
+        )
     }) {
         Column(modifier = modifier.padding(it)) {
             if (settingsUiState.openThemeDialog) {
@@ -84,17 +130,62 @@ fun SettingsScreenRoute(
                     })
 
             }
-            SettingsScreen(modifier = modifier, clickRow = { value ->
+            if (settingsUiState.openLanguageDialog) {
+                SingleSelectDialog(modifier = modifier,
+                    title = stringResource(id = R.string.choise_language),
+                    optionsList = languages,
+                    defaultSelected = languageLocation,
+                    submitButtonText = stringResource(id = R.string.ok),
+                    dismissButtonText = stringResource(id = R.string.cancel),
+                    onSubmitButtonClick = { id ->
+                        coroutineScope.launch {
+                            selectedLanguage = languages[id]
+                            viewModel.handleScreenEvents(
+                                SettingsScreenEvent.SetNewLanguage(
+                                    selectedLanguage
+                                )
+                            )
+                            viewModel.handleScreenEvents(SettingsScreenEvent.LanguageChanged)
+                            (context as? Activity)?.recreate()
+                        }
+                    },
+                    onDismissRequest = { value ->
+                        coroutineScope.launch {
+                            viewModel.handleScreenEvents(
+                                SettingsScreenEvent.OpenLanguageDialog(
+                                    value
+                                )
+                            )
+                        }
+                    })
+            }
+            SettingsScreen(modifier = modifier, openThemeDialog = { value ->
                 viewModel.handleScreenEvents(SettingsScreenEvent.OpenThemeDialog(value))
-            })
+            }, openLanguageDialog = { value ->
+                viewModel.handleScreenEvents(SettingsScreenEvent.OpenLanguageDialog(value))
 
+            }, context = context, viewModel = viewModel, showSnackBar = {
+                coroutineScope.launch {
+                    when (it) {
+                        true -> snackState.showSnackbar("Cache directory deleted successfully")
+                        false -> snackState.showSnackbar("Error deleting cache directory")
+                    }
+                }
+            })
         }
     }
 }
 
 
 @Composable
-fun SettingsScreen(modifier: Modifier, clickRow: (Boolean) -> Unit) {
+fun SettingsScreen(
+    modifier: Modifier,
+    openThemeDialog: (Boolean) -> Unit,
+    openLanguageDialog: (Boolean) -> Unit,
+    showSnackBar: (Boolean) -> Unit,
+    context: Context,
+    viewModel: SettingsViewModel
+) {
     val coroutineScope = rememberCoroutineScope()
     val optionList = OptionLists.appOptionsList
 
@@ -140,33 +231,73 @@ fun SettingsScreen(modifier: Modifier, clickRow: (Boolean) -> Unit) {
         }, itemContent = { profile ->
 
             Row(
-                modifier
+                modifier = modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp),
+                    .padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                profile.icon?.let {
-                    Image(painter = painterResource(id = it), contentDescription = "")
-                }
+                Row {
+                    profile.icon?.let {
+                        Image(painter = painterResource(id = it), contentDescription = "")
+                    }
 
-                profile.titleRes?.let {
-                    Text(
-                        modifier = modifier.padding(20.dp),
-                        text = stringResource(id = it),
-                        style = MaterialTheme.typography.titleSmall
-                    )
+                    profile.titleRes?.let {
+                        Text(
+                            modifier = modifier.padding(start = 8.dp),
+                            text = stringResource(id = it),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    }
+
                 }
+                Icon(
+                    painter = painterResource(id = R.drawable.arrow_small),
+                    contentDescription = "",
+                    modifier = modifier.padding(start = 160.dp)
+                )
             }
+
 
         }, onClick = {
             when (it) {
                 0 -> {
                     coroutineScope.launch {
-                        clickRow.invoke(true)
+                        openThemeDialog.invoke(true)
+                    }
+                }
+
+                1 -> {
+                    coroutineScope.launch {
+                        openLanguageDialog.invoke(true)
+                    }
+                }
+
+                2 -> {
+                    clearAppCache(context = context, viewModel = viewModel)
+                    coroutineScope.launch {
+                        showSnackBar.invoke(viewModel.settingsState.value.cache)
                     }
                 }
             }
         })
+    }
+}
+
+private fun clearAppCache(context: Context, viewModel: SettingsViewModel) {
+    val cacheDir = context.cacheDir
+    when {
+        cacheDir.exists() -> {
+            try {
+                cacheDir.deleteRecursively()
+                Log.d("AppCache", "Cache directory deleted successfully")
+                viewModel.handleScreenEvents(SettingsScreenEvent.ClearCached(true))
+            } catch (e: Exception) {
+                Log.e("AppCache", "Error deleting cache directory: $e")
+                viewModel.handleScreenEvents(SettingsScreenEvent.ClearCached(false))
+            }
+        }
+
+        else -> Log.d("AppCache", "Cache directory does not exist")
     }
 }
