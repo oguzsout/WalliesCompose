@@ -9,18 +9,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-fun <T> LazyListScope.menuRow(
+
+fun <T> LazyListScope.menuRowForList(
     data: List<T>,
     modifier: Modifier,
     itemContent: @Composable BoxScope.(T) -> Unit,
-    background: @Composable (Int) -> CornerBasedShape,
     onClick: (Int) -> Unit
 ) {
     val size = data.count()
@@ -33,27 +35,58 @@ fun <T> LazyListScope.menuRow(
             for (columnIndex in 0 until size) {
                 val itemIndex = rowIndex * size + columnIndex
                 if (itemIndex < size) {
-                    val shape = background(itemIndex)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(64.dp)
-                            .clickable { onClick.invoke(itemIndex) }
-                            .background(
-                                color = MaterialTheme.colorScheme.tertiaryContainer,
-                                shape = shape
-                            )
-                    ) {
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp)
+                        .clickable { onClick.invoke(itemIndex) }
+                        .background(
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            shape = mediumBackground(index = itemIndex, size = data.size)
+                        )) {
                         itemContent(data[itemIndex])
                     }
                     if (rowIndex < rows - 1 && columnIndex < size - 1) {
                         Divider(
-                            modifier = Modifier.fillMaxWidth(),
-                            thickness = 1.dp,
-                            color = Color.Gray
+                            modifier = Modifier.fillMaxWidth(), thickness = 1.dp, color = Color.Gray
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+fun mediumBackground(index: Int, size: Int): CornerBasedShape {
+    return when (size) {
+        1 -> Shapes().medium.copy(
+            topStart = CornerSize(16.dp),
+            topEnd = CornerSize(16.dp),
+            bottomStart = CornerSize(16.dp),
+            bottomEnd = CornerSize(16.dp)
+        )
+
+        else -> {
+            when (index) {
+                0 -> Shapes().medium.copy(
+                    topStart = CornerSize(16.dp),
+                    topEnd = CornerSize(16.dp),
+                    bottomStart = CornerSize(0.dp),
+                    bottomEnd = CornerSize(0.dp)
+                )
+
+                size - 1 -> Shapes().medium.copy(
+                    topStart = CornerSize(0.dp),
+                    topEnd = CornerSize(0.dp),
+                    bottomStart = CornerSize(16.dp),
+                    bottomEnd = CornerSize(16.dp)
+                )
+
+                else -> Shapes().medium.copy(
+                    topStart = CornerSize(0.dp),
+                    topEnd = CornerSize(0.dp),
+                    bottomStart = CornerSize(0.dp),
+                    bottomEnd = CornerSize(0.dp)
+                )
             }
         }
     }
