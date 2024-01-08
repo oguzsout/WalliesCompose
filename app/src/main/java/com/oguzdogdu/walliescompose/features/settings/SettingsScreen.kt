@@ -3,33 +3,14 @@ package com.oguzdogdu.walliescompose.features.settings
 import android.app.Activity
 import android.content.Context
 import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardElevation
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Shapes
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,24 +19,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.features.component.BaseCenteredToolbar
+import com.oguzdogdu.walliescompose.features.settings.components.MenuRowItems
 import com.oguzdogdu.walliescompose.features.settings.components.SingleSelectDialog
 import com.oguzdogdu.walliescompose.util.OptionLists
-import com.oguzdogdu.walliescompose.util.menuRow
-import kotlinx.coroutines.delay
+import com.oguzdogdu.walliescompose.util.menuRowForList
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 
@@ -176,7 +152,6 @@ fun SettingsScreenRoute(
     }
 }
 
-
 @Composable
 fun SettingsScreen(
     modifier: Modifier,
@@ -188,99 +163,29 @@ fun SettingsScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val optionList = OptionLists.appOptionsList
-
     LazyColumn(
         modifier = modifier
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        menuRow(data = optionList, modifier = modifier.fillMaxWidth(), background = { index ->
-            when (optionList.size) {
-                1 -> Shapes().medium.copy(
-                    topStart = CornerSize(16.dp),
-                    topEnd = CornerSize(16.dp),
-                    bottomStart = CornerSize(16.dp),
-                    bottomEnd = CornerSize(16.dp)
+        menuRowForList(data = optionList,
+            modifier = modifier.fillMaxWidth(),
+            itemContent = { menu ->
+                MenuRowItems(
+                    modifier = modifier, menuRow = menu
                 )
-
-                else -> {
-                    when (index) {
-                        0 -> Shapes().medium.copy(
-                            topStart = CornerSize(16.dp),
-                            topEnd = CornerSize(16.dp),
-                            bottomStart = CornerSize(0.dp),
-                            bottomEnd = CornerSize(0.dp)
-                        )
-
-                        optionList.size - 1 -> Shapes().medium.copy(
-                            topStart = CornerSize(0.dp),
-                            topEnd = CornerSize(0.dp),
-                            bottomStart = CornerSize(16.dp),
-                            bottomEnd = CornerSize(16.dp)
-                        )
-
-                        else -> Shapes().medium.copy(
-                            topStart = CornerSize(0.dp),
-                            topEnd = CornerSize(0.dp),
-                            bottomStart = CornerSize(0.dp),
-                            bottomEnd = CornerSize(0.dp)
-                        )
-                    }
-                }
-            }
-        }, itemContent = { profile ->
-
-            Row(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row {
-                    profile.icon?.let {
-                        Image(painter = painterResource(id = it), contentDescription = "")
-                    }
-
-                    profile.titleRes?.let {
-                        Text(
-                            modifier = modifier.padding(start = 8.dp),
-                            text = stringResource(id = it),
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                    }
-
-                }
-                Icon(
-                    painter = painterResource(id = R.drawable.arrow_small),
-                    contentDescription = "",
-                    modifier = modifier.padding(start = 160.dp)
+            },
+            onClick = {
+                handleMenuItemClick(
+                    itemIndex = it,
+                    coroutineScope,
+                    openThemeDialog,
+                    openLanguageDialog,
+                    showSnackBar,
+                    context,
+                    viewModel
                 )
-            }
-
-
-        }, onClick = {
-            when (it) {
-                0 -> {
-                    coroutineScope.launch {
-                        openThemeDialog.invoke(true)
-                    }
-                }
-
-                1 -> {
-                    coroutineScope.launch {
-                        openLanguageDialog.invoke(true)
-                    }
-                }
-
-                2 -> {
-                    clearAppCache(context = context, viewModel = viewModel)
-                    coroutineScope.launch {
-                        showSnackBar.invoke(viewModel.settingsState.value.cache)
-                    }
-                }
-            }
-        })
+            })
     }
 }
 
@@ -299,5 +204,35 @@ private fun clearAppCache(context: Context, viewModel: SettingsViewModel) {
         }
 
         else -> Log.d("AppCache", "Cache directory does not exist")
+    }
+}
+fun handleMenuItemClick(
+    itemIndex: Int,
+    coroutineScope: CoroutineScope,
+    openThemeDialog: (Boolean) -> Unit,
+    openLanguageDialog: (Boolean) -> Unit,
+    showSnackBar: (Boolean) -> Unit,
+    context: Context,
+    viewModel: SettingsViewModel
+) {
+    when (itemIndex) {
+        0 -> {
+            coroutineScope.launch {
+                openThemeDialog.invoke(true)
+            }
+        }
+
+        1 -> {
+            coroutineScope.launch {
+                openLanguageDialog.invoke(true)
+            }
+        }
+
+        2 -> {
+            clearAppCache(context = context, viewModel = viewModel)
+            coroutineScope.launch {
+                showSnackBar.invoke(viewModel.settingsState.value.cache)
+            }
+        }
     }
 }
