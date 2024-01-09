@@ -1,5 +1,6 @@
 package com.oguzdogdu.walliescompose.data.service
 
+import com.oguzdogdu.walliescompose.data.model.collection.CollectionResponse
 import com.oguzdogdu.walliescompose.data.model.topics.TopicsResponseItem
 import com.oguzdogdu.walliescompose.data.model.maindto.UnsplashResponseItem
 import retrofit2.Response
@@ -19,4 +20,10 @@ interface WallpaperService {
         @Query("page") page: Int?,
         @Query("per_page") perPage: Int?,
     ): Response<List<TopicsResponseItem>>
+
+    @GET("collections")
+    suspend fun getCollections(
+        @Query("page") page: Int?,
+        @Query("per_page") perPage: Int?
+    ): Response<List<CollectionResponse>>
 }
