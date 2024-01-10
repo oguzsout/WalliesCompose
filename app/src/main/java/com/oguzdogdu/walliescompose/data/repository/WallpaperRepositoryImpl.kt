@@ -13,6 +13,8 @@ import com.oguzdogdu.walliescompose.data.model.collection.toCollectionDomain
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelLatest
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelPopular
 import com.oguzdogdu.walliescompose.data.model.topics.toDomainTopics
+import com.oguzdogdu.walliescompose.data.pagination.CollectionByLikesPagingSource
+import com.oguzdogdu.walliescompose.data.pagination.CollectionsByTitlePagingSource
 import com.oguzdogdu.walliescompose.data.pagination.CollectionsPagingSource
 import com.oguzdogdu.walliescompose.data.service.WallpaperService
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
@@ -63,6 +65,32 @@ class WallpaperRepositoryImpl @Inject constructor(
             config = pagingConfig,
             initialKey = 1,
             pagingSourceFactory = { CollectionsPagingSource(service = service) }
+        ).flow.mapNotNull {
+            it.map { collection ->
+                collection.toCollectionDomain()
+            }
+        }
+    }
+
+    override suspend fun getCollectionsListByTitleSort(): Flow<PagingData<WallpaperCollections>> {
+        val pagingConfig = PagingConfig(pageSize = PAGE_ITEM_LIMIT)
+        return Pager(
+            config = pagingConfig,
+            initialKey = 1,
+            pagingSourceFactory = { CollectionsByTitlePagingSource(service = service) }
+        ).flow.mapNotNull {
+            it.map { collection ->
+                collection.toCollectionDomain()
+            }
+        }
+    }
+
+    override suspend fun getCollectionsListByLikesSort(): Flow<PagingData<WallpaperCollections>> {
+        val pagingConfig = PagingConfig(pageSize = PAGE_ITEM_LIMIT)
+        return Pager(
+            config = pagingConfig,
+            initialKey = 1,
+            pagingSourceFactory = { CollectionByLikesPagingSource(service = service) }
         ).flow.mapNotNull {
             it.map { collection ->
                 collection.toCollectionDomain()
