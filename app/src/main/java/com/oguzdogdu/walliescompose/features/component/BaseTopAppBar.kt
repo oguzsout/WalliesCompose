@@ -40,7 +40,7 @@ fun BaseCenteredToolbar(
                 text = title.orEmpty(),
                 color = Color.Unspecified,
                 fontFamily = medium,
-                fontSize = 24.sp
+                fontSize = 16.sp
             )
         }, navigationIcon = {
             IconButton(onClick = {

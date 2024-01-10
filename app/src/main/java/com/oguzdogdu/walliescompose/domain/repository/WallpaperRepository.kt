@@ -13,5 +13,7 @@ interface WallpaperRepository {
     suspend fun getHomeImagesByLatest(): Flow<Resource<List<LatestImage>?>>
     suspend fun getHomeTopicsImages(): Flow<Resource<List<Topics>?>>
     suspend fun getCollectionsList(): Flow<PagingData<WallpaperCollections>>
+    suspend fun getCollectionsListByTitleSort(): Flow<PagingData<WallpaperCollections>>
+    suspend fun getCollectionsListByLikesSort(): Flow<PagingData<WallpaperCollections>>
 
 }

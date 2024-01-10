@@ -51,9 +51,9 @@ class CollectionsViewModel @Inject constructor(private val repository: Wallpaper
 
     private fun sortListByTitle() {
         viewModelScope.launch {
-            repository.getCollectionsList().cachedIn(viewModelScope).collectLatest { sortedPagingData ->
+            repository.getCollectionsListByTitleSort().cachedIn(viewModelScope).collectLatest { sortedPagingData ->
                 sortedPagingData.let { list ->
-                    _getCollections.update { it.copy(sortedByTitlePagingData = list) }
+                    _moviesState.value = list
                 }
             }
         }
@@ -61,9 +61,9 @@ class CollectionsViewModel @Inject constructor(private val repository: Wallpaper
 
     private fun sortListByLikes() {
         viewModelScope.launch {
-            repository.getCollectionsList().cachedIn(viewModelScope).collectLatest { sortedPagingData ->
+            repository.getCollectionsListByLikesSort().cachedIn(viewModelScope).collectLatest { sortedPagingData ->
                 sortedPagingData.let { list ->
-                    _getCollections.update { it.copy(sortedByLikesPagingData = list) }
+                    _moviesState.value = list
                 }
             }
         }
