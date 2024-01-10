@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -55,6 +56,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.ImageLoader
@@ -67,6 +69,7 @@ import com.oguzdogdu.walliescompose.features.component.BaseCenteredToolbar
 import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
 import com.oguzdogdu.walliescompose.features.home.state.HomeScreenState
 import com.oguzdogdu.walliescompose.navigation.utils.WalliesIcons
+import com.oguzdogdu.walliescompose.ui.theme.medium
 
 @Composable
 fun HomeScreenRoute(modifier: Modifier = Modifier, viewModel: HomeViewModel = hiltViewModel()) {
@@ -123,18 +126,32 @@ private fun TopicLayoutContainer(modifier: Modifier, homeUiState: HomeScreenStat
             .padding(horizontal = 8.dp),
     ) {
 
-        Text(
-            text = stringResource(id = R.string.topics_title),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
-        )
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(id = R.string.topics_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
+            )
 
-        LazyVerticalGrid(columns = GridCells.Fixed(2),
-            modifier = Modifier
-                .height(184.dp)
+            Text(
+                text = stringResource(id = R.string.show_all),
+                fontFamily = medium,
+                fontSize = 12.sp,
+                color = Color.Unspecified,
+                modifier = modifier.padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
+            )
+        }
 
-            , horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.height(184.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             itemsIndexed(homeUiState.topics, key = { index: Int, item: Topics ->
                 item.id.orEmpty()
             }) { index, item ->
@@ -142,7 +159,6 @@ private fun TopicLayoutContainer(modifier: Modifier, homeUiState: HomeScreenStat
             }
         }
     }
-
 }
 
 @Composable
@@ -153,11 +169,25 @@ private fun PopularLayoutContainer(modifier: Modifier, homeUiState: HomeScreenSt
             .padding(horizontal = 8.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = stringResource(id = R.string.popular_title),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
-        )
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(id = R.string.popular_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
+            )
+
+            Text(
+                text = stringResource(id = R.string.show_all),
+                fontFamily = medium,
+                fontSize = 12.sp,
+                color = Color.Unspecified,
+                modifier = modifier.padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
+            )
+        }
 
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
             items(homeUiState.popular, key = {
@@ -167,7 +197,6 @@ private fun PopularLayoutContainer(modifier: Modifier, homeUiState: HomeScreenSt
 
             }
         })
-
     }
 }
 
@@ -179,11 +208,25 @@ private fun LatestLayoutContainer(modifier: Modifier, homeUiState: HomeScreenSta
             .padding(horizontal = 8.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = stringResource(id = R.string.latest_title),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
-        )
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(id = R.string.latest_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
+            )
+
+            Text(
+                text = stringResource(id = R.string.show_all),
+                fontFamily = medium,
+                fontSize = 12.sp,
+                color = Color.Unspecified,
+                modifier = modifier.padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
+            )
+        }
 
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
             items(homeUiState.latest, key = {
@@ -193,7 +236,6 @@ private fun LatestLayoutContainer(modifier: Modifier, homeUiState: HomeScreenSta
 
             }
         })
-
     }
 }
 
@@ -245,7 +287,7 @@ private fun PopularImageView(imageUrl: String?) {
                 .height(210.dp)
                 .width(150.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
-            loading = { LoadingState()},
+            loading = { LoadingState() },
         )
     }
 }
@@ -264,7 +306,7 @@ private fun LatestImageView(imageUrl: String?) {
                 .height(210.dp)
                 .width(150.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
-            loading = { LoadingState()},
+            loading = { LoadingState() },
         )
     }
 }
