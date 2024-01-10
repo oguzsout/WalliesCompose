@@ -1,8 +1,8 @@
 package com.oguzdogdu.walliescompose.di
 
 import android.content.Context
-import com.oguzdogdu.walliescompose.data.AppSettingsRepositoryImpl
-import com.oguzdogdu.walliescompose.data.WallpaperRepositoryImpl
+import com.oguzdogdu.walliescompose.data.repository.AppSettingsRepositoryImpl
+import com.oguzdogdu.walliescompose.data.repository.WallpaperRepositoryImpl
 import com.oguzdogdu.walliescompose.data.di.Dispatcher
 import com.oguzdogdu.walliescompose.data.di.WalliesDispatchers
 import com.oguzdogdu.walliescompose.data.service.WallpaperService
