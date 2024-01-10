@@ -67,6 +67,7 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.data.common.LoadingState
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
 import com.oguzdogdu.walliescompose.ui.theme.bold
 import com.oguzdogdu.walliescompose.ui.theme.medium
@@ -104,8 +105,15 @@ fun CollectionsScreenRoute(modifier: Modifier = Modifier,viewModel: CollectionsV
            DropdownMenuBox(modifier = modifier
                .align(Alignment.End)
                .padding(top = 8.dp, end = 8.dp, bottom = 8.dp),
-              onItemClick = { title ->
-                   Toast.makeText(context, title, Toast.LENGTH_SHORT).show()
+              onItemClick = { id ->
+                   when(id) {
+                       0 -> {
+                           viewModel.handleUIEvent(CollectionScreenEvent.SortByTitles)
+                       }
+                       1 -> {
+                           viewModel.handleUIEvent(CollectionScreenEvent.SortByLikes)
+                       }
+                   }
                })
             CollectionScreen(modifier = modifier, collectionLazyPagingItems = collectionState, onCollectionClick = {id ->
                 Toast.makeText(context, id, Toast.LENGTH_SHORT).show()
@@ -117,7 +125,7 @@ fun CollectionsScreenRoute(modifier: Modifier = Modifier,viewModel: CollectionsV
 
 @Composable
 fun DropdownMenuBox(
-    modifier: Modifier, onItemClick: (String) -> Unit
+    modifier: Modifier, onItemClick: (Int) -> Unit
 ) {
     val sortTypeList = listOf(
         stringResource(id = R.string.text_alphabetic_sort),
@@ -168,7 +176,7 @@ fun DropdownMenuBox(
         ) {
             sortTypeList.forEach { title ->
                 DropdownMenuItem(onClick = {
-                    onItemClick(title)
+                    onItemClick(sortTypeList.indexOf(title))
                     isContextMenuVisible = false
                 }, text = {
                     Text(text = title)
@@ -229,10 +237,18 @@ fun CollectionItem(collections: WallpaperCollections,onCollectionClick: (String)
                         color = Color.Black.copy(alpha = 0.5f),
                         size = size,
                     )
-                },
+                }, loading = {
+                    LoadingState()
+            }
         )
         if (collections.title != null) {
-            Text(text = collections.title, textAlign = TextAlign.Center,fontFamily = medium, fontSize = 16.sp, color = Color.White)
+            Text(
+                text = collections.title,
+                textAlign = TextAlign.Center,
+                fontFamily = medium,
+                fontSize = 16.sp,
+                color = Color.White
+            )
         }
     }
 }

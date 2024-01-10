@@ -61,6 +61,7 @@ import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.data.common.LoadingState
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
 import com.oguzdogdu.walliescompose.features.component.BaseCenteredToolbar
 import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
@@ -217,7 +218,7 @@ private fun TopicTitleView(imageUrl: String?, title: String?) {
                         size = size,
                     )
                 },
-            loading = { CircularProgressIndicator(modifier = Modifier.size(8.dp), color = Color.Red)},
+            loading = { LoadingState() },
         )
 
         Text(
@@ -244,7 +245,7 @@ private fun PopularImageView(imageUrl: String?) {
                 .height(210.dp)
                 .width(150.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
-            loading = { CircularProgressIndicator(modifier = Modifier.size(8.dp), color = Color.Red)},
+            loading = { LoadingState()},
         )
     }
 }
@@ -263,7 +264,7 @@ private fun LatestImageView(imageUrl: String?) {
                 .height(210.dp)
                 .width(150.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
-            loading = { CircularProgressIndicator(modifier = Modifier.size(8.dp), color = Color.Red)},
+            loading = { LoadingState()},
         )
     }
 }
