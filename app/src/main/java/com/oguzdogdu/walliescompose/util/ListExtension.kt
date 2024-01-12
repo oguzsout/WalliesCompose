@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Divider
@@ -19,37 +19,38 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 
-fun <T> LazyListScope.menuRowForList(
+@Composable
+fun <T> LazyItemScope.ReusableMenuRow(
     data: List<T>,
+    index: Int,
     modifier: Modifier,
     itemContent: @Composable BoxScope.(T) -> Unit,
     onClick: (Int) -> Unit
 ) {
     val size = data.count()
-    val rows = if (size == 0) 0 else 1 + (size - 1)
-    items(rows, key = { it.hashCode() }) { rowIndex ->
-        Column(
-            modifier = modifier.fillMaxWidth()
-        ) {
 
-            for (columnIndex in 0 until size) {
-                val itemIndex = rowIndex * size + columnIndex
-                if (itemIndex < size) {
-                    Box(modifier = Modifier
+    Column(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        for (columnIndex in 0 until size) {
+            val itemIndex = index + columnIndex
+            if (itemIndex < size) {
+                Box(
+                    modifier = Modifier
                         .fillMaxWidth()
                         .height(64.dp)
                         .clickable { onClick.invoke(itemIndex) }
                         .background(
                             color = MaterialTheme.colorScheme.tertiaryContainer,
                             shape = mediumBackground(index = itemIndex, size = data.size)
-                        )) {
-                        itemContent(data[itemIndex])
-                    }
-                    if (rowIndex < rows - 1 && columnIndex < size - 1) {
-                        Divider(
-                            modifier = Modifier.fillMaxWidth(), thickness = 1.dp, color = Color.Gray
                         )
-                    }
+                ) {
+                    itemContent(data[itemIndex])
+                }
+                if (index < size - 1 && columnIndex < size - 1) {
+                    Divider(
+                        modifier = Modifier.fillMaxWidth(), thickness = 1.dp, color = Color.Gray
+                    )
                 }
             }
         }

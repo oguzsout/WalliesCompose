@@ -13,12 +13,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.util.MenuRow
 
 @Composable
-fun MenuRowItems(modifier:Modifier,menuRow: MenuRow) {
+fun MenuRowItems(modifier: Modifier, menuRow: MenuRow) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -35,6 +36,8 @@ fun MenuRowItems(modifier:Modifier,menuRow: MenuRow) {
                 Text(
                     modifier = modifier.padding(start = 8.dp),
                     text = stringResource(id = it),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.titleSmall
                 )
             }
