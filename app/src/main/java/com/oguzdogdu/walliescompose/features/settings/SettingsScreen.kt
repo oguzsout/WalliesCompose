@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,7 +32,7 @@ import com.oguzdogdu.walliescompose.features.component.BaseCenteredToolbar
 import com.oguzdogdu.walliescompose.features.settings.components.MenuRowItems
 import com.oguzdogdu.walliescompose.features.settings.components.SingleSelectDialog
 import com.oguzdogdu.walliescompose.util.OptionLists
-import com.oguzdogdu.walliescompose.util.menuRowForList
+import com.oguzdogdu.walliescompose.util.ReusableMenuRow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -168,24 +170,27 @@ fun SettingsScreen(
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        menuRowForList(data = optionList,
-            modifier = modifier.fillMaxWidth(),
-            itemContent = { menu ->
-                MenuRowItems(
-                    modifier = modifier, menuRow = menu
-                )
-            },
-            onClick = {
-                handleMenuItemClick(
-                    itemIndex = it,
-                    coroutineScope,
-                    openThemeDialog,
-                    openLanguageDialog,
-                    showSnackBar,
-                    context,
-                    viewModel
-                )
-            })
+        items(count = 1) { index: Int ->
+            ReusableMenuRow(data = optionList,
+                index = index,
+                modifier = modifier.fillMaxWidth(),
+                itemContent = { menu ->
+                    MenuRowItems(
+                        modifier = modifier, menuRow = menu
+                    )
+                },
+                onClick = {
+                    handleMenuItemClick(
+                        itemIndex = it,
+                        coroutineScope,
+                        openThemeDialog,
+                        openLanguageDialog,
+                        showSnackBar,
+                        context,
+                        viewModel
+                    )
+                })
+        }
     }
 }
 
