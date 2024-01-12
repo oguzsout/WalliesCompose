@@ -205,7 +205,6 @@ private fun CollectionScreen(modifier: Modifier,
             }
         }
     }
-
 }
 
 @Composable
