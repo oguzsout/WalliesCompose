@@ -4,6 +4,8 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.oguzdogdu.walliescompose.cache.dao.FavoriteDao
+import com.oguzdogdu.walliescompose.cache.entity.toDomain
 import com.oguzdogdu.walliescompose.data.common.Constants
 import com.oguzdogdu.walliescompose.data.common.Constants.PAGE_ITEM_LIMIT
 import com.oguzdogdu.walliescompose.data.common.safeApiCall
@@ -18,18 +20,22 @@ import com.oguzdogdu.walliescompose.data.pagination.CollectionsByTitlePagingSour
 import com.oguzdogdu.walliescompose.data.pagination.CollectionsPagingSource
 import com.oguzdogdu.walliescompose.data.service.WallpaperService
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
+import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
 import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.Resource
+import com.oguzdogdu.walliescompose.domain.wrapper.toResource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import javax.inject.Inject
 
 class WallpaperRepositoryImpl @Inject constructor(
     private val service: WallpaperService,
+    private val favoriteDao: FavoriteDao,
     @Dispatcher(WalliesDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
 ) :
     WallpaperRepository {
@@ -96,5 +102,13 @@ class WallpaperRepositoryImpl @Inject constructor(
                 collection.toCollectionDomain()
             }
         }
+    }
+
+    override suspend fun getFavorites():  Flow<Resource<List<FavoriteImages>>> {
+        return favoriteDao.getFavorites().map { list ->
+            list.map {
+                it.toDomain()
+            }
+        }.toResource()
     }
 }
