@@ -1,6 +1,7 @@
 package com.oguzdogdu.walliescompose.di
 
 import android.content.Context
+import com.oguzdogdu.walliescompose.cache.dao.FavoriteDao
 import com.oguzdogdu.walliescompose.data.repository.AppSettingsRepositoryImpl
 import com.oguzdogdu.walliescompose.data.repository.WallpaperRepositoryImpl
 import com.oguzdogdu.walliescompose.data.di.Dispatcher
@@ -23,9 +24,10 @@ object RepositoryModule {
     @Singleton
     fun provideWallpaperRepository(
         service: WallpaperService,
+        dao: FavoriteDao,
         @Dispatcher(WalliesDispatchers.IO) ioDispatcher: CoroutineDispatcher
     ): WallpaperRepository {
-        return WallpaperRepositoryImpl(service, ioDispatcher)
+        return WallpaperRepositoryImpl(service, dao,ioDispatcher)
     }
     @Singleton
     @Provides
