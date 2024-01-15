@@ -1,6 +1,7 @@
 package com.oguzdogdu.walliescompose.data.model.maindto
 
 import com.google.gson.annotations.SerializedName
+import com.oguzdogdu.walliescompose.domain.model.detail.Photo
 import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
 
@@ -30,5 +31,27 @@ data class Tags(
     val type: String?,
     val title: String?,
 )
+fun UnsplashResponseItem.convertList() = tags.map { it?.title }
 fun UnsplashResponseItem.toDomainModelPopular() = PopularImage(id = id, url = urls?.regular)
 fun UnsplashResponseItem.toDomainModelLatest() = LatestImage(id = id, url = urls?.regular)
+fun UnsplashResponseItem.toDomainModelPhoto() = Photo(
+    id = id,
+    username = user?.username,
+    portfolio = user?.portfolioUrl,
+    profileimage = user?.profileImage?.large,
+    createdAt = createdAt,
+    desc = altDescription,
+    urls = urls?.regular,
+    views = views,
+    downloads = downloads,
+    unsplashProfile = user?.links?.html,
+    likes = likes,
+    bio = user?.bio,
+    name = user?.name,
+    tag = this.convertList(),
+    location = user?.location,
+    rawQuality = urls?.raw,
+    highQuality = urls?.full,
+    mediumQuality = urls?.regular,
+    lowQuality = urls?.small
+)

@@ -13,6 +13,7 @@ import com.oguzdogdu.walliescompose.data.di.Dispatcher
 import com.oguzdogdu.walliescompose.data.di.WalliesDispatchers
 import com.oguzdogdu.walliescompose.data.model.collection.toCollectionDomain
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelLatest
+import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelPhoto
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelPopular
 import com.oguzdogdu.walliescompose.data.model.topics.toDomainTopics
 import com.oguzdogdu.walliescompose.data.pagination.CollectionByLikesPagingSource
@@ -20,6 +21,7 @@ import com.oguzdogdu.walliescompose.data.pagination.CollectionsByTitlePagingSour
 import com.oguzdogdu.walliescompose.data.pagination.CollectionsPagingSource
 import com.oguzdogdu.walliescompose.data.service.WallpaperService
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
+import com.oguzdogdu.walliescompose.domain.model.detail.Photo
 import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
@@ -110,5 +112,10 @@ class WallpaperRepositoryImpl @Inject constructor(
                 it.toDomain()
             }
         }.toResource()
+    }
+    override suspend fun getPhoto(id: String?): Flow<Resource<Photo?>> {
+        return safeApiCall(ioDispatcher) {
+            service.getPhoto(id = id).body()?.toDomainModelPhoto()
+        }
     }
 }
