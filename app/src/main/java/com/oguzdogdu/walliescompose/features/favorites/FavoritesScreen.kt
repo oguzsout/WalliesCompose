@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -22,8 +21,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -31,9 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,18 +39,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.compose.itemContentType
-import androidx.paging.compose.itemKey
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.data.common.LoadingState
-import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
-import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
-import com.oguzdogdu.walliescompose.features.collections.CollectionItem
 import com.oguzdogdu.walliescompose.features.favorites.event.FavoriteScreenEvent
 import com.oguzdogdu.walliescompose.features.favorites.state.FavoriteScreenState
 import com.oguzdogdu.walliescompose.ui.theme.regular
-import kotlinx.coroutines.delay
 
 
 @Composable
@@ -103,8 +91,8 @@ fun FavoritesScreenRoute(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(state.favorites.orEmpty()) {
-                        FavoritesImageView(imageUrl = it.url)
+                    items(state.favorites.orEmpty()) {favorites ->
+                        FavoritesImageView(modifier,imageUrl = favorites.url)
                     }
                 }
             }
@@ -145,7 +133,7 @@ fun EmptyView(modifier: Modifier, state: FavoriteScreenState) {
 }
 
 @Composable
-private fun FavoritesImageView(imageUrl: String?) {
+private fun FavoritesImageView(modifier: Modifier,imageUrl: String?) {
     Box(
         modifier = Modifier.wrapContentSize()
     ) {
@@ -153,10 +141,9 @@ private fun FavoritesImageView(imageUrl: String?) {
             model = imageUrl,
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
-                .height(210.dp)
-                .width(150.dp)
+                .height(240.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
             loading = { LoadingState() },
         )

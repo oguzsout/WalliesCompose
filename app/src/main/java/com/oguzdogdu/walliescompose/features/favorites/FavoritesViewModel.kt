@@ -41,7 +41,7 @@ class FavoritesViewModel @Inject constructor(private val repository: WallpaperRe
                 }
                 status.onSuccess {list->
                     _favoritesState.update {
-                        it.copy(loading = false,favorites = listOf(FavoriteImages(profileImage = "")))
+                        it.copy(loading = false,favorites = list)
                     }
                 }
                 status.onFailure { error ->
