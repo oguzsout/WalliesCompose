@@ -24,11 +24,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -109,10 +117,9 @@ fun DetailScreenRoute(
                 contentDescription = "",
                 modifier = modifier
                     .fillMaxWidth()
-                    .weight(0.5f),
+                    .weight(1f),
                 contentScale = ContentScale.FillBounds
             )
-            Spacer(modifier = modifier.size(32.dp))
             PostView(modifier = modifier, state = state, onAddFavoriteClick = { photo ->
                 detailViewModel.handleScreenEvents(
                     DetailScreenEvent.AddFavorites(
@@ -124,16 +131,20 @@ fun DetailScreenRoute(
                             isChecked = true)
                     )
                 )
-            }, onRemoteFavoriteClick = { photo ->
-                detailViewModel.handleScreenEvents(DetailScreenEvent.DeleteFavorites(
-                    FavoriteImages(id = state.detail?.id,
-                        url = state.detail?.urls,
-                        profileImage = state.detail?.profileimage,
-                        name = state.detail?.name,
-                        portfolioUrl = state.detail?.portfolio,
-                        isChecked = false)
-                ))
-            })
+            }) { photo ->
+                detailViewModel.handleScreenEvents(
+                    DetailScreenEvent.DeleteFavorites(
+                        FavoriteImages(
+                            id = state.detail?.id,
+                            url = state.detail?.urls,
+                            profileImage = state.detail?.profileimage,
+                            name = state.detail?.name,
+                            portfolioUrl = state.detail?.portfolio,
+                            isChecked = false
+                        )
+                    )
+                )
+            }
         }
     }
 }
@@ -147,7 +158,7 @@ fun PostView(
 ) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = MaterialTheme.colorScheme.onPrimary
         ), shape = RoundedCornerShape(
             topStart = 16.dp,
             topEnd = 16.dp,
@@ -192,23 +203,18 @@ fun PostView(
                         )
                     }
                 }
-                WalliesFavoriteButton(
-                        modifier = modifier,
-                        favoriteImages = FavoriteImages(
-                            id = state.favorites?.id,
-                            url = state.favorites?.url,
-                            profileImage = state.favorites?.profileImage,
-                            name = state.favorites?.name,
-                            portfolioUrl = state.favorites?.portfolioUrl,
-                            isChecked = state.favorites?.isChecked ?: false
-                        ),
-                        addPhotoToFavorites = { favorite ->
-                            onAddFavoriteClick.invoke(favorite)
-                        },
-                        removePhotoFromFavorites = { favorite ->
-                            onRemoteFavoriteClick.invoke(favorite)
-                        })
-                }
+                WalliesFavoriteButton(modifier = modifier, favoriteImages = FavoriteImages(
+                    id = state.favorites?.id,
+                    url = state.favorites?.url,
+                    profileImage = state.favorites?.profileImage,
+                    name = state.favorites?.name,
+                    portfolioUrl = state.favorites?.portfolioUrl,
+                    isChecked = state.favorites?.isChecked ?: false
+                ), addPhotoToFavorites = { favorite ->
+                    onAddFavoriteClick.invoke(favorite)
+                }, removePhotoFromFavorites = { favorite ->
+                    onRemoteFavoriteClick.invoke(favorite)
+                })
             }
         }
         Divider(
@@ -225,3 +231,4 @@ fun PostView(
         DetailTagsRow(modifier = modifier, detail = state.detail)
         DetailTripleActionButtons(modifier = modifier)
     }
+}
