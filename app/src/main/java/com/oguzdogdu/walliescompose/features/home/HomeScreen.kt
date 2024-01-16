@@ -361,8 +361,7 @@ private fun PopularImageView(id: String?, imageUrl: String?, onPopularClick: (St
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(210.dp)
-                .width(150.dp)
+                .height(240.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
             loading = { LoadingState() },
         )
@@ -380,8 +379,7 @@ private fun LatestImageView(id: String?, imageUrl: String?, onLatestClick: (Stri
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(210.dp)
-                .width(150.dp)
+                .height(240.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
             loading = { LoadingState() },
         )

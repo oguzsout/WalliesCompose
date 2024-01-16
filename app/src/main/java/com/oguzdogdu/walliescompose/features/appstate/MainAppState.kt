@@ -23,19 +23,15 @@ import kotlinx.coroutines.CoroutineScope
 @Composable
 fun rememberMainAppState(
     navController: NavHostController = rememberNavController(),
-    coroutineScope: CoroutineScope = rememberCoroutineScope(),
-    windowSizeClass: WindowSizeClass
 ): MainAppState {
-    return remember(navController, coroutineScope) {
-        MainAppState(navController, coroutineScope,windowSizeClass)
+    return remember(navController) {
+        MainAppState(navController)
     }
 }
 
 @Stable
 class MainAppState(
-    val navController: NavHostController,
-    val coroutineScope: CoroutineScope,
-    val windowSizeClass: WindowSizeClass
+    val navController: NavHostController
 ) {
     val currentDestination: NavDestination?
         @Composable get() = navController

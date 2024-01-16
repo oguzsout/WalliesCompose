@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    WalliesApp(windowSizeClass = calculateWindowSizeClass(this))
+                    WalliesApp()
                 }
             }
         }

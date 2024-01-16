@@ -23,8 +23,7 @@ import com.oguzdogdu.walliescompose.ui.theme.medium
 @Composable
 fun WalliesApp(
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass,
-    appState: MainAppState = rememberMainAppState(windowSizeClass = windowSizeClass),
+    appState: MainAppState = rememberMainAppState(),
 ) {
     Scaffold(modifier = modifier, bottomBar = {
         if (appState.shouldShowBottomBar) {
