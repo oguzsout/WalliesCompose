@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,7 +22,12 @@ import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.ui.theme.regular
 
 @Composable
-fun DetailTripleActionButtons(modifier: Modifier) {
+fun DetailTripleActionButtons(
+    modifier: Modifier,
+    setWallpaperButtonClick: () -> Unit,
+    shareButtonClick: () -> Unit,
+    downloadButtonClick: () -> Unit
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -28,7 +35,7 @@ fun DetailTripleActionButtons(modifier: Modifier) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Button(onClick = { /*TODO*/ }) {
+        Button(onClick = { setWallpaperButtonClick.invoke() }) {
             Icon(
                 painter = painterResource(id = R.drawable.wallpaper),
                 tint = Color.White,
@@ -43,9 +50,13 @@ fun DetailTripleActionButtons(modifier: Modifier) {
             )
         }
         Row {
-            Icon(painter = painterResource(id = R.drawable.share), contentDescription = "")
+            IconButton(modifier = modifier.wrapContentSize(), onClick = { shareButtonClick.invoke() }) {
+                Icon(painter = painterResource(id = R.drawable.share) , contentDescription = "")
+            }
             Spacer(modifier = modifier.padding(horizontal = 8.dp))
-            Icon(painter = painterResource(id = R.drawable.download), contentDescription = "")
+            IconButton(modifier = modifier.wrapContentSize(), onClick = { downloadButtonClick.invoke() }) {
+                Icon(painter = painterResource(id = R.drawable.download), contentDescription = "")
+            }
         }
     }
 }

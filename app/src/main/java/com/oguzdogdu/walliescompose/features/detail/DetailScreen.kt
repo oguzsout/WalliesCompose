@@ -14,11 +14,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -61,7 +63,8 @@ import com.oguzdogdu.walliescompose.ui.theme.regular
 fun DetailScreenRoute(
     modifier: Modifier = Modifier,
     detailViewModel: DetailViewModel = hiltViewModel(),
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onProfileDetailClick: (String) -> Unit
 ) {
     val state by detailViewModel.photo.collectAsStateWithLifecycle()
     LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
@@ -76,18 +79,23 @@ fun DetailScreenRoute(
         Row(
             modifier = modifier
                 .fillMaxWidth()
+                .wrapContentHeight()
                 .padding(start = 8.dp, top = 16.dp, bottom = 16.dp, end = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Absolute.SpaceBetween
         ) {
-            Icon(painter = painterResource(id = R.drawable.back),
-                contentDescription = "",
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = modifier
-                    .wrapContentSize()
-                    .clickable {
-                        onBackClick.invoke()
-                    })
+            IconButton(
+                onClick = { onBackClick.invoke() },
+                modifier = modifier.wrapContentSize()
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.back),
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = modifier
+                        .wrapContentSize()
+                )
+            }
 
             Text(
                 text = state.detail?.desc.orEmpty(),
@@ -97,14 +105,19 @@ fun DetailScreenRoute(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Icon(painter = painterResource(id = R.drawable.info),
-                contentDescription = "",
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = modifier
-                    .wrapContentSize()
-                    .clickable {
 
-                    })
+            IconButton(
+                onClick = { onProfileDetailClick.invoke(state.detail?.id.orEmpty()) },
+                modifier = modifier.wrapContentSize()
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.info),
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = modifier
+                        .wrapContentSize()
+                )
+            }
         }
     }) {
         Column(
@@ -120,7 +133,15 @@ fun DetailScreenRoute(
                     .weight(1f),
                 contentScale = ContentScale.FillBounds
             )
-            PostView(modifier = modifier, state = state, onAddFavoriteClick = { photo ->
+            PostView(modifier = modifier, state = state,
+                onSetWallpaperClick = {
+
+                }, onShareClick = {
+
+                }, onDownloadClick = {
+
+                },
+                onAddFavoriteClick = { photo ->
                 detailViewModel.handleScreenEvents(
                     DetailScreenEvent.AddFavorites(
                         FavoriteImages(id = state.detail?.id,
@@ -153,6 +174,9 @@ fun DetailScreenRoute(
 fun PostView(
     modifier: Modifier,
     state: DetailState,
+    onSetWallpaperClick: () -> Unit,
+    onShareClick: () -> Unit,
+    onDownloadClick: () -> Unit,
     onAddFavoriteClick: (FavoriteImages) -> Unit,
     onRemoteFavoriteClick: (FavoriteImages) -> Unit
 ) {
@@ -169,14 +193,17 @@ fun PostView(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 8.dp, top = 8.dp)
+                .padding(start = 8.dp, top = 16.dp)
         ) {
             Row(
                 modifier = modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row {
+                Row(
+                    modifier = modifier.wrapContentSize(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     AsyncImage(
                         model = state.detail?.profileimage,
                         contentDescription = "Profile Image",
@@ -229,6 +256,12 @@ fun PostView(
             thickness = 0.8.dp
         )
         DetailTagsRow(modifier = modifier, detail = state.detail)
-        DetailTripleActionButtons(modifier = modifier)
+        DetailTripleActionButtons(modifier = modifier, setWallpaperButtonClick = {
+            onSetWallpaperClick.invoke()
+        }, shareButtonClick = {
+            onShareClick.invoke()
+        }, downloadButtonClick = {
+            onDownloadClick.invoke()
+        })
     }
 }

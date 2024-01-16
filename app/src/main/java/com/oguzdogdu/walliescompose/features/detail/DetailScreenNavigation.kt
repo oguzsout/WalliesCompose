@@ -27,7 +27,10 @@ fun NavGraphBuilder.detailScreen(onBackClick: () -> Unit) {
         )
     ) {
         DetailScreenRoute(
-            onBackClick = onBackClick
+            onBackClick = onBackClick,
+            onProfileDetailClick = {
+                println(it)
+            }
         )
     }
 }
