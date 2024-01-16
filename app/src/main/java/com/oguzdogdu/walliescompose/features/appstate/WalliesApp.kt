@@ -27,12 +27,13 @@ fun WalliesApp(
     appState: MainAppState = rememberMainAppState(windowSizeClass = windowSizeClass),
 ) {
     Scaffold(modifier = modifier, bottomBar = {
-        AppNavBar(
+        if (appState.shouldShowBottomBar) {
+            AppNavBar(
                 destinations = AppDestinations(appState.topLevelDestinations),
                 onNavigateToDestination = appState::navigateToTopLevelDestination,
                 currentDestination = appState.currentDestination
             )
-
+        }
     }) {
         WalliesNavHost(
             navController = appState.navController, modifier = modifier.padding(it)

@@ -16,32 +16,54 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.oguzdogdu.walliescompose.features.settings.ThemeValues
 
-private val DarkColorScheme = darkColorScheme(
-    primary = PurpleDark,
-    secondary = PurpleDark,
-    tertiary = PurpleDark,
+private val DarkColorPalette = darkColorScheme(
+    primary = PrimaryDark,
+    onPrimary = OnPrimaryDark,
+    primaryContainer = PrimaryContainerDark,
+    onPrimaryContainer = OnPrimaryContainerDark,
+    secondary = SecondaryDark,
+    onSecondary = OnSecondaryDark,
+    secondaryContainer = SecondaryContainerDark,
+    onSecondaryContainer = OnSecondaryContainerDark,
+    tertiary = TertiaryDark,
+    onTertiary = OnTertiaryDark,
+    tertiaryContainer = TertiaryContainerDark,
+    onTertiaryContainer = OnTertiaryContainerDark,
+    error = ErrorDark,
+    onError = OnErrorDark,
+    errorContainer = ErrorContainerDark,
+    onErrorContainer = OnErrorContainerDark,
     background = BackgroundDark,
-    tertiaryContainer = RowColorDark,
-
-
+    onBackground = OnBackgroundDark,
+    surface = SurfaceDark,
+    outline = OutlineDark,
+    surfaceVariant = SurfaceVariantDark,
+    onSurfaceVariant = OnSurfaceVariantDark,
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = PurpleLight,
-    secondary = PurpleLight,
-    tertiary = PurpleLight,
-    background = Background,
-    tertiaryContainer = RowColor
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+private val LightColorPalette = lightColorScheme(
+    primary = PrimaryLight,
+    onPrimary = OnPrimaryLight,
+    primaryContainer = PrimaryContainerLight,
+    onPrimaryContainer = OnPrimaryContainerLight,
+    secondary = SecondaryLight,
+    onSecondary = OnSecondaryLight,
+    secondaryContainer = SecondaryContainerLight,
+    onSecondaryContainer = OnSecondaryContainerLight,
+    tertiary = TertiaryLight,
+    onTertiary = OnTertiaryLight,
+    tertiaryContainer = TertiaryContainerLight,
+    onTertiaryContainer = OnTertiaryContainerLight,
+    error = ErrorLight,
+    onError = OnErrorLight,
+    errorContainer = ErrorContainerLight,
+    onErrorContainer = OnErrorContainerLight,
+    background = BackgroundLight,
+    onBackground = OnBackgroundLight,
+    surface = SurfaceLight,
+    outline = OutlineLight,
+    surfaceVariant = SurfaceVariantLight,
+    onSurfaceVariant = OnSurfaceVariantLight,
 )
 
 @Composable
@@ -55,29 +77,29 @@ fun WalliesComposeTheme(
     val colorScheme = when (appTheme) {
         ThemeValues.SYSTEM_DEFAULT.title -> {
             if (darkTheme) {
-                DarkColorScheme
+                DarkColorPalette
             } else {
-                LightColorScheme
+                LightColorPalette
             }
         }
         ThemeValues.LIGHT_MODE.title -> {
-            LightColorScheme
+            LightColorPalette
         }
         ThemeValues.DARK_MODE.title -> {
-            DarkColorScheme
+            DarkColorPalette
         }
         null -> {
             if (darkTheme) {
-                DarkColorScheme
+                DarkColorPalette
             } else {
-                LightColorScheme
+                LightColorPalette
             }
         }
         else -> {
             if (darkTheme) {
-                DarkColorScheme
+                DarkColorPalette
             } else {
-                LightColorScheme
+                LightColorPalette
             }
         }
     }
