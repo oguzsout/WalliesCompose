@@ -23,16 +23,16 @@ import com.oguzdogdu.walliescompose.ui.theme.medium
 @Composable
 fun WalliesApp(
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass,
-    appState: MainAppState = rememberMainAppState(windowSizeClass = windowSizeClass),
+    appState: MainAppState = rememberMainAppState(),
 ) {
     Scaffold(modifier = modifier, bottomBar = {
-        AppNavBar(
+        if (appState.shouldShowBottomBar) {
+            AppNavBar(
                 destinations = AppDestinations(appState.topLevelDestinations),
                 onNavigateToDestination = appState::navigateToTopLevelDestination,
                 currentDestination = appState.currentDestination
             )
-
+        }
     }) {
         WalliesNavHost(
             navController = appState.navController, modifier = modifier.padding(it)

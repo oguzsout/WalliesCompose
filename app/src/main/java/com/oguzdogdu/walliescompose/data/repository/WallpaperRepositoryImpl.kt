@@ -5,6 +5,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.oguzdogdu.walliescompose.cache.dao.FavoriteDao
+import com.oguzdogdu.walliescompose.cache.entity.FavoriteImage
 import com.oguzdogdu.walliescompose.cache.entity.toDomain
 import com.oguzdogdu.walliescompose.data.common.Constants
 import com.oguzdogdu.walliescompose.data.common.Constants.PAGE_ITEM_LIMIT
@@ -13,6 +14,7 @@ import com.oguzdogdu.walliescompose.data.di.Dispatcher
 import com.oguzdogdu.walliescompose.data.di.WalliesDispatchers
 import com.oguzdogdu.walliescompose.data.model.collection.toCollectionDomain
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelLatest
+import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelPhoto
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelPopular
 import com.oguzdogdu.walliescompose.data.model.topics.toDomainTopics
 import com.oguzdogdu.walliescompose.data.pagination.CollectionByLikesPagingSource
@@ -20,6 +22,7 @@ import com.oguzdogdu.walliescompose.data.pagination.CollectionsByTitlePagingSour
 import com.oguzdogdu.walliescompose.data.pagination.CollectionsPagingSource
 import com.oguzdogdu.walliescompose.data.service.WallpaperService
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
+import com.oguzdogdu.walliescompose.domain.model.detail.Photo
 import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
@@ -104,11 +107,41 @@ class WallpaperRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getFavorites():  Flow<Resource<List<FavoriteImages>>> {
+    override suspend fun getFavorites():  Flow<Resource<List<FavoriteImages>?>> {
         return favoriteDao.getFavorites().map { list ->
             list.map {
                 it.toDomain()
             }
         }.toResource()
+    }
+    override suspend fun insertImageToFavorites(favorite: FavoriteImages) {
+        return favoriteDao.addFavorites(
+            FavoriteImage(
+                id = favorite.id.orEmpty(),
+                url = favorite.url,
+                profileImage = favorite.profileImage,
+                name = favorite.name,
+                portfolioUrl = favorite.portfolioUrl,
+                isChecked = favorite.isChecked
+            )
+        )
+    }
+
+    override suspend fun deleteFavorites(favorite: FavoriteImages) {
+        return favoriteDao.deleteFavorite(
+            FavoriteImage(
+                id = favorite.id.orEmpty(),
+                url = favorite.url,
+                profileImage = favorite.profileImage,
+                name = favorite.name,
+                portfolioUrl = favorite.portfolioUrl,
+                isChecked = favorite.isChecked
+            )
+        )
+    }
+    override suspend fun getPhoto(id: String?): Flow<Resource<Photo?>> {
+        return safeApiCall(ioDispatcher) {
+            service.getPhoto(id = id).body()?.toDomainModelPhoto()
+        }
     }
 }

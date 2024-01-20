@@ -41,7 +41,7 @@ fun <T> LazyItemScope.ReusableMenuRow(
                         .height(64.dp)
                         .clickable { onClick.invoke(itemIndex) }
                         .background(
-                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            color = MaterialTheme.colorScheme.outlineVariant,
                             shape = mediumBackground(index = itemIndex, size = data.size)
                         )
                 ) {

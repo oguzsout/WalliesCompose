@@ -227,8 +227,7 @@ fun CollectionItem(collections: WallpaperCollections,onCollectionClick: (String)
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(210.dp)
-                .width(150.dp)
+                .height(240.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp)))
                 .drawWithContent {
                     drawContent()

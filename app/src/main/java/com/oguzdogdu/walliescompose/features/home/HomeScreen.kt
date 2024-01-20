@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
@@ -65,6 +66,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.ImageLoader
 import coil.compose.AsyncImage
@@ -79,13 +82,19 @@ import com.oguzdogdu.walliescompose.navigation.utils.WalliesIcons
 import com.oguzdogdu.walliescompose.ui.theme.medium
 
 @Composable
-fun HomeScreenRoute(modifier: Modifier = Modifier, viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeScreenRoute(
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = hiltViewModel(),
+    onLatestClick: (String) -> Unit,
+    onPopularClick: (String) -> Unit,
+) {
 
     val context = LocalContext.current
 
-    LaunchedEffect(key1 = Unit) {
+    LifecycleEventEffect(Lifecycle.Event.ON_START) {
         viewModel.handleScreenEvents(HomeScreenEvent.FetchHomeScreenLists)
     }
+
     val homeUiState by viewModel.homeListState.collectAsStateWithLifecycle()
 
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
@@ -112,13 +121,17 @@ fun HomeScreenRoute(modifier: Modifier = Modifier, viewModel: HomeViewModel = hi
                 TopicLayoutContainer(modifier = modifier, homeUiState = homeUiState)
             }
             item {
-                PopularLayoutContainer(
-                    modifier = modifier, homeUiState = homeUiState
-                )
+                PopularLayoutContainer(modifier = modifier,
+                    homeUiState = homeUiState,
+                    onPopularClick = { id ->
+                        onPopularClick.invoke(id)
+                    })
             }
 
             item {
-                LatestLayoutContainer(modifier = modifier, homeUiState = homeUiState)
+                LatestLayoutContainer(modifier = modifier,
+                    homeUiState = homeUiState,
+                    onLatestClick = { id -> onLatestClick.invoke(id) })
             }
         }
     }
@@ -137,18 +150,16 @@ private fun TopicLayoutContainer(modifier: Modifier, homeUiState: HomeScreenStat
     }
 
     AnimatedVisibility(
-            visible = visible,
-            enter = expandHorizontally { 50 },
-            exit = shrinkHorizontally(
-                animationSpec = tween(),
-                shrinkTowards = Alignment.End,
-            )
+        visible = visible, enter = expandHorizontally { 50 }, exit = shrinkHorizontally(
+            animationSpec = tween(),
+            shrinkTowards = Alignment.End,
+        )
+    ) {
+        Column(
+            modifier = modifier
+                .wrapContentSize()
+                .padding(horizontal = 8.dp),
         ) {
-            Column(
-                modifier = modifier
-                    .wrapContentSize()
-                    .padding(horizontal = 8.dp),
-            ) {
             Row(
                 modifier = modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -186,7 +197,9 @@ private fun TopicLayoutContainer(modifier: Modifier, homeUiState: HomeScreenStat
 }
 
 @Composable
-private fun PopularLayoutContainer(modifier: Modifier, homeUiState: HomeScreenState) {
+private fun PopularLayoutContainer(
+    modifier: Modifier, homeUiState: HomeScreenState, onPopularClick: (String) -> Unit
+) {
     var visible by remember {
         mutableStateOf(false)
     }
@@ -196,9 +209,7 @@ private fun PopularLayoutContainer(modifier: Modifier, homeUiState: HomeScreenSt
         }
     }
     AnimatedVisibility(
-        visible = visible,
-        enter = expandHorizontally { 50 },
-        exit = shrinkHorizontally(
+        visible = visible, enter = expandHorizontally { 50 }, exit = shrinkHorizontally(
             animationSpec = tween(),
             shrinkTowards = Alignment.End,
         )
@@ -232,8 +243,12 @@ private fun PopularLayoutContainer(modifier: Modifier, homeUiState: HomeScreenSt
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
                 items(homeUiState.popular, key = {
                     it.id.orEmpty()
-                }) {
-                    PopularImageView(imageUrl = it.url)
+                }) { popularImage ->
+                    PopularImageView(id = popularImage.id,
+                        imageUrl = popularImage.url,
+                        onPopularClick = {
+                            onPopularClick.invoke(it)
+                        })
 
                 }
             })
@@ -242,7 +257,9 @@ private fun PopularLayoutContainer(modifier: Modifier, homeUiState: HomeScreenSt
 }
 
 @Composable
-private fun LatestLayoutContainer(modifier: Modifier, homeUiState: HomeScreenState) {
+private fun LatestLayoutContainer(
+    modifier: Modifier, homeUiState: HomeScreenState, onLatestClick: (String) -> Unit
+) {
     var visible by remember {
         mutableStateOf(false)
     }
@@ -252,9 +269,7 @@ private fun LatestLayoutContainer(modifier: Modifier, homeUiState: HomeScreenSta
         }
     }
     AnimatedVisibility(
-        visible = visible,
-        enter = expandHorizontally { 50 },
-        exit = shrinkHorizontally(
+        visible = visible, enter = expandHorizontally { 50 }, exit = shrinkHorizontally(
             animationSpec = tween(),
             shrinkTowards = Alignment.End,
         )
@@ -288,8 +303,12 @@ private fun LatestLayoutContainer(modifier: Modifier, homeUiState: HomeScreenSta
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
                 items(homeUiState.latest, key = {
                     it.id.orEmpty()
-                }) {
-                    LatestImageView(imageUrl = it.url)
+                }) { latestImage ->
+                    LatestImageView(id = latestImage.id,
+                        imageUrl = latestImage.url,
+                        onLatestClick = {
+                            onLatestClick.invoke(it)
+                        })
 
                 }
             })
@@ -332,18 +351,17 @@ private fun TopicTitleView(imageUrl: String?, title: String?) {
 }
 
 @Composable
-private fun PopularImageView(imageUrl: String?) {
-    Box(
-        modifier = Modifier.wrapContentSize()
-    ) {
+private fun PopularImageView(id: String?, imageUrl: String?, onPopularClick: (String) -> Unit) {
+    Box(modifier = Modifier
+        .wrapContentSize()
+        .clickable { onPopularClick.invoke(id.orEmpty()) }) {
         SubcomposeAsyncImage(
             model = imageUrl,
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(210.dp)
-                .width(150.dp)
+                .height(240.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
             loading = { LoadingState() },
         )
@@ -351,18 +369,17 @@ private fun PopularImageView(imageUrl: String?) {
 }
 
 @Composable
-private fun LatestImageView(imageUrl: String?) {
-    Box(
-        modifier = Modifier.wrapContentSize()
-    ) {
+private fun LatestImageView(id: String?, imageUrl: String?, onLatestClick: (String) -> Unit) {
+    Box(modifier = Modifier
+        .wrapContentSize()
+        .clickable { onLatestClick.invoke(id.orEmpty()) }) {
         SubcomposeAsyncImage(
             model = imageUrl,
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(210.dp)
-                .width(150.dp)
+                .height(240.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
             loading = { LoadingState() },
         )

@@ -6,8 +6,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.oguzdogdu.walliescompose.features.home.HomeScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.collections.collectionScreen
+import com.oguzdogdu.walliescompose.features.detail.detailScreen
+import com.oguzdogdu.walliescompose.features.detail.navigateToDetailScreen
 import com.oguzdogdu.walliescompose.features.favorites.favoritesScreen
 import com.oguzdogdu.walliescompose.features.home.homeScreen
+import com.oguzdogdu.walliescompose.features.home.navigateToHomeScreen
 import com.oguzdogdu.walliescompose.features.settings.settingsScreen
 
 @Composable
@@ -20,9 +23,21 @@ fun WalliesNavHost(
         modifier = modifier,
         navController = navController, startDestination = startDestination
     ) {
-        homeScreen()
+        homeScreen(
+            onLatestClick = {
+                navController.navigateToDetailScreen(photoId = it)
+            },
+            onPopularClick = {
+                navController.navigateToDetailScreen(photoId = it)
+            },
+            onTopicClick = {})
         collectionScreen()
         favoritesScreen()
         settingsScreen()
+        detailScreen(
+            onBackClick = {
+                navController.navigateToHomeScreen()
+            }
+        )
     }
 }

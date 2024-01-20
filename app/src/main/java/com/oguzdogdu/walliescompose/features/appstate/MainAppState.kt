@@ -7,6 +7,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -22,26 +23,26 @@ import kotlinx.coroutines.CoroutineScope
 @Composable
 fun rememberMainAppState(
     navController: NavHostController = rememberNavController(),
-    coroutineScope: CoroutineScope = rememberCoroutineScope(),
-    windowSizeClass: WindowSizeClass
 ): MainAppState {
-    return remember(navController, coroutineScope) {
-        MainAppState(navController, coroutineScope,windowSizeClass)
+    return remember(navController) {
+        MainAppState(navController)
     }
 }
 
 @Stable
 class MainAppState(
-    val navController: NavHostController,
-    val coroutineScope: CoroutineScope,
-    val windowSizeClass: WindowSizeClass
+    val navController: NavHostController
 ) {
     val currentDestination: NavDestination?
         @Composable get() = navController
             .currentBackStackEntryAsState().value?.destination
 
     val shouldShowBottomBar: Boolean
-        get() = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
+        @Composable get() = currentDestination?.hierarchy?.any { destination ->
+            topLevelDestinations.any {
+                destination.route?.contains(it.route) ?: false
+            }
+        } ?: false
 
     val topLevelDestinations: List<TopLevelDestination> = TopLevelDestination.entries
 
