@@ -87,6 +87,7 @@ fun HomeScreenRoute(
     viewModel: HomeViewModel = hiltViewModel(),
     onLatestClick: (String) -> Unit,
     onPopularClick: (String) -> Unit,
+    onSearchClick: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -108,7 +109,7 @@ fun HomeScreenRoute(
                 Toast.makeText(context, "Nav Icon Click", Toast.LENGTH_SHORT).show()
             },
             rightClick = {
-                Toast.makeText(context, "Add Click", Toast.LENGTH_SHORT).show()
+                onSearchClick.invoke()
             })
     }) {
         LazyColumn(
@@ -140,57 +141,41 @@ fun HomeScreenRoute(
 
 @Composable
 private fun TopicLayoutContainer(modifier: Modifier, homeUiState: HomeScreenState) {
-    var visible by remember {
-        mutableStateOf(false)
-    }
-    LaunchedEffect(key1 = homeUiState.topics) {
-        if (homeUiState.topics.isNotEmpty()) {
-            visible = true
-        }
-    }
-
-    AnimatedVisibility(
-        visible = visible, enter = expandHorizontally { 50 }, exit = shrinkHorizontally(
-            animationSpec = tween(),
-            shrinkTowards = Alignment.End,
-        )
+    Column(
+        modifier = modifier
+            .wrapContentSize()
+            .padding(horizontal = 8.dp),
     ) {
-        Column(
-            modifier = modifier
-                .wrapContentSize()
-                .padding(horizontal = 8.dp),
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(id = R.string.topics_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
-                )
+            Text(
+                text = stringResource(id = R.string.topics_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
+            )
 
-                Text(
-                    text = stringResource(id = R.string.show_all),
-                    fontFamily = medium,
-                    fontSize = 12.sp,
-                    color = Color.Unspecified,
-                    modifier = modifier.padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
-                )
-            }
+            Text(
+                text = stringResource(id = R.string.show_all),
+                fontFamily = medium,
+                fontSize = 12.sp,
+                color = Color.Unspecified,
+                modifier = modifier.padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
+            )
+        }
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.height(184.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                itemsIndexed(homeUiState.topics, key = { index: Int, item: Topics ->
-                    item.id.orEmpty()
-                }) { index, item ->
-                    TopicTitleView(imageUrl = item.titleBackground, title = item.title)
-                }
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.height(184.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            itemsIndexed(homeUiState.topics, key = { index: Int, item: Topics ->
+                item.id.orEmpty()
+            }) { index, item ->
+                TopicTitleView(imageUrl = item.titleBackground, title = item.title)
             }
         }
     }
@@ -200,59 +185,43 @@ private fun TopicLayoutContainer(modifier: Modifier, homeUiState: HomeScreenStat
 private fun PopularLayoutContainer(
     modifier: Modifier, homeUiState: HomeScreenState, onPopularClick: (String) -> Unit
 ) {
-    var visible by remember {
-        mutableStateOf(false)
-    }
-    LaunchedEffect(key1 = homeUiState.popular) {
-        if (homeUiState.popular.isNotEmpty()) {
-            visible = true
-        }
-    }
-    AnimatedVisibility(
-        visible = visible, enter = expandHorizontally { 50 }, exit = shrinkHorizontally(
-            animationSpec = tween(),
-            shrinkTowards = Alignment.End,
-        )
+    Column(
+        modifier = modifier
+            .wrapContentSize()
+            .padding(horizontal = 8.dp),
+        verticalArrangement = Arrangement.Center
     ) {
-        Column(
-            modifier = modifier
-                .wrapContentSize()
-                .padding(horizontal = 8.dp),
-            verticalArrangement = Arrangement.Center
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(id = R.string.popular_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
-                )
+            Text(
+                text = stringResource(id = R.string.popular_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
+            )
 
-                Text(
-                    text = stringResource(id = R.string.show_all),
-                    fontFamily = medium,
-                    fontSize = 12.sp,
-                    color = Color.Unspecified,
-                    modifier = modifier.padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
-                )
-            }
-
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
-                items(homeUiState.popular, key = {
-                    it.id.orEmpty()
-                }) { popularImage ->
-                    PopularImageView(id = popularImage.id,
-                        imageUrl = popularImage.url,
-                        onPopularClick = {
-                            onPopularClick.invoke(it)
-                        })
-
-                }
-            })
+            Text(
+                text = stringResource(id = R.string.show_all),
+                fontFamily = medium,
+                fontSize = 12.sp,
+                color = Color.Unspecified,
+                modifier = modifier.padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
+            )
         }
+
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
+            items(homeUiState.popular, key = {
+                it.id.orEmpty()
+            }) { popularImage ->
+                PopularImageView(id = popularImage.id,
+                    imageUrl = popularImage.url,
+                    onPopularClick = {
+                        onPopularClick.invoke(it)
+                    })
+            }
+        })
     }
 }
 
@@ -260,59 +229,43 @@ private fun PopularLayoutContainer(
 private fun LatestLayoutContainer(
     modifier: Modifier, homeUiState: HomeScreenState, onLatestClick: (String) -> Unit
 ) {
-    var visible by remember {
-        mutableStateOf(false)
-    }
-    LaunchedEffect(key1 = homeUiState.latest) {
-        if (homeUiState.latest.isNotEmpty()) {
-            visible = true
-        }
-    }
-    AnimatedVisibility(
-        visible = visible, enter = expandHorizontally { 50 }, exit = shrinkHorizontally(
-            animationSpec = tween(),
-            shrinkTowards = Alignment.End,
-        )
+    Column(
+        modifier = modifier
+            .wrapContentSize()
+            .padding(horizontal = 8.dp),
+        verticalArrangement = Arrangement.Center
     ) {
-        Column(
-            modifier = modifier
-                .wrapContentSize()
-                .padding(horizontal = 8.dp),
-            verticalArrangement = Arrangement.Center
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(id = R.string.latest_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
-                )
+            Text(
+                text = stringResource(id = R.string.latest_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
+            )
 
-                Text(
-                    text = stringResource(id = R.string.show_all),
-                    fontFamily = medium,
-                    fontSize = 12.sp,
-                    color = Color.Unspecified,
-                    modifier = modifier.padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
-                )
-            }
-
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
-                items(homeUiState.latest, key = {
-                    it.id.orEmpty()
-                }) { latestImage ->
-                    LatestImageView(id = latestImage.id,
-                        imageUrl = latestImage.url,
-                        onLatestClick = {
-                            onLatestClick.invoke(it)
-                        })
-
-                }
-            })
+            Text(
+                text = stringResource(id = R.string.show_all),
+                fontFamily = medium,
+                fontSize = 12.sp,
+                color = Color.Unspecified,
+                modifier = modifier.padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
+            )
         }
+
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
+            items(homeUiState.latest, key = {
+                it.id.orEmpty()
+            }) { latestImage ->
+                LatestImageView(id = latestImage.id,
+                    imageUrl = latestImage.url,
+                    onLatestClick = {
+                        onLatestClick.invoke(it)
+                    })
+            }
+        })
     }
 }
 
