@@ -1,5 +1,6 @@
 package com.oguzdogdu.walliescompose.data.service
 
+import com.oguzdogdu.walliescompose.data.model.searchdto.SearchResponseItem
 import com.oguzdogdu.walliescompose.data.model.collection.CollectionResponse
 import com.oguzdogdu.walliescompose.data.model.topics.TopicsResponseItem
 import com.oguzdogdu.walliescompose.data.model.maindto.UnsplashResponseItem
@@ -32,4 +33,12 @@ interface WallpaperService {
         @Query("page") page: Int?,
         @Query("per_page") perPage: Int?
     ): Response<List<CollectionResponse>>
+
+    @GET("search/photos")
+    suspend fun searchPhotos(
+        @Query("page") page: Int?,
+        @Query("per_page") perPage: Int?,
+        @Query("query") query: String,
+        @Query("lang") language: String?,
+    ): Response<SearchResponseItem>
 }
