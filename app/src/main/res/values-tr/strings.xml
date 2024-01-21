@@ -114,4 +114,5 @@
     <string name="light_mode">Aydınlık Mod</string>
     <string name="dark_mode">Karanlık Mode</string>
     <string name="system_default">Sistem Varsayılanı</string>
+    <string name="search">Ara</string>
 </resources>
