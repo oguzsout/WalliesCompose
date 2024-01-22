@@ -115,4 +115,5 @@
     <string name="dark_mode">Karanlık Mode</string>
     <string name="system_default">Sistem Varsayılanı</string>
     <string name="search">Ara</string>
+    <string name="search_desc">İstediğin türde ki fotoğraflar için hemen aramaya başla!</string>
 </resources>
