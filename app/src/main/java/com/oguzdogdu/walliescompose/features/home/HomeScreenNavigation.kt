@@ -16,7 +16,8 @@ fun NavController.navigateToHomeScreen(
 fun NavGraphBuilder.homeScreen(
     onTopicClick: (String) -> Unit,
     onPopularClick: (String) -> Unit,
-    onLatestClick: (String) -> Unit
+    onLatestClick: (String) -> Unit,
+    onSearchClick: () -> Unit
 ) {
     composable(
         HomeScreenNavigationRoute
@@ -25,6 +26,6 @@ fun NavGraphBuilder.homeScreen(
             onPopularClick.invoke(it)
         }, onLatestClick = {
             onLatestClick.invoke(it)
-        })
+        }, onSearchClick = { onSearchClick.invoke() })
     }
 }

@@ -113,4 +113,6 @@
     <string name="light_mode">Light Mode</string>
     <string name="dark_mode">Dark Mode</string>
     <string name="system_default">System Default</string>
+    <string name="search">Search</string>
+    <string name="search_desc">Start searching now for the kind of photos you want!</string>
 </resources>

@@ -4,6 +4,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.oguzdogdu.walliescompose.data.model.searchdto.toDomainSearch
 import com.oguzdogdu.walliescompose.cache.dao.FavoriteDao
 import com.oguzdogdu.walliescompose.cache.entity.FavoriteImage
 import com.oguzdogdu.walliescompose.cache.entity.toDomain
@@ -20,12 +21,14 @@ import com.oguzdogdu.walliescompose.data.model.topics.toDomainTopics
 import com.oguzdogdu.walliescompose.data.pagination.CollectionByLikesPagingSource
 import com.oguzdogdu.walliescompose.data.pagination.CollectionsByTitlePagingSource
 import com.oguzdogdu.walliescompose.data.pagination.CollectionsPagingSource
+import com.oguzdogdu.walliescompose.data.pagination.SearchPagingSource
 import com.oguzdogdu.walliescompose.data.service.WallpaperService
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
 import com.oguzdogdu.walliescompose.domain.model.detail.Photo
 import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
+import com.oguzdogdu.walliescompose.domain.model.search.SearchPhoto
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
 import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.Resource
@@ -142,6 +145,22 @@ class WallpaperRepositoryImpl @Inject constructor(
     override suspend fun getPhoto(id: String?): Flow<Resource<Photo?>> {
         return safeApiCall(ioDispatcher) {
             service.getPhoto(id = id).body()?.toDomainModelPhoto()
+        }
+    }
+
+    override suspend fun searchPhoto(
+        query: String?,
+        language: String?
+    ): Flow<PagingData<SearchPhoto>> {
+        val pagingConfig = PagingConfig(pageSize = PAGE_ITEM_LIMIT)
+        return Pager(
+            config = pagingConfig,
+            initialKey = 1,
+            pagingSourceFactory = { SearchPagingSource(service = service, query = query ?: "",lang = language) }
+        ).flow.mapNotNull {
+            it.map { search ->
+                search.toDomainSearch()
+            }
         }
     }
 }
