@@ -9,7 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
-fun ColumnScope.LoadingState(modifier:Modifier) {
+fun LoadingState(modifier:Modifier) {
     Box(
         modifier = modifier.fillMaxWidth()
     ) {

@@ -9,8 +9,11 @@ import com.oguzdogdu.walliescompose.domain.wrapper.onSuccess
 import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
 import com.oguzdogdu.walliescompose.features.home.state.HomeScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,57 +28,40 @@ class HomeViewModel @Inject constructor(
     fun handleScreenEvents(event: HomeScreenEvent) {
         when (event) {
             is HomeScreenEvent.FetchHomeScreenLists -> {
-                fetchTopicsTitleList()
-                fetchHomePopularList()
-                fetchHomeLatestList()
+                fetchHomeScreenData()
             }
         }
     }
-    private fun fetchTopicsTitleList() {
+    private fun fetchHomeScreenData() {
         viewModelScope.launch {
-            repository.getHomeTopicsImages().collect { result ->
-                    result.onLoading {
-                        _homeListState.update { it.copy(loading = true) }
-                    }
-                    result.onSuccess { list ->
-                        _homeListState.update { it.copy(loading = false, topics = list.orEmpty()) }
-                    }
-                    result.onFailure {
+            combine(
+                repository.getHomeTopicsImages(),
+                repository.getHomeImagesByPopulars(),
+                repository.getHomeImagesByLatest()
+            ) { topicsResult, popularsResult, latestResult ->
 
-                    }
+                _homeListState.update { it.copy(loading = true) }
+
+                topicsResult.onSuccess { topics ->
+                    _homeListState.update { it.copy(loading = false, topics = topics.orEmpty()) }
                 }
-        }
-    }
-
-    private fun fetchHomePopularList() {
-        viewModelScope.launch {
-            repository.getHomeImagesByPopulars().collect { result ->
-                    result.onLoading {
-                        _homeListState.update { it.copy(loading = true) }
-                    }
-                    result.onSuccess { list ->
-                        _homeListState.update { it.copy(loading = false, popular = list.orEmpty()) }
-                    }
-                    result.onFailure {
-
-                    }
+                popularsResult.onSuccess { populars ->
+                    _homeListState.update { it.copy(loading = false, popular = populars.orEmpty()) }
                 }
-        }
-    }
-
-    private fun fetchHomeLatestList() {
-        viewModelScope.launch {
-            repository.getHomeImagesByLatest().collect { result ->
-                    result.onLoading {
-                        _homeListState.update { it.copy(loading = true) }
-                    }
-                    result.onSuccess { list ->
-                        _homeListState.update { it.copy(loading = false, latest = list.orEmpty()) }
-                    }
-                    result.onFailure {
-
-                    }
+                latestResult.onSuccess { latest ->
+                    _homeListState.update { it.copy(loading = false, latest = latest.orEmpty()) }
                 }
+
+                topicsResult.onFailure { error ->
+                    _homeListState.update { it.copy(loading = false, error = error) }
+                }
+                popularsResult.onFailure { error ->
+                    _homeListState.update { it.copy(loading = false, error = error) }
+                }
+                latestResult.onFailure { error ->
+                    _homeListState.update { it.copy(loading = false, error = error) }
+                }
+            }.collect()
         }
     }
 }

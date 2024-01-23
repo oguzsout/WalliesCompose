@@ -44,6 +44,7 @@ import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.features.favorites.event.FavoriteScreenEvent
 import com.oguzdogdu.walliescompose.features.favorites.state.FavoriteScreenState
+import com.oguzdogdu.walliescompose.features.home.LoadingState
 import com.oguzdogdu.walliescompose.ui.theme.regular
 
 
@@ -78,9 +79,6 @@ fun FavoritesScreenRoute(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            if (state.loading) {
-                ImageLoadingState()
-            }
             if (state.favorites?.isNotEmpty() == true) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
