@@ -17,7 +17,7 @@ private val defaultModifier = Modifier
     .padding(all = 24.dp)
 
 @Composable
-fun LoadingState(modifier: Modifier = Modifier) {
+fun ImageLoadingState(modifier: Modifier = Modifier) {
     Box(modifier = modifier.wrapContentSize()) {
         CircularProgressIndicator(
             modifier = modifier.heightIn(min = 16.dp, max = 32.dp),
