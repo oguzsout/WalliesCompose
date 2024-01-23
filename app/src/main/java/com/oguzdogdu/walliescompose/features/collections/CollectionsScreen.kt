@@ -18,18 +18,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -60,16 +56,14 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.data.common.LoadingState
+import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
-import com.oguzdogdu.walliescompose.ui.theme.bold
 import com.oguzdogdu.walliescompose.ui.theme.medium
 
 @SuppressLint("StateFlowValueCalledInComposition")
@@ -236,7 +230,7 @@ fun CollectionItem(collections: WallpaperCollections,onCollectionClick: (String)
                         size = size,
                     )
                 }, loading = {
-                    LoadingState()
+                    ImageLoadingState()
             }
         )
         if (collections.title != null) {

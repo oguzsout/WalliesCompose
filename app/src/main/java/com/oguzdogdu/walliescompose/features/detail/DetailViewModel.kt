@@ -1,6 +1,5 @@
 package com.oguzdogdu.walliescompose.features.detail
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,14 +8,11 @@ import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.onFailure
 import com.oguzdogdu.walliescompose.domain.wrapper.onLoading
 import com.oguzdogdu.walliescompose.domain.wrapper.onSuccess
-import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
-import com.oguzdogdu.walliescompose.features.home.state.HomeScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import javax.inject.Inject
