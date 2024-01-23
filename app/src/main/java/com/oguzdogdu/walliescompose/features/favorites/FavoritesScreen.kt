@@ -41,7 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.data.common.LoadingState
+import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.features.favorites.event.FavoriteScreenEvent
 import com.oguzdogdu.walliescompose.features.favorites.state.FavoriteScreenState
 import com.oguzdogdu.walliescompose.ui.theme.regular
@@ -79,7 +79,7 @@ fun FavoritesScreenRoute(
             verticalArrangement = Arrangement.Center
         ) {
             if (state.loading) {
-                LoadingState()
+                ImageLoadingState()
             }
             if (state.favorites?.isNotEmpty() == true) {
                 LazyVerticalGrid(
@@ -145,7 +145,7 @@ private fun FavoritesImageView(modifier: Modifier,imageUrl: String?) {
                 .fillMaxWidth()
                 .height(240.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
-            loading = { LoadingState() },
+            loading = { ImageLoadingState() },
         )
     }
 }

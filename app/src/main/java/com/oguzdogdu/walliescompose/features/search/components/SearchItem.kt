@@ -14,7 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
-import com.oguzdogdu.walliescompose.data.common.LoadingState
+import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.domain.model.search.SearchPhoto
 
 @Composable
@@ -40,7 +40,7 @@ fun SearchItem(searchPhoto: SearchPhoto, onCollectionClick: (String) -> Unit) {
                 .height(240.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp)))
             , loading = {
-                LoadingState()
+                ImageLoadingState()
             }
         )
     }

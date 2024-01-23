@@ -1,53 +1,31 @@
 package com.oguzdogdu.walliescompose.features.home
 
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.foundation.magnifier
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,23 +35,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.ImageLoader
-import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.data.common.LoadingState
+import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
 import com.oguzdogdu.walliescompose.features.component.BaseCenteredToolbar
 import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
@@ -89,14 +67,15 @@ fun HomeScreenRoute(
     onPopularClick: (String) -> Unit,
     onSearchClick: () -> Unit
 ) {
-
     val context = LocalContext.current
 
-    LifecycleEventEffect(Lifecycle.Event.ON_START) {
+    LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
         viewModel.handleScreenEvents(HomeScreenEvent.FetchHomeScreenLists)
     }
 
     val homeUiState by viewModel.homeListState.collectAsStateWithLifecycle()
+
+    val state = rememberLazyListState()
 
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         BaseCenteredToolbar(modifier = Modifier,
@@ -113,17 +92,20 @@ fun HomeScreenRoute(
             })
     }) {
         LazyColumn(
+            state = state,
             modifier = modifier
                 .padding(it)
-                .fillMaxHeight()
+                .fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
 
             item {
-                TopicLayoutContainer(modifier = modifier, homeUiState = homeUiState)
+                TopicLayoutContainer(modifier = modifier, homeScreenState = homeUiState)
             }
             item {
                 PopularLayoutContainer(modifier = modifier,
-                    homeUiState = homeUiState,
+                    homeScreenState = homeUiState,
                     onPopularClick = { id ->
                         onPopularClick.invoke(id)
                     })
@@ -131,16 +113,16 @@ fun HomeScreenRoute(
 
             item {
                 LatestLayoutContainer(modifier = modifier,
-                    homeUiState = homeUiState,
+                    homeScreenState = homeUiState,
                     onLatestClick = { id -> onLatestClick.invoke(id) })
+
             }
         }
     }
 }
 
-
 @Composable
-private fun TopicLayoutContainer(modifier: Modifier, homeUiState: HomeScreenState) {
+private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreenState) {
     Column(
         modifier = modifier
             .wrapContentSize()
@@ -154,7 +136,7 @@ private fun TopicLayoutContainer(modifier: Modifier, homeUiState: HomeScreenStat
             Text(
                 text = stringResource(id = R.string.topics_title),
                 style = MaterialTheme.typography.titleMedium,
-                modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
+                modifier = modifier.padding(start = 4.dp, top = 16.dp, bottom = 8.dp)
             )
 
             Text(
@@ -172,8 +154,8 @@ private fun TopicLayoutContainer(modifier: Modifier, homeUiState: HomeScreenStat
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            itemsIndexed(homeUiState.topics, key = { index: Int, item: Topics ->
-                item.id.orEmpty()
+            itemsIndexed(homeScreenState.topics, key = { index: Int, item: Topics ->
+                item.id.hashCode()
             }) { index, item ->
                 TopicTitleView(imageUrl = item.titleBackground, title = item.title)
             }
@@ -183,7 +165,7 @@ private fun TopicLayoutContainer(modifier: Modifier, homeUiState: HomeScreenStat
 
 @Composable
 private fun PopularLayoutContainer(
-    modifier: Modifier, homeUiState: HomeScreenState, onPopularClick: (String) -> Unit
+    modifier: Modifier, homeScreenState: HomeScreenState, onPopularClick: (String) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -199,7 +181,7 @@ private fun PopularLayoutContainer(
             Text(
                 text = stringResource(id = R.string.popular_title),
                 style = MaterialTheme.typography.titleMedium,
-                modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
+                modifier = modifier.padding(start = 4.dp, top = 16.dp, bottom = 8.dp)
             )
 
             Text(
@@ -212,8 +194,8 @@ private fun PopularLayoutContainer(
         }
 
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
-            items(homeUiState.popular, key = {
-                it.id.orEmpty()
+            items(homeScreenState.popular, key = {
+                it.id.hashCode()
             }) { popularImage ->
                 PopularImageView(id = popularImage.id,
                     imageUrl = popularImage.url,
@@ -227,7 +209,7 @@ private fun PopularLayoutContainer(
 
 @Composable
 private fun LatestLayoutContainer(
-    modifier: Modifier, homeUiState: HomeScreenState, onLatestClick: (String) -> Unit
+    modifier: Modifier, homeScreenState: HomeScreenState, onLatestClick: (String) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -243,7 +225,7 @@ private fun LatestLayoutContainer(
             Text(
                 text = stringResource(id = R.string.latest_title),
                 style = MaterialTheme.typography.titleMedium,
-                modifier = modifier.padding(start = 8.dp, top = 16.dp, bottom = 8.dp)
+                modifier = modifier.padding(start = 4.dp, top = 16.dp, bottom = 8.dp)
             )
 
             Text(
@@ -256,8 +238,8 @@ private fun LatestLayoutContainer(
         }
 
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
-            items(homeUiState.latest, key = {
-                it.id.orEmpty()
+            items(homeScreenState.latest, key = {
+                it.id.hashCode()
             }) { latestImage ->
                 LatestImageView(id = latestImage.id,
                     imageUrl = latestImage.url,
@@ -290,7 +272,7 @@ private fun TopicTitleView(imageUrl: String?, title: String?) {
                         size = size,
                     )
                 },
-            loading = { LoadingState() },
+            loading = { com.oguzdogdu.walliescompose.data.common.ImageLoadingState() },
         )
 
         Text(
@@ -316,7 +298,7 @@ private fun PopularImageView(id: String?, imageUrl: String?, onPopularClick: (St
                 .fillMaxWidth()
                 .height(240.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
-            loading = { LoadingState() },
+            loading = { ImageLoadingState() },
         )
     }
 }
@@ -334,7 +316,7 @@ private fun LatestImageView(id: String?, imageUrl: String?, onLatestClick: (Stri
                 .fillMaxWidth()
                 .height(240.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
-            loading = { LoadingState() },
+            loading = { ImageLoadingState() },
         )
     }
 }
