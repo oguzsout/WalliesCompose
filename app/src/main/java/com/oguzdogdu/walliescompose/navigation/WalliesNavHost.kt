@@ -16,6 +16,8 @@ import com.oguzdogdu.walliescompose.features.home.navigateToHomeScreen
 import com.oguzdogdu.walliescompose.features.search.navigateToSearchScreen
 import com.oguzdogdu.walliescompose.features.search.searchScreen
 import com.oguzdogdu.walliescompose.features.settings.settingsScreen
+import com.oguzdogdu.walliescompose.features.topics.navigateToTopicsScreen
+import com.oguzdogdu.walliescompose.features.topics.topicsScreen
 
 @Composable
 fun WalliesNavHost(
@@ -43,7 +45,9 @@ fun WalliesNavHost(
             onPopularClick = {
                 navController.navigateToDetailScreen(photoId = it)
             },
-            onTopicClick = {},
+            onTopicSeeAllClick = {
+                navController.navigateToTopicsScreen()
+            },
             onSearchClick = {
                 navController.navigateToSearchScreen()
             }
@@ -59,5 +63,8 @@ fun WalliesNavHost(
                 navController.navigateToHomeScreen()
             }
         )
+        topicsScreen(onBackClick = {
+            navController.navigateToHomeScreen()
+        })
     }
 }

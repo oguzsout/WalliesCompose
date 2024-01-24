@@ -60,6 +60,7 @@ import com.oguzdogdu.walliescompose.ui.theme.medium
 fun HomeScreenRoute(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
+    onTopicSeeAllClick: () -> Unit,
     onLatestClick: (String) -> Unit,
     onPopularClick: (String) -> Unit,
     onSearchClick: () -> Unit
@@ -101,6 +102,9 @@ fun HomeScreenRoute(
                 HomeScreenContent(
                     homeUiState = homeUiState,
                     modifier = modifier,
+                    onTopicSeeAllClick = {
+                        onTopicSeeAllClick.invoke()
+                    },
                     onPopularClick = { id ->
                         onPopularClick.invoke(id)
                     },
@@ -115,6 +119,7 @@ fun HomeScreenRoute(
 fun HomeScreenContent(
     homeUiState: HomeScreenState,
     modifier: Modifier,
+    onTopicSeeAllClick: () -> Unit,
     onPopularClick: (String) -> Unit,
     onLatestClick: (String) -> Unit
 ) {
@@ -132,7 +137,9 @@ fun HomeScreenContent(
             ) {
 
                 item(key = 0) {
-                    TopicLayoutContainer(modifier = modifier, homeScreenState = homeUiState)
+                    TopicLayoutContainer(modifier = modifier, homeScreenState = homeUiState, onTopicSeeAllClick = {
+                        onTopicSeeAllClick.invoke()
+                    })
                 }
                 item(key = 1) {
                     PopularLayoutContainer(modifier = modifier,
@@ -153,7 +160,7 @@ fun HomeScreenContent(
 }
 
 @Composable
-private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreenState) {
+private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreenState,onTopicSeeAllClick: () -> Unit) {
     Column(
         modifier = modifier
             .wrapContentSize()
@@ -174,7 +181,11 @@ private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreen
                 fontFamily = medium,
                 fontSize = 12.sp,
                 color = Color.Unspecified,
-                modifier = modifier.padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
+                modifier = modifier
+                    .padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
+                    .clickable {
+                        onTopicSeeAllClick.invoke()
+                    }
             )
         }
 
