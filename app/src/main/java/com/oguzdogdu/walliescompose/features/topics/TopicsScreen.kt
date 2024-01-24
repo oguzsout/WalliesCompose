@@ -124,7 +124,7 @@ private fun TopicsScreen(
             items(
                 count = topicsLazyPagingItems.itemCount,
                 key = topicsLazyPagingItems.itemKey { item: Topics -> item.id.hashCode() },
-                contentType = topicsLazyPagingItems.itemContentType { "Collections" }) { index: Int ->
+                contentType = topicsLazyPagingItems.itemContentType { "Topics" }) { index: Int ->
                 val topics: Topics? = topicsLazyPagingItems[index]
                 if (topics != null) {
                     TopicsItem(topics = topics, onTopicClick = { onTopicClick.invoke(it) })

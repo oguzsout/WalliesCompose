@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import com.oguzdogdu.walliescompose.features.appstate.MainAppState
 import com.oguzdogdu.walliescompose.features.collections.collectionScreen
 import com.oguzdogdu.walliescompose.features.detail.detailScreen
 import com.oguzdogdu.walliescompose.features.detail.navigateToDetailScreen
@@ -21,13 +22,15 @@ import com.oguzdogdu.walliescompose.features.topics.topicsScreen
 
 @Composable
 fun WalliesNavHost(
-    navController: NavHostController,
+    appState: MainAppState,
     modifier: Modifier = Modifier,
     startDestination: String = HomeScreenNavigationRoute,
 ) {
+    val navController = appState.navController
     NavHost(
+        navController = navController,
+        startDestination = startDestination,
         modifier = modifier,
-        navController = navController, startDestination = startDestination,
         enterTransition = {
             EnterTransition.None
         }, exitTransition = {
