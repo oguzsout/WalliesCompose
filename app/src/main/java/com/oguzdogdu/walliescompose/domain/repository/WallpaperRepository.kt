@@ -7,6 +7,7 @@ import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
 import com.oguzdogdu.walliescompose.domain.model.search.SearchPhoto
+import com.oguzdogdu.walliescompose.domain.model.topics.TopicDetail
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
 import com.oguzdogdu.walliescompose.domain.wrapper.Resource
 import kotlinx.coroutines.flow.Flow
@@ -23,4 +24,6 @@ interface WallpaperRepository {
     suspend fun deleteFavorites(favorite: FavoriteImages)
     suspend fun getPhoto(id: String?): Flow<Resource<Photo?>>
     suspend fun searchPhoto(query: String?,language:String?): Flow<PagingData<SearchPhoto>>
+    suspend fun getTopicsTitleWithPaging(): Flow<PagingData<Topics>>
+    suspend fun getTopicListWithPaging(idOrSlug:String?): Flow<PagingData<TopicDetail>>
 }

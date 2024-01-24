@@ -4,6 +4,7 @@ import com.oguzdogdu.walliescompose.data.model.searchdto.SearchResponseItem
 import com.oguzdogdu.walliescompose.data.model.collection.CollectionResponse
 import com.oguzdogdu.walliescompose.data.model.topics.TopicsResponseItem
 import com.oguzdogdu.walliescompose.data.model.maindto.UnsplashResponseItem
+import com.oguzdogdu.walliescompose.data.model.topics.CoverPhoto
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -41,4 +42,11 @@ interface WallpaperService {
         @Query("query") query: String,
         @Query("lang") language: String?,
     ): Response<SearchResponseItem>
+
+    @GET("topics/{id_or_slug}/photos")
+    suspend fun getTopicList(
+        @Path("id_or_slug") id: String?,
+        @Query("page") page: Int?,
+        @Query("per_page") perPage: Int?,
+    ): Response<List<CoverPhoto>>
 }
