@@ -17,11 +17,14 @@ import com.oguzdogdu.walliescompose.data.model.collection.toCollectionDomain
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelLatest
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelPhoto
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelPopular
+import com.oguzdogdu.walliescompose.data.model.topics.toDomainTopicList
 import com.oguzdogdu.walliescompose.data.model.topics.toDomainTopics
 import com.oguzdogdu.walliescompose.data.pagination.CollectionByLikesPagingSource
 import com.oguzdogdu.walliescompose.data.pagination.CollectionsByTitlePagingSource
 import com.oguzdogdu.walliescompose.data.pagination.CollectionsPagingSource
 import com.oguzdogdu.walliescompose.data.pagination.SearchPagingSource
+import com.oguzdogdu.walliescompose.data.pagination.TopicListSource
+import com.oguzdogdu.walliescompose.data.pagination.TopicsPagingSource
 import com.oguzdogdu.walliescompose.data.service.WallpaperService
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
 import com.oguzdogdu.walliescompose.domain.model.detail.Photo
@@ -29,6 +32,7 @@ import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
 import com.oguzdogdu.walliescompose.domain.model.search.SearchPhoto
+import com.oguzdogdu.walliescompose.domain.model.topics.TopicDetail
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
 import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.Resource
@@ -160,6 +164,32 @@ class WallpaperRepositoryImpl @Inject constructor(
         ).flow.mapNotNull {
             it.map { search ->
                 search.toDomainSearch()
+            }
+        }
+    }
+
+    override suspend fun getTopicsTitleWithPaging(): Flow<PagingData<Topics>> {
+        val pagingConfig = PagingConfig(pageSize = PAGE_ITEM_LIMIT)
+        return Pager(
+            config = pagingConfig,
+            initialKey = 1,
+            pagingSourceFactory = { TopicsPagingSource(service = service) }
+        ).flow.mapNotNull {
+            it.map { topics ->
+                topics.toDomainTopics()
+            }
+        }
+    }
+
+    override suspend fun getTopicListWithPaging(idOrSlug:String?): Flow<PagingData<TopicDetail>> {
+        val pagingConfig = PagingConfig(pageSize = PAGE_ITEM_LIMIT)
+        return Pager(
+            config = pagingConfig,
+            initialKey = 1,
+            pagingSourceFactory = { TopicListSource(service = service, idOrSlug = idOrSlug) }
+        ).flow.mapNotNull {
+            it.map { topicList ->
+                topicList.toDomainTopicList()
             }
         }
     }

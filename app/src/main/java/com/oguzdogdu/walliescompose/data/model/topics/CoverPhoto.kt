@@ -2,6 +2,7 @@ package com.oguzdogdu.walliescompose.data.model.topics
 
 
 import com.google.gson.annotations.SerializedName
+import com.oguzdogdu.walliescompose.domain.model.topics.TopicDetail
 
 
 data class CoverPhoto(
@@ -22,3 +23,4 @@ data class CoverPhoto(
     @SerializedName("user") val user: User?,
     @SerializedName("width") val width: Int?
 )
+fun CoverPhoto.toDomainTopicList() = TopicDetail(id = id, url = urls?.regular)

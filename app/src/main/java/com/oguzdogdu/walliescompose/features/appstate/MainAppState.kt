@@ -1,24 +1,20 @@
 package com.oguzdogdu.walliescompose.features.appstate
 
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import com.oguzdogdu.walliescompose.features.home.HomeScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.collections.navigateToCollectionScreen
-import com.oguzdogdu.walliescompose.features.favorites.navigateTofavoritesScreen
+import com.oguzdogdu.walliescompose.features.favorites.navigateToFavoritesScreen
 import com.oguzdogdu.walliescompose.features.home.navigateToHomeScreen
-import com.oguzdogdu.walliescompose.features.settings.navigateTosettingsScreen
+import com.oguzdogdu.walliescompose.features.settings.navigateToSettingsScreen
 import com.oguzdogdu.walliescompose.navigation.TopLevelDestination
-import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun rememberMainAppState(
@@ -48,8 +44,8 @@ class MainAppState(
 
 
     fun navigateToTopLevelDestination(topLevelDestination: TopLevelDestination) {
-        val topLevelOptions = navOptions {
-            popUpTo(HomeScreenNavigationRoute) {
+        val topLevelNavOptions = navOptions {
+            popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
             launchSingleTop = true
@@ -57,15 +53,14 @@ class MainAppState(
         }
 
         when (topLevelDestination) {
-            TopLevelDestination.WALLPAPERS -> navController.navigateToHomeScreen(topLevelOptions)
-            TopLevelDestination.COLLECTIONS -> navController.navigateToCollectionScreen(topLevelOptions)
-            TopLevelDestination.FAVORITES -> navController.navigateTofavoritesScreen(topLevelOptions)
-            TopLevelDestination.SETTINGS -> navController.navigateTosettingsScreen(topLevelOptions)
+            TopLevelDestination.WALLPAPERS -> navController.navigateToHomeScreen(topLevelNavOptions)
+            TopLevelDestination.COLLECTIONS -> navController.navigateToCollectionScreen(topLevelNavOptions)
+            TopLevelDestination.FAVORITES -> navController.navigateToFavoritesScreen(topLevelNavOptions)
+            TopLevelDestination.SETTINGS -> navController.navigateToSettingsScreen(topLevelNavOptions)
         }
     }
 
     fun onBackPress() {
         navController.popBackStack()
     }
-
 }

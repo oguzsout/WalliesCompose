@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import com.oguzdogdu.walliescompose.features.appstate.MainAppState
 import com.oguzdogdu.walliescompose.features.collections.collectionScreen
 import com.oguzdogdu.walliescompose.features.detail.detailScreen
 import com.oguzdogdu.walliescompose.features.detail.navigateToDetailScreen
@@ -16,16 +17,20 @@ import com.oguzdogdu.walliescompose.features.home.navigateToHomeScreen
 import com.oguzdogdu.walliescompose.features.search.navigateToSearchScreen
 import com.oguzdogdu.walliescompose.features.search.searchScreen
 import com.oguzdogdu.walliescompose.features.settings.settingsScreen
+import com.oguzdogdu.walliescompose.features.topics.navigateToTopicsScreen
+import com.oguzdogdu.walliescompose.features.topics.topicsScreen
 
 @Composable
 fun WalliesNavHost(
-    navController: NavHostController,
+    appState: MainAppState,
     modifier: Modifier = Modifier,
     startDestination: String = HomeScreenNavigationRoute,
 ) {
+    val navController = appState.navController
     NavHost(
+        navController = navController,
+        startDestination = startDestination,
         modifier = modifier,
-        navController = navController, startDestination = startDestination,
         enterTransition = {
             EnterTransition.None
         }, exitTransition = {
@@ -43,7 +48,9 @@ fun WalliesNavHost(
             onPopularClick = {
                 navController.navigateToDetailScreen(photoId = it)
             },
-            onTopicClick = {},
+            onTopicSeeAllClick = {
+                navController.navigateToTopicsScreen()
+            },
             onSearchClick = {
                 navController.navigateToSearchScreen()
             }
@@ -59,5 +66,8 @@ fun WalliesNavHost(
                 navController.navigateToHomeScreen()
             }
         )
+        topicsScreen(onBackClick = {
+            navController.navigateToHomeScreen()
+        })
     }
 }

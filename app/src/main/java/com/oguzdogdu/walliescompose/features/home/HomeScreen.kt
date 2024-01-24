@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,9 +26,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
@@ -60,6 +59,7 @@ import com.oguzdogdu.walliescompose.ui.theme.medium
 fun HomeScreenRoute(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
+    onTopicSeeAllClick: () -> Unit,
     onLatestClick: (String) -> Unit,
     onPopularClick: (String) -> Unit,
     onSearchClick: () -> Unit
@@ -68,9 +68,19 @@ fun HomeScreenRoute(
 
     val homeUiState by viewModel.homeListState.collectAsStateWithLifecycle()
 
+    var itemsLoad by remember {
+        mutableStateOf(false)
+    }
     LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
         viewModel.handleScreenEvents(HomeScreenEvent.FetchHomeScreenLists)
     }
+
+    LaunchedEffect(homeUiState) {
+        if (homeUiState.topics.isNotEmpty() && homeUiState.popular.isNotEmpty() && homeUiState.latest.isNotEmpty()) {
+            itemsLoad = !itemsLoad
+        }
+    }
+
 
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         BaseCenteredToolbar(modifier = modifier,
@@ -89,11 +99,7 @@ fun HomeScreenRoute(
         Box(modifier = modifier
             .padding(it)
             .fillMaxSize(), contentAlignment = Alignment.Center) {
-            val itemsLoad by remember {
-                derivedStateOf {
-                    homeUiState.topics.isNotEmpty() && homeUiState.popular.isNotEmpty() && homeUiState.latest.isNotEmpty()
-                }
-            }
+
             if (homeUiState.loading) {
                 LoadingState(modifier = modifier)
             }
@@ -101,6 +107,9 @@ fun HomeScreenRoute(
                 HomeScreenContent(
                     homeUiState = homeUiState,
                     modifier = modifier,
+                    onTopicSeeAllClick = {
+                        onTopicSeeAllClick.invoke()
+                    },
                     onPopularClick = { id ->
                         onPopularClick.invoke(id)
                     },
@@ -115,45 +124,46 @@ fun HomeScreenRoute(
 fun HomeScreenContent(
     homeUiState: HomeScreenState,
     modifier: Modifier,
+    onTopicSeeAllClick: () -> Unit,
     onPopularClick: (String) -> Unit,
     onLatestClick: (String) -> Unit
 ) {
-
-    Column(
+    LazyColumn(
         modifier = modifier
-            .fillMaxSize()
+            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+            .fillMaxHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        LazyColumn(
-                modifier = modifier
-                    .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
 
-                item(key = 0) {
-                    TopicLayoutContainer(modifier = modifier, homeScreenState = homeUiState)
-                }
-                item(key = 1) {
-                    PopularLayoutContainer(modifier = modifier,
-                        homeScreenState = homeUiState,
-                        onPopularClick = { id ->
-                            onPopularClick.invoke(id)
-                        })
-                }
+        item(key = 0) {
+            TopicLayoutContainer(
+                modifier = modifier,
+                homeScreenState = homeUiState,
+                onTopicSeeAllClick = {
+                    onTopicSeeAllClick.invoke()
+                })
+        }
+        item(key = 1) {
+            PopularLayoutContainer(modifier = modifier,
+                homeScreenState = homeUiState,
+                onPopularClick = { id ->
+                    onPopularClick.invoke(id)
+                })
+        }
 
-                item(key = 2) {
-                    LatestLayoutContainer(modifier = modifier,
-                        homeScreenState = homeUiState,
-                        onLatestClick = { id -> onLatestClick.invoke(id) })
+        item(key = 2) {
+            LatestLayoutContainer(modifier = modifier,
+                homeScreenState = homeUiState,
+                onLatestClick = { id -> onLatestClick.invoke(id) })
 
-            }
         }
     }
 }
 
+
 @Composable
-private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreenState) {
+private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreenState,onTopicSeeAllClick: () -> Unit) {
     Column(
         modifier = modifier
             .wrapContentSize()
@@ -174,7 +184,11 @@ private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreen
                 fontFamily = medium,
                 fontSize = 12.sp,
                 color = Color.Unspecified,
-                modifier = modifier.padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
+                modifier = modifier
+                    .padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
+                    .clickable {
+                        onTopicSeeAllClick.invoke()
+                    }
             )
         }
 

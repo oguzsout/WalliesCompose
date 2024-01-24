@@ -7,7 +7,7 @@ import androidx.navigation.compose.composable
 
 const val FavoritesScreenNavigationRoute = "favorites_screen_route"
 
-fun NavController.navigateTofavoritesScreen(
+fun NavController.navigateToFavoritesScreen(
     navOptions: NavOptions? = null,
 ) {
     this.navigate(FavoritesScreenNavigationRoute, navOptions)

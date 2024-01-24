@@ -9,8 +9,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -26,48 +29,51 @@ fun WalliesApp(
     Scaffold(modifier = modifier, bottomBar = {
         if (appState.shouldShowBottomBar) {
             AppNavBar(
-                destinations = AppDestinations(appState.topLevelDestinations),
+                destinations = appState.topLevelDestinations,
                 onNavigateToDestination = appState::navigateToTopLevelDestination,
                 currentDestination = appState.currentDestination
             )
         }
     }) {
         WalliesNavHost(
-            navController = appState.navController, modifier = modifier.padding(it)
+            appState = appState, modifier = modifier.padding(it)
         )
     }
 }
 
-data class AppDestinations(
-    val destinations: List<TopLevelDestination>,
-) : List<TopLevelDestination> by destinations
-
 @Composable
 internal fun AppNavBar(
-    destinations: AppDestinations,
+    destinations: List<TopLevelDestination>,
     onNavigateToDestination: (TopLevelDestination) -> Unit,
     currentDestination: NavDestination?,
 ) {
     NavigationBar {
         destinations.forEach { destination ->
-            val selected =
-                currentDestination?.hierarchy?.any { it.route == destination.route } == true
-            NavigationBarItem(selected = selected,
-                label = { Text(
-                    text = stringResource(id = destination.titleTextId),
-                    maxLines = 2,
-                    fontSize = 11.sp,
-                    fontFamily = medium,
-                    color = Color.Unspecified
-                ) },
+            val selected = currentDestination.isTopLevelDestinationInHierarchy(destination)
+            NavigationBarItem(
+                alwaysShowLabel = true,
+                selected = selected,
                 onClick = { onNavigateToDestination(destination) },
                 icon = {
                     Icon(
-                        painterResource(id = destination.icon),
-                        contentDescription = null,
+                        imageVector = ImageVector.vectorResource(id = destination.icon),
+                        contentDescription = ""
+                    )
+                },
+                label = {
+                    Text(
+                        text = stringResource(id = destination.iconTextId),
+                        fontSize = 11.sp,
+                        fontFamily = medium,
+                        color = Color.Unspecified
                     )
                 }
             )
         }
     }
 }
+
+private fun NavDestination?.isTopLevelDestinationInHierarchy(destination: TopLevelDestination) =
+    this?.hierarchy?.any {
+        it.route?.contains(destination.route, true) ?: false
+    } ?: false
