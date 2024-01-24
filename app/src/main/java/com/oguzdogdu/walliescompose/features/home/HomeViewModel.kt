@@ -42,6 +42,8 @@ class HomeViewModel @Inject constructor(
 
                 _homeListState.update { it.copy(loading = true) }
 
+                delay(250)
+
                 topicsResult.onSuccess { topics ->
                     _homeListState.update { it.copy(loading = false, topics = topics.orEmpty()) }
                 }
