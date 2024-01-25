@@ -1,7 +1,5 @@
 package com.oguzdogdu.walliescompose.features.topics
 
-import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -50,7 +47,7 @@ import com.oguzdogdu.walliescompose.domain.model.topics.Topics
 import com.oguzdogdu.walliescompose.ui.theme.medium
 
 @Composable
-fun TopicsScreenRoute(modifier: Modifier = Modifier,viewModel: TopicsViewModel = hiltViewModel(),onBackClick:() -> Unit) {
+fun TopicsScreenRoute(modifier: Modifier = Modifier,viewModel: TopicsViewModel = hiltViewModel(),onBackClick:() -> Unit,onTopicClick: (String) -> Unit) {
     val topicsState: LazyPagingItems<Topics> =
         viewModel.topicsState.collectAsLazyPagingItems()
     LifecycleStartEffect {
@@ -100,7 +97,7 @@ fun TopicsScreenRoute(modifier: Modifier = Modifier,viewModel: TopicsViewModel =
                 .fillMaxSize()
         ) {
             TopicsScreen(modifier = modifier, topicsLazyPagingItems = topicsState, onTopicClick = {id ->
-                Toast.makeText(context, id, Toast.LENGTH_SHORT).show()
+                onTopicClick.invoke(id)
             })
         }
     }
@@ -139,7 +136,7 @@ fun TopicsItem(topics: Topics, onTopicClick: (String) -> Unit) {
         modifier = Modifier
             .wrapContentSize()
             .clickable {
-                topics.id?.let {
+                topics.title?.let {
                     onTopicClick.invoke(
                         it
                     )
