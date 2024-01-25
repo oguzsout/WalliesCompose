@@ -1,6 +1,7 @@
 package com.oguzdogdu.walliescompose.features.home
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,6 +61,7 @@ fun HomeScreenRoute(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     onTopicSeeAllClick: () -> Unit,
+    onTopicDetailListClick: (String?) -> Unit,
     onLatestClick: (String) -> Unit,
     onPopularClick: (String) -> Unit,
     onSearchClick: () -> Unit
@@ -95,7 +97,7 @@ fun HomeScreenRoute(
             rightClick = {
                 onSearchClick.invoke()
             })
-    }) {
+    }) { it ->
         Box(modifier = modifier
             .padding(it)
             .fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -109,6 +111,9 @@ fun HomeScreenRoute(
                     modifier = modifier,
                     onTopicSeeAllClick = {
                         onTopicSeeAllClick.invoke()
+                    },
+                    onTopicDetailListClick = {id->
+                        onTopicDetailListClick.invoke(id)
                     },
                     onPopularClick = { id ->
                         onPopularClick.invoke(id)
@@ -125,6 +130,7 @@ fun HomeScreenContent(
     homeUiState: HomeScreenState,
     modifier: Modifier,
     onTopicSeeAllClick: () -> Unit,
+    onTopicDetailListClick: (String?) -> Unit,
     onPopularClick: (String) -> Unit,
     onLatestClick: (String) -> Unit
 ) {
@@ -140,6 +146,9 @@ fun HomeScreenContent(
             TopicLayoutContainer(
                 modifier = modifier,
                 homeScreenState = homeUiState,
+                onTopicDetailListClick =  {
+                                  onTopicDetailListClick.invoke(it)
+                },
                 onTopicSeeAllClick = {
                     onTopicSeeAllClick.invoke()
                 })
@@ -163,7 +172,7 @@ fun HomeScreenContent(
 
 
 @Composable
-private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreenState,onTopicSeeAllClick: () -> Unit) {
+private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreenState,onTopicDetailListClick: (String?) -> Unit,onTopicSeeAllClick: () -> Unit) {
     Column(
         modifier = modifier
             .wrapContentSize()
@@ -201,7 +210,9 @@ private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreen
             itemsIndexed(homeScreenState.topics, key = { index: Int, item: Topics ->
                 item.id.hashCode()
             }) { index, item ->
-                TopicTitleView(imageUrl = item.titleBackground, title = item.title)
+                TopicTitleView(imageUrl = item.titleBackground, title = item.title, onTopicDetailListClick = {
+                    onTopicDetailListClick.invoke(it)
+                })
             }
         }
     }
@@ -294,9 +305,13 @@ private fun LatestLayoutContainer(
 }
 
 @Composable
-private fun TopicTitleView(imageUrl: String?, title: String?) {
+private fun TopicTitleView(imageUrl: String?, title: String?,onTopicDetailListClick: (String?) -> Unit) {
     Box(
-        modifier = Modifier.wrapContentSize()
+        modifier = Modifier
+            .wrapContentSize()
+            .clickable {
+                onTopicDetailListClick.invoke(title)
+            }
     ) {
 
         SubcomposeAsyncImage(
