@@ -1,5 +1,6 @@
-package com.oguzdogdu.walliescompose.features.topics
+package com.oguzdogdu.walliescompose.features.topics.topicdetaillist
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,12 +25,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -43,20 +41,26 @@ import androidx.paging.compose.itemKey
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
-import com.oguzdogdu.walliescompose.domain.model.topics.Topics
+import com.oguzdogdu.walliescompose.domain.model.topics.TopicDetail
 import com.oguzdogdu.walliescompose.ui.theme.medium
 
 @Composable
-fun TopicsScreenRoute(modifier: Modifier = Modifier,viewModel: TopicsViewModel = hiltViewModel(),onBackClick:() -> Unit,onTopicClick: (String) -> Unit) {
-    val topicsState: LazyPagingItems<Topics> =
-        viewModel.topicsState.collectAsLazyPagingItems()
+fun TopicDetailListRoute(
+    modifier: Modifier = Modifier,
+    viewModel: TopicDetailListViewModel = hiltViewModel(),
+    topicId: String?,
+    onTopicClick: (String) -> Unit,
+    onBackClick: () -> Unit
+) {
+    val topicDetailListState: LazyPagingItems<TopicDetail> =
+        viewModel.topicListState.collectAsLazyPagingItems()
+
     LifecycleStartEffect {
-        viewModel.handleUIEvent(TopicsScreenEvent.FetchTopicsData)
-        onStopOrDispose { 
-            
+        viewModel.handleUIEvent(TopicDetailListEvent.FetchTopicListData(idOrSlug = topicId))
+        onStopOrDispose {
+
         }
     }
-    val context = LocalContext.current
     Scaffold(modifier = modifier
         .fillMaxSize(), topBar = {
         Row(
@@ -81,7 +85,7 @@ fun TopicsScreenRoute(modifier: Modifier = Modifier,viewModel: TopicsViewModel =
 
             Text(
                 modifier = modifier,
-                text = stringResource(id = R.string.topics_title),
+                text = "$topicId",
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontSize = 16.sp,
                 fontFamily = medium,
@@ -96,7 +100,7 @@ fun TopicsScreenRoute(modifier: Modifier = Modifier,viewModel: TopicsViewModel =
                 .padding(it)
                 .fillMaxSize()
         ) {
-            TopicsScreen(modifier = modifier, topicsLazyPagingItems = topicsState, onTopicClick = {id ->
+            TopicDetailListScreen(modifier = modifier, topicDetailLazyPagingItems = topicDetailListState, onTopicClick = {id ->
                 onTopicClick.invoke(id)
             })
         }
@@ -104,12 +108,14 @@ fun TopicsScreenRoute(modifier: Modifier = Modifier,viewModel: TopicsViewModel =
 }
 
 @Composable
-private fun TopicsScreen(
+private fun TopicDetailListScreen(
     modifier: Modifier,
-    topicsLazyPagingItems: LazyPagingItems<Topics>,
+    topicDetailLazyPagingItems: LazyPagingItems<TopicDetail>,
     onTopicClick: (String) -> Unit
 ) {
-    Column(modifier = modifier.fillMaxSize().padding(bottom = 8.dp, start = 8.dp, end = 8.dp)) {
+    Column(modifier = modifier
+        .fillMaxSize()
+        .padding(bottom = 8.dp, start = 8.dp, end = 8.dp)) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = modifier
@@ -119,24 +125,24 @@ private fun TopicsScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(
-                count = topicsLazyPagingItems.itemCount,
-                key = topicsLazyPagingItems.itemKey { item: Topics -> item.id.hashCode() },
-                contentType = topicsLazyPagingItems.itemContentType { "Topics" }) { index: Int ->
-                val topics: Topics? = topicsLazyPagingItems[index]
-                if (topics != null) {
-                    TopicsItem(topics = topics, onTopicClick = { onTopicClick.invoke(it) })
+                count = topicDetailLazyPagingItems.itemCount,
+                key = topicDetailLazyPagingItems.itemKey { item: TopicDetail -> item.id.hashCode() },
+                contentType = topicDetailLazyPagingItems.itemContentType { "TopicDetailList" }) { index: Int ->
+                val topicDetail: TopicDetail? = topicDetailLazyPagingItems[index]
+                if (topicDetail != null) {
+                    TopicListItem(topicDetail = topicDetail, onTopicClick = { onTopicClick.invoke(it) })
                 }
             }
         }
     }
 }
 @Composable
-fun TopicsItem(topics: Topics, onTopicClick: (String) -> Unit) {
+fun TopicListItem(topicDetail: TopicDetail, onTopicClick: (String) -> Unit) {
     Box(
         modifier = Modifier
             .wrapContentSize()
             .clickable {
-                topics.title?.let {
+                topicDetail.id?.let {
                     onTopicClick.invoke(
                         it
                     )
@@ -145,31 +151,16 @@ fun TopicsItem(topics: Topics, onTopicClick: (String) -> Unit) {
         , contentAlignment = Alignment.Center
     ) {
         SubcomposeAsyncImage(
-            model = topics.titleBackground,
+            model = topicDetail.url,
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(240.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp)))
-                .drawWithContent {
-                    drawContent()
-                    drawRect(
-                        color = Color.Black.copy(alpha = 0.5f),
-                        size = size,
-                    )
-                }, loading = {
+            , loading = {
                 ImageLoadingState()
             }
         )
-        if (topics.title != null) {
-            Text(
-                text = topics.title,
-                textAlign = TextAlign.Center,
-                fontFamily = medium,
-                fontSize = 16.sp,
-                color = Color.White
-            )
-        }
     }
 }

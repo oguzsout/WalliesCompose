@@ -18,6 +18,8 @@ import com.oguzdogdu.walliescompose.features.search.navigateToSearchScreen
 import com.oguzdogdu.walliescompose.features.search.searchScreen
 import com.oguzdogdu.walliescompose.features.settings.settingsScreen
 import com.oguzdogdu.walliescompose.features.topics.navigateToTopicsScreen
+import com.oguzdogdu.walliescompose.features.topics.topicdetaillist.navigateToTopicDetailListScreen
+import com.oguzdogdu.walliescompose.features.topics.topicdetaillist.topicDetailListScreen
 import com.oguzdogdu.walliescompose.features.topics.topicsScreen
 
 @Composable
@@ -42,6 +44,9 @@ fun WalliesNavHost(
         }
     ) {
         homeScreen(
+            onTopicDetailListClick = {
+                navController.navigateToTopicDetailListScreen(topicId = it)
+            },
             onLatestClick = {
                 navController.navigateToDetailScreen(photoId = it)
             },
@@ -63,11 +68,18 @@ fun WalliesNavHost(
         })
         detailScreen(
             onBackClick = {
-                navController.navigateToHomeScreen()
+                navController.popBackStack()
             }
         )
         topicsScreen(onBackClick = {
             navController.navigateToHomeScreen()
+        }, onTopicClick = {
+            navController.navigateToTopicDetailListScreen(topicId = it)
+        })
+        topicDetailListScreen(onTopicClick = {
+            navController.navigateToDetailScreen(photoId = it)
+        }, onBackClick = {
+            navController.popBackStack()
         })
     }
 }

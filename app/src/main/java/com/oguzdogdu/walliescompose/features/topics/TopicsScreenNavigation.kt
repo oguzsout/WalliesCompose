@@ -13,10 +13,12 @@ fun NavController.navigateToTopicsScreen(
     this.navigate(TopicsScreenNavigationRoute, navOptions)
 }
 
-fun NavGraphBuilder.topicsScreen(onBackClick: () -> Unit) {
+fun NavGraphBuilder.topicsScreen(onBackClick: () -> Unit,onTopicClick: (String) -> Unit) {
     composable(
         TopicsScreenNavigationRoute
     ) {
-        TopicsScreenRoute(onBackClick = { onBackClick.invoke() })
+        TopicsScreenRoute(onBackClick = { onBackClick.invoke() }, onTopicClick = {
+            onTopicClick.invoke(it)
+        })
     }
 }
