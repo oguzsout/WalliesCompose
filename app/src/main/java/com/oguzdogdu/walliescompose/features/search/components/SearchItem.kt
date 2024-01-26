@@ -18,13 +18,13 @@ import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.domain.model.search.SearchPhoto
 
 @Composable
-fun SearchItem(searchPhoto: SearchPhoto, onCollectionClick: (String) -> Unit) {
+fun SearchItem(searchPhoto: SearchPhoto, onSearchPhotoClick: (String) -> Unit) {
     Box(
         modifier = Modifier
             .wrapContentSize()
             .clickable {
                 searchPhoto.id?.let {
-                    onCollectionClick.invoke(
+                    onSearchPhotoClick.invoke(
                         it
                     )
                 }

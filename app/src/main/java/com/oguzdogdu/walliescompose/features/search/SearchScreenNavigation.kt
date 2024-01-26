@@ -13,12 +13,14 @@ fun NavController.navigateToSearchScreen(
     this.navigate(SearchScreenNavigationRoute, navOptions)
 }
 
-fun NavGraphBuilder.searchScreen(onBackClick: () -> Unit) {
+fun NavGraphBuilder.searchScreen(onBackClick: () -> Unit,searchPhotoClick: (String) -> Unit) {
     composable(
         SearchScreenNavigationRoute
     ) {
         SearchScreenRoute(onBackClick = {
             onBackClick.invoke()
+        }, searchPhotoClick = {
+            searchPhotoClick.invoke(it)
         })
     }
 }

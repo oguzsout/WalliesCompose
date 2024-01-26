@@ -45,6 +45,7 @@ import com.oguzdogdu.walliescompose.features.detail.component.DetailPhotoAttribu
 import com.oguzdogdu.walliescompose.features.detail.component.DetailTagsRow
 import com.oguzdogdu.walliescompose.features.detail.component.DetailTripleActionButtons
 import com.oguzdogdu.walliescompose.features.detail.component.WalliesFavoriteButton
+import com.oguzdogdu.walliescompose.features.home.LoadingState
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
 
@@ -76,7 +77,9 @@ fun DetailScreenRoute(
         ) {
             IconButton(
                 onClick = { onBackClick.invoke() },
-                modifier = modifier.wrapContentSize().weight(1f)
+                modifier = modifier
+                    .wrapContentSize()
+                    .weight(1f)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.back),
@@ -100,7 +103,9 @@ fun DetailScreenRoute(
 
             IconButton(
                 onClick = { onProfileDetailClick.invoke(state.detail?.id.orEmpty()) },
-                modifier = modifier.wrapContentSize().weight(1f)
+                modifier = modifier
+                    .wrapContentSize()
+                    .weight(1f)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.info),
@@ -123,7 +128,8 @@ fun DetailScreenRoute(
                 modifier = modifier
                     .fillMaxWidth()
                     .weight(1f),
-                contentScale = ContentScale.FillBounds
+                contentScale = ContentScale.FillBounds,
+                loading = { LoadingState(modifier = modifier)}
             )
             PostView(modifier = modifier, state = state,
                 onSetWallpaperClick = {

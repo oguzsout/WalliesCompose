@@ -27,12 +27,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -60,13 +58,13 @@ import com.oguzdogdu.walliescompose.domain.model.search.SearchPhoto
 import com.oguzdogdu.walliescompose.features.search.components.EmptyView
 import com.oguzdogdu.walliescompose.features.search.components.ErrorItem
 import com.oguzdogdu.walliescompose.features.search.components.SearchItem
-import kotlinx.coroutines.launch
 
 @Composable
 fun SearchScreenRoute(
     modifier: Modifier = Modifier,
     viewModel: SearchViewModel = hiltViewModel(),
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    searchPhotoClick: (String) -> Unit
 ) {
     val searchState: LazyPagingItems<SearchPhoto> =
         viewModel.searchListState.collectAsLazyPagingItems()
@@ -88,7 +86,7 @@ fun SearchScreenRoute(
         }, searchLazyPagingItems = searchState, onBackClick = {
             onBackClick.invoke()
         }, searchPhotoClick = {
-            Toast.makeText(contextForToast, it, Toast.LENGTH_LONG).show()
+            searchPhotoClick.invoke(it)
         })
     }
 }
@@ -212,7 +210,7 @@ fun SearchScreen(
                             val searchPhoto: SearchPhoto? = searchLazyPagingItems[index]
                             if (searchPhoto != null) {
                                 SearchItem(searchPhoto = searchPhoto,
-                                    onCollectionClick = { searchPhotoClick.invoke(it) })
+                                    onSearchPhotoClick = { searchPhotoClick.invoke(it) })
                             }
                         }
                     }

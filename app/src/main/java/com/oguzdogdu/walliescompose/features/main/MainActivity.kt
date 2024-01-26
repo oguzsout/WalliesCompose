@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -12,8 +13,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import com.oguzdogdu.walliescompose.WalliesApplication
 import com.oguzdogdu.walliescompose.features.appstate.WalliesApp
 import com.oguzdogdu.walliescompose.ui.theme.WalliesComposeTheme
@@ -29,13 +34,19 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
 
-    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            viewModel.handleScreenEvents(MainScreenEvent.LanguageChanged)
+            LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
+                viewModel.handleScreenEvents(MainScreenEvent.ThemeChanged)
+                viewModel.handleScreenEvents(MainScreenEvent.LanguageChanged)
+            }
+
             LaunchedEffect(application.theme.value) {
                 viewModel.handleScreenEvents(MainScreenEvent.ThemeChanged)
+            }
+            val LocalApplication = staticCompositionLocalOf {
+                WalliesApplication()
             }
             LaunchedEffect(application.language.value) {
                 viewModel.handleScreenEvents(MainScreenEvent.LanguageChanged)
@@ -45,14 +56,15 @@ class MainActivity : ComponentActivity() {
                     LocaleHelper(context = this@MainActivity).updateResources(application.language.value)
                 }
             }
-
-            WalliesComposeTheme(
-                appTheme = application.theme.value
-            ) {
-                Surface(
-                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
+            CompositionLocalProvider(LocalApplication provides application) {
+                WalliesComposeTheme(
+                    appTheme = application.theme.value
                 ) {
-                    WalliesApp()
+                    Surface(
+                        modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
+                    ) {
+                        WalliesApp()
+                    }
                 }
             }
         }

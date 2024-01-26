@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,7 +53,9 @@ import com.oguzdogdu.walliescompose.ui.theme.regular
 
 @Composable
 fun FavoritesScreenRoute(
-    modifier: Modifier = Modifier, viewModel: FavoritesViewModel = hiltViewModel()
+    modifier: Modifier = Modifier,
+    viewModel: FavoritesViewModel = hiltViewModel(),
+    onFavoriteClick: (String?) -> Unit
 ) {
     val state by viewModel.favoritesState.collectAsStateWithLifecycle()
 
@@ -90,7 +95,9 @@ fun FavoritesScreenRoute(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(state.favorites.orEmpty()) {favorites ->
-                        FavoritesImageView(modifier,imageUrl = favorites.url)
+                        FavoritesImageView(modifier,imageUrl = favorites.url, imageId = favorites.id, onFavoriteClick = {id ->
+                            onFavoriteClick.invoke(id)
+                        })
                     }
                 }
             }
@@ -131,9 +138,16 @@ fun EmptyView(modifier: Modifier, state: FavoriteScreenState) {
 }
 
 @Composable
-private fun FavoritesImageView(modifier: Modifier,imageUrl: String?) {
+private fun FavoritesImageView(modifier: Modifier,imageUrl: String?,imageId:String?,onFavoriteClick:(String?) -> Unit) {
+    val favoriteId by remember {
+        mutableStateOf(imageId)
+    }
     Box(
-        modifier = Modifier.wrapContentSize()
+        modifier = Modifier
+            .wrapContentSize()
+            .clickable {
+                onFavoriteClick.invoke(favoriteId)
+            }
     ) {
         SubcomposeAsyncImage(
             model = imageUrl,

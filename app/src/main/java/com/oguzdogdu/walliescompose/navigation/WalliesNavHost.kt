@@ -61,10 +61,14 @@ fun WalliesNavHost(
             }
         )
         collectionScreen()
-        favoritesScreen()
+        favoritesScreen(onFavoriteClick = {
+            navController.navigateToDetailScreen(photoId = it)
+        })
         settingsScreen()
         searchScreen(onBackClick = {
             navController.navigateToHomeScreen()
+        }, searchPhotoClick = {
+            navController.navigateToDetailScreen(photoId = it)
         })
         detailScreen(
             onBackClick = {
