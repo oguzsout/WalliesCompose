@@ -1,5 +1,6 @@
 package com.oguzdogdu.walliescompose.features.detail.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
@@ -21,7 +22,7 @@ import com.oguzdogdu.walliescompose.domain.model.detail.Photo
 import com.oguzdogdu.walliescompose.ui.theme.regular
 
 @Composable
-fun DetailTagsRow(modifier: Modifier, detail: Photo?) {
+fun DetailTagsRow(modifier: Modifier, detail: Photo?,onTagClick:(String) -> Unit) {
     LazyRow(
         contentPadding = PaddingValues(8.dp),
     ) {
@@ -35,7 +36,10 @@ fun DetailTagsRow(modifier: Modifier, detail: Photo?) {
                 shape = CircleShape.copy(CornerSize(16.dp)),
                 modifier = modifier
                     .wrapContentSize()
-                    .padding(4.dp),
+                    .padding(4.dp)
+                    .clickable {
+                        onTagClick.invoke(item.orEmpty())
+                    },
             ) {
                 Text(
                     text = item.orEmpty(),

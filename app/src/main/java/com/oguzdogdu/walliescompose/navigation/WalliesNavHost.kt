@@ -4,7 +4,6 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.oguzdogdu.walliescompose.features.appstate.MainAppState
 import com.oguzdogdu.walliescompose.features.collections.collectionScreen
@@ -66,13 +65,16 @@ fun WalliesNavHost(
         })
         settingsScreen()
         searchScreen(onBackClick = {
-            navController.navigateToHomeScreen()
+            navController.popBackStack()
         }, searchPhotoClick = {
             navController.navigateToDetailScreen(photoId = it)
         })
         detailScreen(
             onBackClick = {
                 navController.popBackStack()
+            },
+            onTagClick = {
+                navController.navigateToSearchScreen(queryFromDetail = it)
             }
         )
         topicsScreen(onBackClick = {

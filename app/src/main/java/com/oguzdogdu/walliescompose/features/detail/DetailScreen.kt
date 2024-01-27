@@ -55,7 +55,8 @@ fun DetailScreenRoute(
     modifier: Modifier = Modifier,
     detailViewModel: DetailViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
-    onProfileDetailClick: (String) -> Unit
+    onProfileDetailClick: (String) -> Unit,
+    onTagClick: (String) -> Unit
 ) {
     val state by detailViewModel.photo.collectAsStateWithLifecycle()
     LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
@@ -150,20 +151,22 @@ fun DetailScreenRoute(
                             isChecked = true)
                     )
                 )
-            }) { photo ->
-                detailViewModel.handleScreenEvents(
-                    DetailScreenEvent.DeleteFavorites(
-                        FavoriteImages(
-                            id = state.detail?.id,
-                            url = state.detail?.urls,
-                            profileImage = state.detail?.profileimage,
-                            name = state.detail?.name,
-                            portfolioUrl = state.detail?.portfolio,
-                            isChecked = false
+            }, onRemoveFavoriteClick = { photo ->
+                    detailViewModel.handleScreenEvents(
+                        DetailScreenEvent.DeleteFavorites(
+                            FavoriteImages(
+                                id = state.detail?.id,
+                                url = state.detail?.urls,
+                                profileImage = state.detail?.profileimage,
+                                name = state.detail?.name,
+                                portfolioUrl = state.detail?.portfolio,
+                                isChecked = false
+                            )
                         )
                     )
-                )
-            }
+                },onTagClick = {tag ->
+                    onTagClick.invoke(tag)
+                })
         }
     }
 }
@@ -176,7 +179,8 @@ fun PostView(
     onShareClick: () -> Unit,
     onDownloadClick: () -> Unit,
     onAddFavoriteClick: (FavoriteImages) -> Unit,
-    onRemoteFavoriteClick: (FavoriteImages) -> Unit
+    onRemoveFavoriteClick: (FavoriteImages) -> Unit,
+    onTagClick:(String) -> Unit
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -238,7 +242,7 @@ fun PostView(
                 ), addPhotoToFavorites = { favorite ->
                     onAddFavoriteClick.invoke(favorite)
                 }, removePhotoFromFavorites = { favorite ->
-                    onRemoteFavoriteClick.invoke(favorite)
+                    onRemoveFavoriteClick.invoke(favorite)
                 })
             }
         }
@@ -253,7 +257,9 @@ fun PostView(
             color = Color(0xFF30363D),
             thickness = 0.8.dp
         )
-        DetailTagsRow(modifier = modifier, detail = state.detail)
+        DetailTagsRow(modifier = modifier, detail = state.detail, onTagClick = {
+            onTagClick.invoke(it)
+        })
         DetailTripleActionButtons(modifier = modifier, setWallpaperButtonClick = {
             onSetWallpaperClick.invoke()
         }, shareButtonClick = {
