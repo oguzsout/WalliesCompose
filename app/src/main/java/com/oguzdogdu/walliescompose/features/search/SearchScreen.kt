@@ -27,10 +27,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -64,7 +66,8 @@ fun SearchScreenRoute(
     modifier: Modifier = Modifier,
     viewModel: SearchViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
-    searchPhotoClick: (String) -> Unit
+    searchPhotoClick: (String) -> Unit,
+    queryFromDetail:String?
 ) {
     val searchState: LazyPagingItems<SearchPhoto> =
         viewModel.searchListState.collectAsLazyPagingItems()
@@ -87,7 +90,7 @@ fun SearchScreenRoute(
             onBackClick.invoke()
         }, searchPhotoClick = {
             searchPhotoClick.invoke(it)
-        })
+        }, queryFromDetail = queryFromDetail.orEmpty())
     }
 }
 
@@ -98,9 +101,10 @@ fun SearchScreen(
     onQuerySearch: (String) -> Unit,
     searchLazyPagingItems: LazyPagingItems<SearchPhoto>,
     onBackClick: () -> Unit,
-    searchPhotoClick: (String) -> Unit
+    searchPhotoClick: (String) -> Unit,
+    queryFromDetail: String?
 ) {
-    var queryString by remember {
+    var queryString by rememberSaveable {
         mutableStateOf("")
     }
     val isEmptyState by remember {
@@ -110,6 +114,12 @@ fun SearchScreen(
     }
 
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    LaunchedEffect(key1 = queryFromDetail) {
+        if (queryFromDetail?.isNotEmpty() == true) {
+            queryString = queryFromDetail.toString()
+        }
+    }
 
     Column(
         modifier = modifier.fillMaxSize()
@@ -135,7 +145,9 @@ fun SearchScreen(
             Spacer(modifier = modifier.size(8.dp))
             TextField(modifier = modifier.fillMaxWidth(),
                 value = queryString,
-                onValueChange = { queryString = it },
+                onValueChange = {
+                    queryString = it
+                },
                 placeholder = { Text(stringResource(R.string.search)) },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Search
