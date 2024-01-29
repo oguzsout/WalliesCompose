@@ -1,7 +1,6 @@
 package com.oguzdogdu.walliescompose.features.collections
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -68,7 +67,11 @@ import com.oguzdogdu.walliescompose.ui.theme.medium
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun CollectionsScreenRoute(modifier: Modifier = Modifier,viewModel: CollectionsViewModel = hiltViewModel()) {
+fun CollectionsScreenRoute(
+    modifier: Modifier = Modifier,
+    viewModel: CollectionsViewModel = hiltViewModel(),
+    onCollectionClick: (String,String) -> Unit
+) {
     val collectionState: LazyPagingItems<WallpaperCollections> =
         viewModel.moviesState.collectAsLazyPagingItems()
     LaunchedEffect(key1 = Unit) {
@@ -109,9 +112,12 @@ fun CollectionsScreenRoute(modifier: Modifier = Modifier,viewModel: CollectionsV
                        }
                    }
                })
-            CollectionScreen(modifier = modifier, collectionLazyPagingItems = collectionState, onCollectionClick = {id ->
-                Toast.makeText(context, id, Toast.LENGTH_SHORT).show()
-            })
+            CollectionScreen(
+                modifier = modifier,
+                collectionLazyPagingItems = collectionState,
+                onCollectionClick = { id, title ->
+                    onCollectionClick.invoke(id,title)
+                })
         }
     }
 }
@@ -182,7 +188,7 @@ fun DropdownMenuBox(
 @Composable
 private fun CollectionScreen(modifier: Modifier,
     collectionLazyPagingItems: LazyPagingItems<WallpaperCollections>,
-    onCollectionClick: (String) -> Unit
+    onCollectionClick: (String, String) -> Unit
 ) {
     LazyVerticalGrid(columns = GridCells.Fixed(2),modifier = modifier
         .fillMaxSize()
@@ -195,23 +201,26 @@ private fun CollectionScreen(modifier: Modifier,
             contentType = collectionLazyPagingItems.itemContentType { "Collections" }) { index: Int ->
             val collections: WallpaperCollections? = collectionLazyPagingItems[index]
             if (collections != null) {
-                CollectionItem(collections = collections, onCollectionClick = { onCollectionClick.invoke(it)})
+                CollectionItem(
+                    collections = collections,
+                    onCollectionItemClick = { id, title ->
+                        onCollectionClick.invoke(id, title)
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun CollectionItem(collections: WallpaperCollections,onCollectionClick: (String) -> Unit) {
+fun CollectionItem(collections: WallpaperCollections, onCollectionItemClick: (String,String) -> Unit) {
     Box(
         modifier = Modifier
             .wrapContentSize()
             .clickable {
-                collections.id?.let {
-                    onCollectionClick.invoke(
-                        it
-                    )
-                }
+                onCollectionItemClick.invoke(
+                    collections.id.orEmpty(), collections.title.orEmpty()
+                )
             }
         , contentAlignment = Alignment.Center
     ) {

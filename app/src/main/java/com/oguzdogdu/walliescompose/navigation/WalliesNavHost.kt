@@ -7,6 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import com.oguzdogdu.walliescompose.features.appstate.MainAppState
 import com.oguzdogdu.walliescompose.features.collections.collectionScreen
+import com.oguzdogdu.walliescompose.features.collections.detaillist.collectionDetailListScreen
+import com.oguzdogdu.walliescompose.features.collections.detaillist.navigateToCollectionDetailListScreen
 import com.oguzdogdu.walliescompose.features.detail.detailScreen
 import com.oguzdogdu.walliescompose.features.detail.navigateToDetailScreen
 import com.oguzdogdu.walliescompose.features.favorites.favoritesScreen
@@ -59,7 +61,12 @@ fun WalliesNavHost(
                 navController.navigateToSearchScreen()
             }
         )
-        collectionScreen()
+        collectionScreen(onCollectionClick = {id,title ->
+            navController.navigateToCollectionDetailListScreen(
+                collectionDetailListId = id,
+                collectionDetailListTitle = title
+            )
+        })
         favoritesScreen(onFavoriteClick = {
             navController.navigateToDetailScreen(photoId = it)
         })
@@ -83,6 +90,11 @@ fun WalliesNavHost(
             navController.navigateToTopicDetailListScreen(topicId = it)
         })
         topicDetailListScreen(onTopicClick = {
+            navController.navigateToDetailScreen(photoId = it)
+        }, onBackClick = {
+            navController.popBackStack()
+        })
+        collectionDetailListScreen(onCollectionClick = {
             navController.navigateToDetailScreen(photoId = it)
         }, onBackClick = {
             navController.popBackStack()
