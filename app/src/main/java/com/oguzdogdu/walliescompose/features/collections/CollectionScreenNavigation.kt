@@ -13,10 +13,12 @@ fun NavController.navigateToCollectionScreen(
     this.navigate(CollectionScreenNavigationRoute, navOptions)
 }
 
-fun NavGraphBuilder.collectionScreen() {
+fun NavGraphBuilder.collectionScreen(onCollectionClick: (String,String) -> Unit) {
     composable(
         CollectionScreenNavigationRoute
     ) {
-        CollectionsScreenRoute()
+        CollectionsScreenRoute(onCollectionClick = {id,title ->
+            onCollectionClick.invoke(id,title)
+        })
     }
 }

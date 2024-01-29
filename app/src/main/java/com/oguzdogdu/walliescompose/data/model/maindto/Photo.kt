@@ -1,6 +1,7 @@
 package com.oguzdogdu.walliescompose.data.model.maindto
 
 import com.google.gson.annotations.SerializedName
+import com.oguzdogdu.walliescompose.domain.model.collections.CollectionList
 
 data class Photo(
     @SerializedName("id")
@@ -38,3 +39,5 @@ data class Photo(
     @SerializedName("user")
     val user: User?,
 )
+
+fun Photo.toDomainCollectionDetailList() = CollectionList(id = id, url = urls?.regular,desc = description)

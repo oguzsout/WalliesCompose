@@ -14,6 +14,7 @@ import com.oguzdogdu.walliescompose.data.common.safeApiCall
 import com.oguzdogdu.walliescompose.data.di.Dispatcher
 import com.oguzdogdu.walliescompose.data.di.WalliesDispatchers
 import com.oguzdogdu.walliescompose.data.model.collection.toCollectionDomain
+import com.oguzdogdu.walliescompose.data.model.maindto.toDomainCollectionDetailList
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelLatest
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelPhoto
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelPopular
@@ -26,6 +27,7 @@ import com.oguzdogdu.walliescompose.data.pagination.SearchPagingSource
 import com.oguzdogdu.walliescompose.data.pagination.TopicListSource
 import com.oguzdogdu.walliescompose.data.pagination.TopicsPagingSource
 import com.oguzdogdu.walliescompose.data.service.WallpaperService
+import com.oguzdogdu.walliescompose.domain.model.collections.CollectionList
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
 import com.oguzdogdu.walliescompose.domain.model.detail.Photo
 import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
@@ -190,6 +192,13 @@ class WallpaperRepositoryImpl @Inject constructor(
         ).flow.mapNotNull {
             it.map { topicList ->
                 topicList.toDomainTopicList()
+            }
+        }
+    }
+    override suspend fun getCollectionsListById(id: String?): Flow<Resource<List<CollectionList>?>> {
+        return safeApiCall(ioDispatcher){
+            service.getCollectionsListById(id).body()?.map {
+                it.toDomainCollectionDetailList()
             }
         }
     }

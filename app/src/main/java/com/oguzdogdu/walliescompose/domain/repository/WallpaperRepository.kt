@@ -1,6 +1,7 @@
 package com.oguzdogdu.walliescompose.domain.repository
 
 import androidx.paging.PagingData
+import com.oguzdogdu.walliescompose.domain.model.collections.CollectionList
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
 import com.oguzdogdu.walliescompose.domain.model.detail.Photo
 import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
@@ -26,4 +27,5 @@ interface WallpaperRepository {
     suspend fun searchPhoto(query: String?,language:String?): Flow<PagingData<SearchPhoto>>
     suspend fun getTopicsTitleWithPaging(): Flow<PagingData<Topics>>
     suspend fun getTopicListWithPaging(idOrSlug:String?): Flow<PagingData<TopicDetail>>
+    suspend fun getCollectionsListById(id: String?): Flow<Resource<List<CollectionList>?>>
 }

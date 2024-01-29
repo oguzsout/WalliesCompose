@@ -2,6 +2,7 @@ package com.oguzdogdu.walliescompose.data.service
 
 import com.oguzdogdu.walliescompose.data.model.searchdto.SearchResponseItem
 import com.oguzdogdu.walliescompose.data.model.collection.CollectionResponse
+import com.oguzdogdu.walliescompose.data.model.maindto.Photo
 import com.oguzdogdu.walliescompose.data.model.topics.TopicsResponseItem
 import com.oguzdogdu.walliescompose.data.model.maindto.UnsplashResponseItem
 import com.oguzdogdu.walliescompose.data.model.topics.CoverPhoto
@@ -49,4 +50,9 @@ interface WallpaperService {
         @Query("page") page: Int?,
         @Query("per_page") perPage: Int?,
     ): Response<List<CoverPhoto>>
+
+    @GET("collections/{id}/photos")
+    suspend fun getCollectionsListById(
+        @Path("id") id: String?,
+    ): Response<List<Photo>>
 }

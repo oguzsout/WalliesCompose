@@ -104,7 +104,7 @@ fun FavoritesScreenRoute(
                 }
             }
             if (state.favorites.isNullOrEmpty()) {
-                EmptyView(modifier = modifier, state = state)
+                EmptyView(modifier = modifier, state = true)
             }
         }
     }
@@ -112,9 +112,9 @@ fun FavoritesScreenRoute(
 
 
 @Composable
-fun EmptyView(modifier: Modifier, state: FavoriteScreenState) {
+fun EmptyView(modifier: Modifier, state: Boolean) {
     AnimatedVisibility(
-        visible = state.favorites.isNullOrEmpty(),
+        visible = state,
         enter = expandHorizontally { 20 },
         exit = shrinkHorizontally(
             animationSpec = tween(),
