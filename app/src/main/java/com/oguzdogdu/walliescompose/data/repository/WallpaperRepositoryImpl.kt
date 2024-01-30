@@ -23,6 +23,7 @@ import com.oguzdogdu.walliescompose.data.model.topics.toDomainTopics
 import com.oguzdogdu.walliescompose.data.pagination.CollectionByLikesPagingSource
 import com.oguzdogdu.walliescompose.data.pagination.CollectionsByTitlePagingSource
 import com.oguzdogdu.walliescompose.data.pagination.CollectionsPagingSource
+import com.oguzdogdu.walliescompose.data.pagination.PopularPagingSource
 import com.oguzdogdu.walliescompose.data.pagination.SearchPagingSource
 import com.oguzdogdu.walliescompose.data.pagination.TopicListSource
 import com.oguzdogdu.walliescompose.data.pagination.TopicsPagingSource
@@ -199,6 +200,18 @@ class WallpaperRepositoryImpl @Inject constructor(
         return safeApiCall(ioDispatcher){
             service.getCollectionsListById(id).body()?.map {
                 it.toDomainCollectionDetailList()
+            }
+        }
+    }
+    override suspend fun getImagesByPopulars(): Flow<PagingData<PopularImage>> {
+        val pagingConfig = PagingConfig(pageSize = PAGE_ITEM_LIMIT)
+        return Pager(
+            config = pagingConfig,
+            initialKey = 1,
+            pagingSourceFactory = { PopularPagingSource(service = service) }
+        ).flow.mapNotNull {
+            it.map { popular ->
+                popular.toDomainModelPopular()
             }
         }
     }

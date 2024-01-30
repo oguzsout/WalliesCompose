@@ -55,4 +55,5 @@ interface WallpaperService {
     suspend fun getCollectionsListById(
         @Path("id") id: String?,
     ): Response<List<Photo>>
+
 }
