@@ -61,6 +61,7 @@ fun HomeScreenRoute(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     onTopicSeeAllClick: () -> Unit,
+    onPopularSeeAllClick: () -> Unit,
     onTopicDetailListClick: (String?) -> Unit,
     onLatestClick: (String) -> Unit,
     onPopularClick: (String) -> Unit,
@@ -118,7 +119,10 @@ fun HomeScreenRoute(
                     onPopularClick = { id ->
                         onPopularClick.invoke(id)
                     },
-                    onLatestClick = { id -> onLatestClick.invoke(id) }
+                    onLatestClick = { id -> onLatestClick.invoke(id) },
+                    onPopularSeeAllClick = {
+                        onPopularSeeAllClick.invoke()
+                    }
                 )
             }
         }
@@ -130,6 +134,7 @@ fun HomeScreenContent(
     homeUiState: HomeScreenState,
     modifier: Modifier,
     onTopicSeeAllClick: () -> Unit,
+    onPopularSeeAllClick: () -> Unit,
     onTopicDetailListClick: (String?) -> Unit,
     onPopularClick: (String) -> Unit,
     onLatestClick: (String) -> Unit
@@ -158,6 +163,9 @@ fun HomeScreenContent(
                 homeScreenState = homeUiState,
                 onPopularClick = { id ->
                     onPopularClick.invoke(id)
+                },
+                onPopularSeeAllClick = {
+                    onPopularSeeAllClick.invoke()
                 })
         }
 
@@ -220,7 +228,7 @@ private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreen
 
 @Composable
 private fun PopularLayoutContainer(
-    modifier: Modifier, homeScreenState: HomeScreenState, onPopularClick: (String) -> Unit
+    modifier: Modifier, homeScreenState: HomeScreenState, onPopularClick: (String) -> Unit,onPopularSeeAllClick: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -243,7 +251,11 @@ private fun PopularLayoutContainer(
                 fontFamily = medium,
                 fontSize = 12.sp,
                 color = Color.Unspecified,
-                modifier = modifier.padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
+                modifier = modifier
+                    .padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
+                    .clickable {
+                        onPopularSeeAllClick.invoke()
+                    }
             )
         }
 

@@ -15,6 +15,8 @@ import com.oguzdogdu.walliescompose.features.favorites.favoritesScreen
 import com.oguzdogdu.walliescompose.features.home.HomeScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.home.homeScreen
 import com.oguzdogdu.walliescompose.features.home.navigateToHomeScreen
+import com.oguzdogdu.walliescompose.features.popular.navigateToPopularScreen
+import com.oguzdogdu.walliescompose.features.popular.popularScreen
 import com.oguzdogdu.walliescompose.features.search.navigateToSearchScreen
 import com.oguzdogdu.walliescompose.features.search.searchScreen
 import com.oguzdogdu.walliescompose.features.settings.settingsScreen
@@ -59,6 +61,9 @@ fun WalliesNavHost(
             },
             onSearchClick = {
                 navController.navigateToSearchScreen()
+            },
+            onPopularSeeAllClick = {
+                navController.navigateToPopularScreen()
             }
         )
         collectionScreen(onCollectionClick = {id,title ->
@@ -99,5 +104,11 @@ fun WalliesNavHost(
         }, onBackClick = {
             navController.popBackStack()
         })
+        popularScreen(onPopularClick = {
+            navController.navigateToDetailScreen(photoId = it)
+        },
+            onBackClick = {
+                navController.popBackStack()
+            })
     }
 }
