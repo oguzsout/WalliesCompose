@@ -15,6 +15,8 @@ import com.oguzdogdu.walliescompose.features.favorites.favoritesScreen
 import com.oguzdogdu.walliescompose.features.home.HomeScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.home.homeScreen
 import com.oguzdogdu.walliescompose.features.home.navigateToHomeScreen
+import com.oguzdogdu.walliescompose.features.login.LoginScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.login.loginScreen
 import com.oguzdogdu.walliescompose.features.popular.navigateToPopularScreen
 import com.oguzdogdu.walliescompose.features.popular.popularScreen
 import com.oguzdogdu.walliescompose.features.search.navigateToSearchScreen
@@ -29,7 +31,7 @@ import com.oguzdogdu.walliescompose.features.topics.topicsScreen
 fun WalliesNavHost(
     appState: MainAppState,
     modifier: Modifier = Modifier,
-    startDestination: String = HomeScreenNavigationRoute,
+    startDestination: String = LoginScreenNavigationRoute,
 ) {
     val navController = appState.navController
     NavHost(
@@ -46,6 +48,7 @@ fun WalliesNavHost(
             ExitTransition.None
         }
     ) {
+        loginScreen()
         homeScreen(
             onTopicDetailListClick = {
                 navController.navigateToTopicDetailListScreen(topicId = it)
