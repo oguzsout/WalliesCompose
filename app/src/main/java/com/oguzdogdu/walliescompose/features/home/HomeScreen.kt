@@ -62,6 +62,7 @@ fun HomeScreenRoute(
     viewModel: HomeViewModel = hiltViewModel(),
     onTopicSeeAllClick: () -> Unit,
     onPopularSeeAllClick: () -> Unit,
+    onLatestSeeAllClick: () -> Unit,
     onTopicDetailListClick: (String?) -> Unit,
     onLatestClick: (String) -> Unit,
     onPopularClick: (String) -> Unit,
@@ -69,6 +70,9 @@ fun HomeScreenRoute(
 ) {
     val context = LocalContext.current
 
+    LaunchedEffect(key1 = Unit) {
+        viewModel.handleScreenEvents(HomeScreenEvent.FetchHomeScreenLists)
+    }
     val homeUiState by viewModel.homeListState.collectAsStateWithLifecycle()
 
     var itemsLoad by remember {
@@ -122,6 +126,9 @@ fun HomeScreenRoute(
                     onLatestClick = { id -> onLatestClick.invoke(id) },
                     onPopularSeeAllClick = {
                         onPopularSeeAllClick.invoke()
+                    },
+                    onLatestSeeAllClick = {
+                        onLatestSeeAllClick.invoke()
                     }
                 )
             }
@@ -135,6 +142,7 @@ fun HomeScreenContent(
     modifier: Modifier,
     onTopicSeeAllClick: () -> Unit,
     onPopularSeeAllClick: () -> Unit,
+    onLatestSeeAllClick: () -> Unit,
     onTopicDetailListClick: (String?) -> Unit,
     onPopularClick: (String) -> Unit,
     onLatestClick: (String) -> Unit
@@ -172,7 +180,8 @@ fun HomeScreenContent(
         item(key = 2) {
             LatestLayoutContainer(modifier = modifier,
                 homeScreenState = homeUiState,
-                onLatestClick = { id -> onLatestClick.invoke(id) })
+                onLatestClick = { id -> onLatestClick.invoke(id) },
+                onLatestSeeAllClick = { onLatestSeeAllClick.invoke() })
 
         }
     }
@@ -224,6 +233,7 @@ private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreen
             }
         }
     }
+
 }
 
 @Composable
@@ -270,12 +280,13 @@ private fun PopularLayoutContainer(
                     })
             }
         })
+
     }
 }
 
 @Composable
 private fun LatestLayoutContainer(
-    modifier: Modifier, homeScreenState: HomeScreenState, onLatestClick: (String) -> Unit
+    modifier: Modifier, homeScreenState: HomeScreenState, onLatestClick: (String) -> Unit,onLatestSeeAllClick:() -> Unit
 ) {
     Column(
         modifier = modifier
@@ -298,7 +309,9 @@ private fun LatestLayoutContainer(
                 fontFamily = medium,
                 fontSize = 12.sp,
                 color = Color.Unspecified,
-                modifier = modifier.padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
+                modifier = modifier.padding(end = 8.dp, top = 16.dp, bottom = 8.dp).clickable {
+                    onLatestSeeAllClick.invoke()
+                }
             )
         }
 
@@ -313,6 +326,7 @@ private fun LatestLayoutContainer(
                     })
             }
         })
+
     }
 }
 

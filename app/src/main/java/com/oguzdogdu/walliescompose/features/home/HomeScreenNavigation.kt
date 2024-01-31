@@ -16,6 +16,7 @@ fun NavController.navigateToHomeScreen(
 fun NavGraphBuilder.homeScreen(
     onTopicSeeAllClick: () -> Unit,
     onPopularSeeAllClick: () -> Unit,
+    onLatestSeeAllClick: () -> Unit,
     onTopicDetailListClick: (String?) -> Unit,
     onPopularClick: (String) -> Unit,
     onLatestClick: (String) -> Unit,
@@ -36,6 +37,9 @@ fun NavGraphBuilder.homeScreen(
             }, onSearchClick = { onSearchClick.invoke() },
             onPopularSeeAllClick = {
                 onPopularSeeAllClick.invoke()
+            },
+            onLatestSeeAllClick = {
+                onLatestSeeAllClick.invoke()
             }
         )
     }

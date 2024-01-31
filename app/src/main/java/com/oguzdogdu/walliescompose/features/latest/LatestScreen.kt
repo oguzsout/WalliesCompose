@@ -1,4 +1,4 @@
-package com.oguzdogdu.walliescompose.features.popular
+package com.oguzdogdu.walliescompose.features.latest
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,22 +44,23 @@ import androidx.paging.compose.itemKey
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
-import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
+import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.ui.theme.medium
 
 @Composable
-fun PopularScreenRoute(
+fun LatestScreenRoute(
     modifier: Modifier = Modifier,
-    viewModel: PopularViewModel = hiltViewModel(),
-    onPopularClick: (String?) -> Unit,
+    viewModel: LatestViewModel = hiltViewModel(),
+    onLatestClick: (String?) -> Unit,
     onBackClick: () -> Unit
 ) {
-    val popularListState: LazyPagingItems<PopularImage> =
-        viewModel.getPopular.collectAsLazyPagingItems()
+    val latestListState: LazyPagingItems<LatestImage> =
+        viewModel.getLatest.collectAsLazyPagingItems()
+
     val lifecycleOwner = LocalLifecycleOwner.current
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE, lifecycleOwner = lifecycleOwner) {
-        viewModel.handleUIEvent(PopularScreenEvent.FetchPopularData)
+        viewModel.handleUIEvent(LatestScreenEvent.FetchLatestData)
 
     }
     Scaffold(modifier = modifier
@@ -87,7 +88,7 @@ fun PopularScreenRoute(
 
             Text(
                 modifier = modifier,
-                text = stringResource(id = R.string.popular_title),
+                text = stringResource(id = R.string.latest_title),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontSize = 16.sp,
                 fontFamily = medium,
@@ -102,18 +103,18 @@ fun PopularScreenRoute(
                 .padding(it)
                 .fillMaxSize()
         ) {
-            PopularDetailListScreen(modifier = modifier, popularLazyPagingItems = popularListState, onTopicClick = { id ->
-                onPopularClick.invoke(id)
+            LatestDetailListScreen(modifier = modifier, latestLazyPagingItems = latestListState, onLatestClick = { id ->
+                onLatestClick.invoke(id)
             })
         }
     }
 }
 
 @Composable
-private fun PopularDetailListScreen(
+private fun LatestDetailListScreen(
     modifier: Modifier,
-    popularLazyPagingItems: LazyPagingItems<PopularImage>,
-    onTopicClick: (String) -> Unit
+    latestLazyPagingItems: LazyPagingItems<LatestImage>,
+    onLatestClick: (String) -> Unit
 ) {
     Column(modifier = modifier
         .fillMaxSize()
@@ -127,25 +128,25 @@ private fun PopularDetailListScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(
-                count = popularLazyPagingItems.itemCount,
-                key = popularLazyPagingItems.itemKey { item: PopularImage -> item.id.hashCode() },
-                contentType = popularLazyPagingItems.itemContentType { "Popular" }) { index: Int ->
-                val popular: PopularImage? = popularLazyPagingItems[index]
-                if (popular != null) {
-                    PopularListItem(popularImage = popular, onPopularClick = { onTopicClick.invoke(it) })
+                count = latestLazyPagingItems.itemCount,
+                key = latestLazyPagingItems.itemKey { item: LatestImage -> item.id.hashCode() },
+                contentType = latestLazyPagingItems.itemContentType { "Latest" }) { index: Int ->
+                val latest: LatestImage? = latestLazyPagingItems[index]
+                if (latest != null) {
+                    LatestListItem(latestImage = latest, onLatestClick = { onLatestClick.invoke(it) })
                 }
             }
         }
     }
 }
 @Composable
-fun PopularListItem(popularImage: PopularImage, onPopularClick: (String) -> Unit) {
+fun LatestListItem(latestImage: LatestImage, onLatestClick: (String) -> Unit) {
     Box(
         modifier = Modifier
             .wrapContentSize()
             .clickable {
-                popularImage.id?.let {
-                    onPopularClick.invoke(
+                latestImage.id?.let {
+                    onLatestClick.invoke(
                         it
                     )
                 }
@@ -153,7 +154,7 @@ fun PopularListItem(popularImage: PopularImage, onPopularClick: (String) -> Unit
         , contentAlignment = Alignment.Center
     ) {
         SubcomposeAsyncImage(
-            model = popularImage.url,
+            model = latestImage.url,
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
