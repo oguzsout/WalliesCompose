@@ -23,6 +23,7 @@ import com.oguzdogdu.walliescompose.data.model.topics.toDomainTopics
 import com.oguzdogdu.walliescompose.data.pagination.CollectionByLikesPagingSource
 import com.oguzdogdu.walliescompose.data.pagination.CollectionsByTitlePagingSource
 import com.oguzdogdu.walliescompose.data.pagination.CollectionsPagingSource
+import com.oguzdogdu.walliescompose.data.pagination.LatestPagingSource
 import com.oguzdogdu.walliescompose.data.pagination.PopularPagingSource
 import com.oguzdogdu.walliescompose.data.pagination.SearchPagingSource
 import com.oguzdogdu.walliescompose.data.pagination.TopicListSource
@@ -212,6 +213,19 @@ class WallpaperRepositoryImpl @Inject constructor(
         ).flow.mapNotNull {
             it.map { popular ->
                 popular.toDomainModelPopular()
+            }
+        }
+    }
+
+    override suspend fun getImagesByLatest(): Flow<PagingData<LatestImage>> {
+        val pagingConfig = PagingConfig(pageSize = PAGE_ITEM_LIMIT)
+        return Pager(
+            config = pagingConfig,
+            initialKey = 1,
+            pagingSourceFactory = { LatestPagingSource(service = service) }
+        ).flow.mapNotNull {
+            it.map { latest ->
+                latest.toDomainModelLatest()
             }
         }
     }

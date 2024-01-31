@@ -29,4 +29,5 @@ interface WallpaperRepository {
     suspend fun getTopicListWithPaging(idOrSlug:String?): Flow<PagingData<TopicDetail>>
     suspend fun getCollectionsListById(id: String?): Flow<Resource<List<CollectionList>?>>
     suspend fun getImagesByPopulars(): Flow<PagingData<PopularImage>>
+    suspend fun getImagesByLatest(): Flow<PagingData<LatestImage>>
 }
