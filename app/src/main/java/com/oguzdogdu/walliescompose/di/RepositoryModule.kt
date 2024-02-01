@@ -1,13 +1,17 @@
 package com.oguzdogdu.walliescompose.di
 
 import android.content.Context
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.oguzdogdu.walliescompose.cache.dao.FavoriteDao
 import com.oguzdogdu.walliescompose.data.repository.AppSettingsRepositoryImpl
 import com.oguzdogdu.walliescompose.data.repository.WallpaperRepositoryImpl
 import com.oguzdogdu.walliescompose.data.di.Dispatcher
 import com.oguzdogdu.walliescompose.data.di.WalliesDispatchers
+import com.oguzdogdu.walliescompose.data.repository.UserAuthenticationRepositoryImpl
 import com.oguzdogdu.walliescompose.data.service.WallpaperService
 import com.oguzdogdu.walliescompose.domain.repository.AppSettingsRepository
+import com.oguzdogdu.walliescompose.domain.repository.UserAuthenticationRepository
 import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
 import dagger.Module
 import dagger.Provides
@@ -28,6 +32,12 @@ object RepositoryModule {
         @Dispatcher(WalliesDispatchers.IO) ioDispatcher: CoroutineDispatcher
     ): WallpaperRepository {
         return WallpaperRepositoryImpl(service, dao,ioDispatcher)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthRepository(auth: FirebaseAuth, firestore: FirebaseFirestore): UserAuthenticationRepository {
+        return UserAuthenticationRepositoryImpl(auth, firestore)
     }
     @Singleton
     @Provides
