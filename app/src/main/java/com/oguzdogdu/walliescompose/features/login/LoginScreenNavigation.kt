@@ -13,10 +13,15 @@ fun NavController.navigateToLoginScreen(
     this.navigate(LoginScreenNavigationRoute, navOptions)
 }
 
-fun NavGraphBuilder.loginScreen() {
+fun NavGraphBuilder.loginScreen(navigateToHome:() -> Unit,onContinueWithoutLoginClick: () -> Unit) {
     composable(
         LoginScreenNavigationRoute
     ) {
-       LoginScreenRoute()
+       LoginScreenRoute(navigateToHome = {
+           navigateToHome.invoke()
+       },
+           onContinueWithoutLoginClick = {
+               onContinueWithoutLoginClick.invoke()
+           })
     }
 }

@@ -4,7 +4,11 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.navigation
+import androidx.navigation.navOptions
 import com.oguzdogdu.walliescompose.features.appstate.MainAppState
 import com.oguzdogdu.walliescompose.features.collections.collectionScreen
 import com.oguzdogdu.walliescompose.features.collections.detaillist.collectionDetailListScreen
@@ -33,12 +37,12 @@ import com.oguzdogdu.walliescompose.features.topics.topicsScreen
 fun WalliesNavHost(
     appState: MainAppState,
     modifier: Modifier = Modifier,
-    startDestination: String = LoginScreenNavigationRoute,
+    startDestination: Boolean,
 ) {
     val navController = appState.navController
     NavHost(
         navController = navController,
-        startDestination = startDestination,
+        startDestination = if (!startDestination) "auth" else "content",
         modifier = modifier,
         enterTransition = {
             EnterTransition.None
@@ -50,79 +54,93 @@ fun WalliesNavHost(
             ExitTransition.None
         }
     ) {
-        loginScreen()
-        homeScreen(
-            onTopicDetailListClick = {
-                navController.navigateToTopicDetailListScreen(topicId = it)
+
+        navigation(startDestination = LoginScreenNavigationRoute, route = "auth") {
+            loginScreen(navigateToHome = {
+                navController.navigate(HomeScreenNavigationRoute)
             },
-            onLatestClick = {
-                navController.navigateToDetailScreen(photoId = it)
-            },
-            onPopularClick = {
-                navController.navigateToDetailScreen(photoId = it)
-            },
-            onTopicSeeAllClick = {
-                navController.navigateToTopicsScreen()
-            },
-            onSearchClick = {
-                navController.navigateToSearchScreen()
-            },
-            onPopularSeeAllClick = {
-                navController.navigateToPopularScreen()
-            },
-            onLatestSeeAllClick = {
-                navController.navigateToLatestScreen()
-            }
-        )
-        collectionScreen(onCollectionClick = {id,title ->
-            navController.navigateToCollectionDetailListScreen(
-                collectionDetailListId = id,
-                collectionDetailListTitle = title
+                onContinueWithoutLoginClick = {
+                    navController.navigate("content") {
+                        popUpTo("auth") {
+                            inclusive = true
+                        }
+                    }
+                })
+        }
+        navigation(startDestination = HomeScreenNavigationRoute, route = "content") {
+            homeScreen(
+                onTopicDetailListClick = {
+                    navController.navigateToTopicDetailListScreen(topicId = it)
+                },
+                onLatestClick = {
+                    navController.navigateToDetailScreen(photoId = it)
+                },
+                onPopularClick = {
+                    navController.navigateToDetailScreen(photoId = it)
+                },
+                onTopicSeeAllClick = {
+                    navController.navigateToTopicsScreen()
+                },
+                onSearchClick = {
+                    navController.navigateToSearchScreen()
+                },
+                onPopularSeeAllClick = {
+                    navController.navigateToPopularScreen()
+                },
+                onLatestSeeAllClick = {
+                    navController.navigateToLatestScreen()
+                }
             )
-        })
-        favoritesScreen(onFavoriteClick = {
-            navController.navigateToDetailScreen(photoId = it)
-        })
-        settingsScreen()
-        searchScreen(onBackClick = {
-            navController.popBackStack()
-        }, searchPhotoClick = {
-            navController.navigateToDetailScreen(photoId = it)
-        })
-        detailScreen(
-            onBackClick = {
+            collectionScreen(onCollectionClick = {id,title ->
+                navController.navigateToCollectionDetailListScreen(
+                    collectionDetailListId = id,
+                    collectionDetailListTitle = title
+                )
+            })
+            favoritesScreen(onFavoriteClick = {
+                navController.navigateToDetailScreen(photoId = it)
+            })
+            settingsScreen()
+            searchScreen(onBackClick = {
                 navController.popBackStack()
+            }, searchPhotoClick = {
+                navController.navigateToDetailScreen(photoId = it)
+            })
+            detailScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onTagClick = {
+                    navController.navigateToSearchScreen(queryFromDetail = it)
+                }
+            )
+            topicsScreen(onBackClick = {
+                navController.navigateToHomeScreen()
+            }, onTopicClick = {
+                navController.navigateToTopicDetailListScreen(topicId = it)
+            })
+            topicDetailListScreen(onTopicClick = {
+                navController.navigateToDetailScreen(photoId = it)
+            }, onBackClick = {
+                navController.popBackStack()
+            })
+            collectionDetailListScreen(onCollectionClick = {
+                navController.navigateToDetailScreen(photoId = it)
+            }, onBackClick = {
+                navController.popBackStack()
+            })
+            popularScreen(onPopularClick = {
+                navController.navigateToDetailScreen(photoId = it)
             },
-            onTagClick = {
-                navController.navigateToSearchScreen(queryFromDetail = it)
-            }
-        )
-        topicsScreen(onBackClick = {
-            navController.navigateToHomeScreen()
-        }, onTopicClick = {
-            navController.navigateToTopicDetailListScreen(topicId = it)
-        })
-        topicDetailListScreen(onTopicClick = {
-            navController.navigateToDetailScreen(photoId = it)
-        }, onBackClick = {
-            navController.popBackStack()
-        })
-        collectionDetailListScreen(onCollectionClick = {
-            navController.navigateToDetailScreen(photoId = it)
-        }, onBackClick = {
-            navController.popBackStack()
-        })
-        popularScreen(onPopularClick = {
-            navController.navigateToDetailScreen(photoId = it)
-        },
-            onBackClick = {
-                navController.popBackStack()
-            })
-        latestScreen(onLatestClick = {
-            navController.navigateToDetailScreen(photoId = it)
-        },
-            onBackClick = {
-                navController.popBackStack()
-            })
+                onBackClick = {
+                    navController.popBackStack()
+                })
+            latestScreen(onLatestClick = {
+                navController.navigateToDetailScreen(photoId = it)
+            },
+                onBackClick = {
+                    navController.popBackStack()
+                })
+        }
     }
 }

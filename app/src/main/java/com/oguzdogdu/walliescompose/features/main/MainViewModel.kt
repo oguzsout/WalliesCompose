@@ -4,17 +4,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oguzdogdu.walliescompose.WalliesApplication
 import com.oguzdogdu.walliescompose.domain.repository.AppSettingsRepository
+import com.oguzdogdu.walliescompose.domain.repository.UserAuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val dataStore: AppSettingsRepository, private val application: WalliesApplication
+    private val dataStore: AppSettingsRepository, private val application: WalliesApplication,
+    private val authenticationRepository: UserAuthenticationRepository
 ) : ViewModel() {
     private val _mainState = MutableStateFlow(MainScreenState())
     val mainState = _mainState.asStateFlow()
@@ -27,6 +31,10 @@ class MainViewModel @Inject constructor(
 
             MainScreenEvent.LanguageChanged -> {
                 getLanguageValue()
+            }
+
+            MainScreenEvent.CheckUserAuthState -> {
+                checkUserAuthState()
             }
         }
     }
@@ -47,6 +55,12 @@ class MainViewModel @Inject constructor(
                     application.language.value = value
                 }
             }
+        }
+    }
+    private fun checkUserAuthState() {
+        viewModelScope.launch {
+           val state = authenticationRepository.isUserAuthenticatedInFirebase().single()
+            _mainState.update { it.copy(userAuth = state) }
         }
     }
 }

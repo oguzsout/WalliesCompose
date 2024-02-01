@@ -15,10 +15,12 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oguzdogdu.walliescompose.WalliesApplication
 import com.oguzdogdu.walliescompose.features.appstate.WalliesApp
 import com.oguzdogdu.walliescompose.ui.theme.WalliesComposeTheme
@@ -37,9 +39,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val mainState by viewModel.mainState.collectAsStateWithLifecycle()
             LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
+                viewModel.handleScreenEvents(MainScreenEvent.CheckUserAuthState)
                 viewModel.handleScreenEvents(MainScreenEvent.ThemeChanged)
                 viewModel.handleScreenEvents(MainScreenEvent.LanguageChanged)
+
             }
 
             LaunchedEffect(application.theme.value) {
@@ -63,7 +68,7 @@ class MainActivity : ComponentActivity() {
                     Surface(
                         modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                     ) {
-                        WalliesApp()
+                        WalliesApp(startDestination = mainState.userAuth)
                     }
                 }
             }

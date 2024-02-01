@@ -2,10 +2,14 @@ package com.oguzdogdu.walliescompose.features.appstate
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemColors
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +29,7 @@ import com.oguzdogdu.walliescompose.ui.theme.medium
 fun WalliesApp(
     modifier: Modifier = Modifier,
     appState: MainAppState = rememberMainAppState(),
+    startDestination:Boolean
 ) {
     Scaffold(modifier = modifier, bottomBar = {
         if (appState.shouldShowBottomBar) {
@@ -36,7 +41,7 @@ fun WalliesApp(
         }
     }) {
         WalliesNavHost(
-            appState = appState, modifier = modifier.padding(it)
+            appState = appState, modifier = modifier.padding(it), startDestination = startDestination
         )
     }
 }
@@ -53,6 +58,9 @@ internal fun AppNavBar(
             NavigationBarItem(
                 alwaysShowLabel = true,
                 selected = selected,
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = MaterialTheme.colorScheme.onPrimary
+                ),
                 onClick = { onNavigateToDestination(destination) },
                 icon = {
                     Icon(
