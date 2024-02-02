@@ -11,8 +11,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -67,24 +69,43 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun signInWithGoogle(idToken: String?) {
-
-    }
-
-    private fun checkSignIn() {
-
-    }
-
     private fun signIn(userEmail: String?, password: String?) {
         viewModelScope.launch {
             authenticationRepository.signIn(userEmail, password).collect { response ->
                 response.onLoading {
-                    _loginState.update { LoginState.Loading }
+                    _loginState.update { LoginState.Loading(true) }
                 }
                 response.onSuccess {
-                    _loginState.update { LoginState.UserSignIn }
+                    _loginState.update {
+                        LoginState.Loading(false)
+                        LoginState.UserSignIn
+                    }
                 }
                 response.onFailure {error ->
+                    _loginState.update {
+                        LoginState.ErrorSignIn(
+                            errorMessage = error
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun signInWithGoogle(idToken: String?) {
+        viewModelScope.launch {
+            authenticationRepository.signInWithGoogle(idToken).collect { response ->
+                response.onLoading {
+                    _loginState.update { LoginState.Loading(true) }
+                }
+
+                response.onSuccess {
+                    _loginState.update {
+                        LoginState.Loading(false)
+                        LoginState.UserSignIn
+                    }
+                }
+                response.onFailure { error ->
                     _loginState.update {
                         LoginState.ErrorSignIn(
                             errorMessage = error
