@@ -31,4 +31,23 @@ class UserAuthenticationRepositoryImpl @Inject constructor(
            emit(auth.signInWithEmailAndPassword(userEmail.orEmpty(), password.orEmpty()).await())
         }.toResource()
     }
+
+    override suspend fun signInWithGoogle(idToken: String?): Flow<Resource<AuthResult>> {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        return flowOf(auth.signInWithCredential(credential).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val user = FirebaseAuth.getInstance().currentUser
+                val userModel = hashMapOf(
+                    ID to auth.currentUser?.uid,
+                    EMAIL to user?.email.orEmpty(),
+                    NAME to user?.displayName.orEmpty(),
+                    IMAGE to user?.photoUrl.toString()
+                )
+                auth.currentUser?.uid?.let {
+                    firebaseFirestore.collection(COLLECTION_PATH).document(it)
+                        .set(userModel)
+                }
+            }
+        }.await()) .toResource()
+    }
 }

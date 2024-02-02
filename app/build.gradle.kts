@@ -100,6 +100,8 @@ dependencies {
     implementation (libs.androidx.navigation.compose)
     implementation("com.airbnb.android:lottie-compose:4.0.0")
 
+
+    implementation ("com.google.android.gms:play-services-auth:20.7.0")
     implementation ("com.google.firebase:firebase-auth-ktx:22.3.1")
     implementation ("com.google.firebase:firebase-bom:32.7.1")
     implementation ("com.google.firebase:firebase-firestore-ktx:24.10.1")

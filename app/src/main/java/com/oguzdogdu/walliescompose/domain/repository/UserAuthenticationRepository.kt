@@ -7,4 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface UserAuthenticationRepository {
     suspend fun isUserAuthenticatedInFirebase(): Flow<Boolean>
     suspend fun signIn(userEmail: String?, password: String?):Flow<Resource<AuthResult>>
+    suspend fun signInWithGoogle(idToken: String?):Flow<Resource<AuthResult>>
 }

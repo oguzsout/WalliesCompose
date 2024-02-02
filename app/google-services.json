@@ -8,44 +8,7 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:225181955346:android:7d086f0dff42a49584efcb",
-        "android_client_info": {
-          "package_name": "com.oguzdogdu.wallies"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "225181955346-jm25gn2htfor0mr6lkbhi3mvb91uuttk.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.oguzdogdu.wallies",
-            "certificate_hash": "5a57d5d657dd9d9e673937ea449fad1502d99a8b"
-          }
-        },
-        {
-          "client_id": "225181955346-optbgqie0019o21o6d77h7b5inf7op6s.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBDtMdM70JfeBXp2_r3Iigz4Hj3e2pr1Xo"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "225181955346-fe24mqoaiu3lon9gt5ud0rds0dubrpjp.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:225181955346:android:66b83ab98b51c23484efcb",
+        "mobilesdk_app_id": "1:225181955346:android:8fca48e41ff9bb0384efcb",
         "android_client_info": {
           "package_name": "com.oguzdogdu.walliescompose"
         }
