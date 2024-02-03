@@ -1,11 +1,16 @@
 package com.oguzdogdu.walliescompose.navigation
 
+import android.app.Activity
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.navigation
 import androidx.navigation.navOptions
@@ -23,26 +28,39 @@ import com.oguzdogdu.walliescompose.features.latest.latestScreen
 import com.oguzdogdu.walliescompose.features.latest.navigateToLatestScreen
 import com.oguzdogdu.walliescompose.features.login.LoginScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.login.loginScreen
+import com.oguzdogdu.walliescompose.features.main.MainActivity
 import com.oguzdogdu.walliescompose.features.popular.navigateToPopularScreen
 import com.oguzdogdu.walliescompose.features.popular.popularScreen
 import com.oguzdogdu.walliescompose.features.search.navigateToSearchScreen
 import com.oguzdogdu.walliescompose.features.search.searchScreen
 import com.oguzdogdu.walliescompose.features.settings.settingsScreen
+import com.oguzdogdu.walliescompose.features.splash.SplashScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.splash.navigateToSplashScreen
+import com.oguzdogdu.walliescompose.features.splash.splashScreen
 import com.oguzdogdu.walliescompose.features.topics.navigateToTopicsScreen
 import com.oguzdogdu.walliescompose.features.topics.topicdetaillist.navigateToTopicDetailListScreen
 import com.oguzdogdu.walliescompose.features.topics.topicdetaillist.topicDetailListScreen
 import com.oguzdogdu.walliescompose.features.topics.topicsScreen
+import com.oguzdogdu.walliescompose.navigation.utils.NavigationConstants.AUTH
+import com.oguzdogdu.walliescompose.navigation.utils.NavigationConstants.CONTENT
+
 
 @Composable
 fun WalliesNavHost(
     appState: MainAppState,
     modifier: Modifier = Modifier,
-    startDestination: Boolean,
+    startDestination: String = SplashScreenNavigationRoute,
+    isAuthenticated:Boolean
 ) {
+    val context = LocalContext.current
     val navController = appState.navController
-    NavHost(
+    val authState by remember {
+        mutableStateOf(isAuthenticated)
+    }
+
+        NavHost(
         navController = navController,
-        startDestination = if (!startDestination) "auth" else "content",
+        startDestination = determineStartDestination(authState, startDestination),
         modifier = modifier,
         enterTransition = {
             EnterTransition.None
@@ -54,20 +72,48 @@ fun WalliesNavHost(
             ExitTransition.None
         }
     ) {
-
-        navigation(startDestination = LoginScreenNavigationRoute, route = "auth") {
-            loginScreen(navigateToHome = {
+            splashScreen(goToLoginFlow = {
+                navController.navigate(LoginScreenNavigationRoute)
+            }, goToContentScreen = {
                 navController.navigate(HomeScreenNavigationRoute)
+            })
+        navigation(startDestination = LoginScreenNavigationRoute, route = AUTH,enterTransition = {
+            EnterTransition.None
+        }, exitTransition = {
+            ExitTransition.None
+        }, popEnterTransition = {
+            EnterTransition.None
+        }, popExitTransition = {
+            ExitTransition.None
+        }) {
+            loginScreen(navigateToHome = {
+                navController.navigate(HomeScreenNavigationRoute) {
+                    popUpTo(SplashScreenNavigationRoute){
+                        inclusive = true
+                    }
+                }
             },
                 onContinueWithoutLoginClick = {
-                    navController.navigate("content") {
-                        popUpTo("auth") {
+                    navController.navigate(HomeScreenNavigationRoute) {
+                        popUpTo(SplashScreenNavigationRoute){
                             inclusive = true
                         }
                     }
+                }, navigateBack = {
+                    val activity = context as? MainActivity
+                    activity?.finish()
                 })
         }
-        navigation(startDestination = HomeScreenNavigationRoute, route = "content") {
+
+        navigation(startDestination = HomeScreenNavigationRoute, route = CONTENT,enterTransition = {
+            EnterTransition.None
+        }, exitTransition = {
+            ExitTransition.None
+        }, popEnterTransition = {
+            EnterTransition.None
+        }, popExitTransition = {
+            ExitTransition.None
+        }) {
             homeScreen(
                 onTopicDetailListClick = {
                     navController.navigateToTopicDetailListScreen(topicId = it)
@@ -142,5 +188,13 @@ fun WalliesNavHost(
                     navController.popBackStack()
                 })
         }
+    }
+}
+
+private fun determineStartDestination(isLoggedIn: Boolean, default: String): String {
+    return if (isLoggedIn) {
+        HomeScreenNavigationRoute
+    } else {
+        default
     }
 }

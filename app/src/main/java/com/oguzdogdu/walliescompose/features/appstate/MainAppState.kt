@@ -1,8 +1,14 @@
 package com.oguzdogdu.walliescompose.features.appstate
 
+import android.app.Activity
+import android.content.Context
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -54,9 +60,17 @@ class MainAppState(
 
         when (topLevelDestination) {
             TopLevelDestination.WALLPAPERS -> navController.navigateToHomeScreen(topLevelNavOptions)
-            TopLevelDestination.COLLECTIONS -> navController.navigateToCollectionScreen(topLevelNavOptions)
-            TopLevelDestination.FAVORITES -> navController.navigateToFavoritesScreen(topLevelNavOptions)
-            TopLevelDestination.SETTINGS -> navController.navigateToSettingsScreen(topLevelNavOptions)
+            TopLevelDestination.COLLECTIONS -> navController.navigateToCollectionScreen(
+                topLevelNavOptions
+            )
+
+            TopLevelDestination.FAVORITES -> navController.navigateToFavoritesScreen(
+                topLevelNavOptions
+            )
+
+            TopLevelDestination.SETTINGS -> navController.navigateToSettingsScreen(
+                topLevelNavOptions
+            )
         }
     }
 
