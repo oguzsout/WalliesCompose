@@ -111,9 +111,12 @@
     <string name="show_all">Tümünü Gör</string>
     <string name="popular_title">Popüler</string>
     <string name="latest_title">En Son</string>
-    <string name="light_mode">Aydınlık Mod</string>
-    <string name="dark_mode">Karanlık Mode</string>
-    <string name="system_default">Sistem Varsayılanı</string>
-    <string name="search">Ara</string>
+    <string name="photos">Fotoğraflar</string>
+    <string name="connect_with_user">%1$s ile bağlantı kurun</string>
+    <string name="or">Veya</string>
+    <string name="continue_without_registration">Kayıt Olmadan Devam Et</string>
+    <string name="users">Kullanıcılar</string>
+    <string name="profile_image">Profil Resmi</string>
     <string name="search_desc">İstediğin türde ki fotoğraflar için hemen aramaya başla!</string>
+    <string name="search">Arama</string>
 </resources>

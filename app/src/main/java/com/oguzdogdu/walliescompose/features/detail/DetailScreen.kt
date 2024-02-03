@@ -130,7 +130,7 @@ fun DetailScreenRoute(
                     .fillMaxWidth()
                     .weight(1f),
                 contentScale = ContentScale.FillBounds,
-                loading = { LoadingState(modifier = modifier)}
+                loading = { LoadingState(modifier = modifier) }
             )
             PostView(modifier = modifier, state = state,
                 onSetWallpaperClick = {

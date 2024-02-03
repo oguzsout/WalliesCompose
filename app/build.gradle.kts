@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     id("com.google.devtools.ksp")
     id("dagger.hilt.android.plugin")
+    id("com.google.gms.google-services")
 }
 val debugApiKey: String = gradleLocalProperties(rootDir).getProperty("DEBUG_API_KEY")
 android {
@@ -98,6 +99,12 @@ dependencies {
 
     implementation (libs.androidx.navigation.compose)
     implementation("com.airbnb.android:lottie-compose:4.0.0")
+
+
+    implementation ("com.google.android.gms:play-services-auth:20.7.0")
+    implementation ("com.google.firebase:firebase-auth-ktx:22.3.1")
+    implementation ("com.google.firebase:firebase-bom:32.7.1")
+    implementation ("com.google.firebase:firebase-firestore-ktx:24.10.1")
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
