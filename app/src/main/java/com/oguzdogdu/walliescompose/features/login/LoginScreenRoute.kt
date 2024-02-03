@@ -2,6 +2,7 @@ package com.oguzdogdu.walliescompose.features.login
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -58,12 +59,22 @@ import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
 
 @Composable
-fun LoginScreenRoute(modifier: Modifier = Modifier,viewModel: LoginViewModel = hiltViewModel(),navigateToHome:() -> Unit,onContinueWithoutLoginClick: () -> Unit) {
+fun LoginScreenRoute(
+    modifier: Modifier = Modifier,
+    viewModel: LoginViewModel = hiltViewModel(),
+    navigateToHome: () -> Unit,
+    onContinueWithoutLoginClick: () -> Unit,
+    navigateBack:() -> Unit
+) {
 
     val loginState by viewModel.loginState.collectAsState()
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
         viewModel.handleUIEvent(LoginScreenEvent.ButtonState)
+    }
+
+    BackHandler(enabled = true) {
+        navigateBack.invoke()
     }
 
     Scaffold(modifier = modifier

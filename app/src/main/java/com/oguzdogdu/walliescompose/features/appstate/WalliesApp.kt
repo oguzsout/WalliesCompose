@@ -11,6 +11,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -19,8 +24,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
+import com.oguzdogdu.walliescompose.features.home.HomeScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.splash.SplashScreenNavigationRoute
 import com.oguzdogdu.walliescompose.navigation.TopLevelDestination
 import com.oguzdogdu.walliescompose.navigation.WalliesNavHost
 import com.oguzdogdu.walliescompose.ui.theme.medium
@@ -29,7 +38,7 @@ import com.oguzdogdu.walliescompose.ui.theme.medium
 fun WalliesApp(
     modifier: Modifier = Modifier,
     appState: MainAppState = rememberMainAppState(),
-    startDestination:Boolean
+    isAuthenticated:Boolean,
 ) {
     Scaffold(modifier = modifier, bottomBar = {
         if (appState.shouldShowBottomBar) {
@@ -41,7 +50,7 @@ fun WalliesApp(
         }
     }) {
         WalliesNavHost(
-            appState = appState, modifier = modifier.padding(it), startDestination = startDestination
+            appState = appState, modifier = modifier.padding(it), isAuthenticated = isAuthenticated
         )
     }
 }

@@ -13,7 +13,7 @@ fun NavController.navigateToLoginScreen(
     this.navigate(LoginScreenNavigationRoute, navOptions)
 }
 
-fun NavGraphBuilder.loginScreen(navigateToHome:() -> Unit,onContinueWithoutLoginClick: () -> Unit) {
+fun NavGraphBuilder.loginScreen(navigateToHome:() -> Unit,onContinueWithoutLoginClick: () -> Unit,navigateBack:() -> Unit) {
     composable(
         LoginScreenNavigationRoute
     ) {
@@ -22,6 +22,9 @@ fun NavGraphBuilder.loginScreen(navigateToHome:() -> Unit,onContinueWithoutLogin
        },
            onContinueWithoutLoginClick = {
                onContinueWithoutLoginClick.invoke()
+           },
+           navigateBack = {
+               navigateBack.invoke()
            })
     }
 }
