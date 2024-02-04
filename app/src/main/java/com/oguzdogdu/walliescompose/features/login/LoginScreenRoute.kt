@@ -67,7 +67,7 @@ fun LoginScreenRoute(
     navigateBack:() -> Unit
 ) {
 
-    val loginState by viewModel.loginState.collectAsState()
+    val loginState by viewModel.loginState.collectAsStateWithLifecycle()
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
         viewModel.handleUIEvent(LoginScreenEvent.ButtonState)
@@ -84,7 +84,7 @@ fun LoginScreenRoute(
                 .padding(it)
                 .fillMaxSize()
         ) {
-            LoginScreenContent(modifier = modifier, state = loginState, onEmailChange = { email ->
+            LoginScreenContent(state = loginState,modifier = modifier, onEmailChange = { email ->
                 viewModel.setEmail(email)
                 viewModel.handleUIEvent(LoginScreenEvent.ButtonState)
             },
@@ -110,8 +110,8 @@ fun LoginScreenRoute(
 
 @Composable
 fun LoginScreenContent(
-    modifier: Modifier,
     state: LoginState,
+    modifier: Modifier,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onLoginButtonClick:(String,String) -> Unit,
@@ -162,9 +162,6 @@ fun LoginScreenContent(
             .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        if (loading) {
-            LoadingState(modifier = modifier)
-        } else {
             Column(
                 modifier = modifier
                     .fillMaxSize()
@@ -249,7 +246,8 @@ fun LoginScreenContent(
                                 .build()
                         val googleSignInClient = GoogleSignIn.getClient(context, gso)
                         launcher.launch(googleSignInClient.signInIntent)
-                    })
+                    },
+                        loading = loading)
 
                     Text(
                         buildAnnotatedString {
@@ -306,4 +304,3 @@ fun LoginScreenContent(
             }
         }
     }
-}
