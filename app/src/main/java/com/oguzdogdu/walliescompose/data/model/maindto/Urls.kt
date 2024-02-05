@@ -1,8 +1,9 @@
 package com.oguzdogdu.walliescompose.data.model.maindto
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 
-
+@kotlinx.parcelize.Parcelize
 data class Urls(
     @SerializedName("full")
     val full: String?,
@@ -14,4 +15,4 @@ data class Urls(
     val small: String?,
     @SerializedName("thumb")
     val thumb: String?
-)
+):Parcelable

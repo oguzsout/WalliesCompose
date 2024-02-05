@@ -1,7 +1,8 @@
 package com.oguzdogdu.walliescompose.data.model.searchdto
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-
+@kotlinx.parcelize.Parcelize
 data class SearchResponseItem(
     @SerializedName("results")
     val results: List<Result>,
@@ -9,4 +10,4 @@ data class SearchResponseItem(
     val total: Int,
     @SerializedName("total_pages")
     val total_pages: Int
-)
+):Parcelable

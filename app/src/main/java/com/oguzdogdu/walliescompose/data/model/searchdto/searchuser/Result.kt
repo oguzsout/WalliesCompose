@@ -1,6 +1,8 @@
 package com.oguzdogdu.walliescompose.data.model.searchdto.searchuser
 
+import android.os.Parcelable
 
+@kotlinx.parcelize.Parcelize
 data class Result(
     val accepted_tos: Boolean,
     val bio: String,
@@ -24,4 +26,4 @@ data class Result(
     val twitter_username: String,
     val updated_at: String,
     val username: String
-)
+):Parcelable
