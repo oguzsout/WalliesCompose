@@ -1,5 +1,6 @@
 package com.oguzdogdu.walliescompose.features.home
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -74,7 +75,8 @@ fun HomeScreenRoute(
     onTopicDetailListClick: (String?) -> Unit,
     onLatestClick: (String) -> Unit,
     onPopularClick: (String) -> Unit,
-    onSearchClick: () -> Unit
+    onSearchClick: () -> Unit,
+    navigateBack:() -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -87,6 +89,10 @@ fun HomeScreenRoute(
     }
     var profileImageAuthUser: Any by remember {
         mutableStateOf(0)
+    }
+
+    BackHandler(enabled = true) {
+        navigateBack.invoke()
     }
 
     LaunchedEffect(authUserProfileImage) {

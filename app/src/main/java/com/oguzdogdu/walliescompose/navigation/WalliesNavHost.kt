@@ -1,8 +1,7 @@
 package com.oguzdogdu.walliescompose.navigation
 
-import android.app.Activity
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -10,10 +9,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.navigation
-import androidx.navigation.navOptions
 import com.oguzdogdu.walliescompose.features.appstate.MainAppState
 import com.oguzdogdu.walliescompose.features.collections.collectionScreen
 import com.oguzdogdu.walliescompose.features.collections.detaillist.collectionDetailListScreen
@@ -35,7 +32,6 @@ import com.oguzdogdu.walliescompose.features.search.navigateToSearchScreen
 import com.oguzdogdu.walliescompose.features.search.searchScreen
 import com.oguzdogdu.walliescompose.features.settings.settingsScreen
 import com.oguzdogdu.walliescompose.features.splash.SplashScreenNavigationRoute
-import com.oguzdogdu.walliescompose.features.splash.navigateToSplashScreen
 import com.oguzdogdu.walliescompose.features.splash.splashScreen
 import com.oguzdogdu.walliescompose.features.topics.navigateToTopicsScreen
 import com.oguzdogdu.walliescompose.features.topics.topicdetaillist.navigateToTopicDetailListScreen
@@ -43,8 +39,10 @@ import com.oguzdogdu.walliescompose.features.topics.topicdetaillist.topicDetailL
 import com.oguzdogdu.walliescompose.features.topics.topicsScreen
 import com.oguzdogdu.walliescompose.navigation.utils.NavigationConstants.AUTH
 import com.oguzdogdu.walliescompose.navigation.utils.NavigationConstants.CONTENT
+import kotlinx.coroutines.flow.collect
 
 
+@SuppressLint("RestrictedApi")
 @Composable
 fun WalliesNavHost(
     appState: MainAppState,
@@ -57,63 +55,53 @@ fun WalliesNavHost(
     val authState by remember {
         mutableStateOf(isAuthenticated)
     }
-
+    LaunchedEffect(key1 = navController) {
+        println("${navController.currentBackStackEntryFlow.collect()}")
+    }
         NavHost(
         navController = navController,
         startDestination = determineStartDestination(authState, startDestination),
-        modifier = modifier,
-        enterTransition = {
-            EnterTransition.None
-        }, exitTransition = {
-            ExitTransition.None
-        }, popEnterTransition = {
-            EnterTransition.None
-        }, popExitTransition = {
-            ExitTransition.None
-        }
+        modifier = modifier
     ) {
+
             splashScreen(goToLoginFlow = {
-                navController.navigate(LoginScreenNavigationRoute)
+                navController.navigate(LoginScreenNavigationRoute) {
+                    popUpTo(SplashScreenNavigationRoute) {
+                        inclusive = true
+                    }
+                }
             }, goToContentScreen = {
-                navController.navigate(HomeScreenNavigationRoute)
+                navController.navigate(HomeScreenNavigationRoute) {
+                    popUpTo(SplashScreenNavigationRoute) {
+                        inclusive = true
+                    }
+                }
             })
-        navigation(startDestination = LoginScreenNavigationRoute, route = AUTH,enterTransition = {
-            EnterTransition.None
-        }, exitTransition = {
-            ExitTransition.None
-        }, popEnterTransition = {
-            EnterTransition.None
-        }, popExitTransition = {
-            ExitTransition.None
-        }) {
+        navigation(startDestination = LoginScreenNavigationRoute, route = AUTH) {
             loginScreen(navigateToHome = {
                 navController.navigate(HomeScreenNavigationRoute) {
-                    popUpTo(SplashScreenNavigationRoute){
+                    popUpTo(LoginScreenNavigationRoute){
                         inclusive = true
                     }
                 }
             },
                 onContinueWithoutLoginClick = {
                     navController.navigate(HomeScreenNavigationRoute) {
-                        popUpTo(SplashScreenNavigationRoute){
+                        popUpTo(LoginScreenNavigationRoute){
                             inclusive = true
                         }
                     }
                 }, navigateBack = {
-                    val activity = context as? MainActivity
-                    activity?.finish()
+                    if (appState.navController.currentBackStack.value.size > 2) {
+                        appState.onBackPress()
+                    } else {
+                        val activity = context as? MainActivity
+                        activity?.finish()
+                    }
                 })
         }
 
-        navigation(startDestination = HomeScreenNavigationRoute, route = CONTENT,enterTransition = {
-            EnterTransition.None
-        }, exitTransition = {
-            ExitTransition.None
-        }, popEnterTransition = {
-            EnterTransition.None
-        }, popExitTransition = {
-            ExitTransition.None
-        }) {
+        navigation(startDestination = HomeScreenNavigationRoute, route = CONTENT) {
             homeScreen(
                 onTopicDetailListClick = {
                     navController.navigateToTopicDetailListScreen(topicId = it)
@@ -135,6 +123,14 @@ fun WalliesNavHost(
                 },
                 onLatestSeeAllClick = {
                     navController.navigateToLatestScreen()
+                },
+                navigateBack = {
+                    if (appState.navController.currentBackStack.value.size > 2) {
+                        appState.onBackPress()
+                    } else {
+                        val activity = context as? MainActivity
+                        activity?.finish()
+                    }
                 }
             )
             collectionScreen(onCollectionClick = {id,title ->
