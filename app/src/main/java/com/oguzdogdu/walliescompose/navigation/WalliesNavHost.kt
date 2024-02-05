@@ -1,14 +1,13 @@
 package com.oguzdogdu.walliescompose.navigation
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.navigation
 import com.oguzdogdu.walliescompose.features.appstate.MainAppState
@@ -25,7 +24,6 @@ import com.oguzdogdu.walliescompose.features.latest.latestScreen
 import com.oguzdogdu.walliescompose.features.latest.navigateToLatestScreen
 import com.oguzdogdu.walliescompose.features.login.LoginScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.login.loginScreen
-import com.oguzdogdu.walliescompose.features.main.MainActivity
 import com.oguzdogdu.walliescompose.features.popular.navigateToPopularScreen
 import com.oguzdogdu.walliescompose.features.popular.popularScreen
 import com.oguzdogdu.walliescompose.features.search.navigateToSearchScreen
@@ -39,7 +37,6 @@ import com.oguzdogdu.walliescompose.features.topics.topicdetaillist.topicDetailL
 import com.oguzdogdu.walliescompose.features.topics.topicsScreen
 import com.oguzdogdu.walliescompose.navigation.utils.NavigationConstants.AUTH
 import com.oguzdogdu.walliescompose.navigation.utils.NavigationConstants.CONTENT
-import kotlinx.coroutines.flow.collect
 
 
 @SuppressLint("RestrictedApi")
@@ -50,17 +47,17 @@ fun WalliesNavHost(
     startDestination: String = SplashScreenNavigationRoute,
     isAuthenticated:Boolean
 ) {
-    val context = LocalContext.current
+
     val navController = appState.navController
-    val authState by remember {
-        mutableStateOf(isAuthenticated)
+    var authState by remember {
+        mutableStateOf(false)
     }
-    LaunchedEffect(key1 = navController) {
-        println("${navController.currentBackStackEntryFlow.collect()}")
+    LaunchedEffect(key1 = isAuthenticated) {
+        authState = isAuthenticated
     }
         NavHost(
         navController = navController,
-        startDestination = determineStartDestination(authState, startDestination),
+        startDestination,
         modifier = modifier
     ) {
 
@@ -92,12 +89,7 @@ fun WalliesNavHost(
                         }
                     }
                 }, navigateBack = {
-                    if (appState.navController.currentBackStack.value.size > 2) {
-                        appState.onBackPress()
-                    } else {
-                        val activity = context as? MainActivity
-                        activity?.finish()
-                    }
+                    appState.onBackPress()
                 })
         }
 
@@ -125,12 +117,7 @@ fun WalliesNavHost(
                     navController.navigateToLatestScreen()
                 },
                 navigateBack = {
-                    if (appState.navController.currentBackStack.value.size > 2) {
-                        appState.onBackPress()
-                    } else {
-                        val activity = context as? MainActivity
-                        activity?.finish()
-                    }
+                    appState.onBackPress()
                 }
             )
             collectionScreen(onCollectionClick = {id,title ->
@@ -184,13 +171,5 @@ fun WalliesNavHost(
                     navController.popBackStack()
                 })
         }
-    }
-}
-
-private fun determineStartDestination(isLoggedIn: Boolean, default: String): String {
-    return if (isLoggedIn) {
-        HomeScreenNavigationRoute
-    } else {
-        default
     }
 }
