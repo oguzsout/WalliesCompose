@@ -1,7 +1,7 @@
 package com.oguzdogdu.walliescompose.features.home
 
-import android.widget.Toast
-import androidx.compose.foundation.background
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -22,6 +24,9 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,23 +43,27 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
-import com.oguzdogdu.walliescompose.features.component.BaseCenteredToolbar
 import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
 import com.oguzdogdu.walliescompose.features.home.state.HomeScreenState
 import com.oguzdogdu.walliescompose.navigation.utils.WalliesIcons
 import com.oguzdogdu.walliescompose.ui.theme.medium
+import kotlinx.coroutines.delay
 
 @Composable
 fun HomeScreenRoute(
@@ -66,72 +75,111 @@ fun HomeScreenRoute(
     onTopicDetailListClick: (String?) -> Unit,
     onLatestClick: (String) -> Unit,
     onPopularClick: (String) -> Unit,
-    onSearchClick: () -> Unit
+    onSearchClick: () -> Unit,
+    navigateBack:() -> Unit
 ) {
     val context = LocalContext.current
-
-    LaunchedEffect(key1 = Unit) {
-        viewModel.handleScreenEvents(HomeScreenEvent.FetchHomeScreenLists)
-    }
+    val lifecycleOwner = LocalLifecycleOwner.current
     val homeUiState by viewModel.homeListState.collectAsStateWithLifecycle()
+    val authUserProfileImage by viewModel.userProfileImage.collectAsStateWithLifecycle()
 
-    var itemsLoad by remember {
-        mutableStateOf(false)
-    }
-    LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
+    LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE, lifecycleOwner = lifecycleOwner){
+        viewModel.handleScreenEvents(HomeScreenEvent.FetchMainScreenUserData)
         viewModel.handleScreenEvents(HomeScreenEvent.FetchHomeScreenLists)
     }
+    var profileImageAuthUser: Any by remember {
+        mutableStateOf(0)
+    }
 
-    LaunchedEffect(homeUiState) {
-        if (homeUiState.topics.isNotEmpty() && homeUiState.popular.isNotEmpty() && homeUiState.latest.isNotEmpty()) {
-            itemsLoad = !itemsLoad
+    BackHandler(enabled = true) {
+        navigateBack.invoke()
+    }
+
+    LaunchedEffect(authUserProfileImage) {
+        when {
+            authUserProfileImage.isNullOrEmpty() -> {
+                profileImageAuthUser = WalliesIcons.DefaultAvatar
+            }
+            authUserProfileImage?.isNotEmpty() == true -> {
+                profileImageAuthUser = authUserProfileImage as String
+            }
         }
     }
 
-
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
-        BaseCenteredToolbar(modifier = modifier,
-            title = stringResource(id = R.string.app_name),
-            imageLeft = painterResource(WalliesIcons.DefaultAvatar),
-            imageRight = painterResource(WalliesIcons.SearchIcon),
-            imageLeftTint = MaterialTheme.colorScheme.secondary,
-            imageRightTint = MaterialTheme.colorScheme.secondary,
-            leftClick = {
-                Toast.makeText(context, "Nav Icon Click", Toast.LENGTH_SHORT).show()
-            },
-            rightClick = {
-                onSearchClick.invoke()
-            })
-    }) { it ->
-        Box(modifier = modifier
-            .padding(it)
-            .fillMaxSize(), contentAlignment = Alignment.Center) {
-
-            if (homeUiState.loading) {
-                LoadingState(modifier = modifier)
-            }
-            if (itemsLoad) {
-                HomeScreenContent(
-                    homeUiState = homeUiState,
-                    modifier = modifier,
-                    onTopicSeeAllClick = {
-                        onTopicSeeAllClick.invoke()
-                    },
-                    onTopicDetailListClick = {id->
-                        onTopicDetailListClick.invoke(id)
-                    },
-                    onPopularClick = { id ->
-                        onPopularClick.invoke(id)
-                    },
-                    onLatestClick = { id -> onLatestClick.invoke(id) },
-                    onPopularSeeAllClick = {
-                        onPopularSeeAllClick.invoke()
-                    },
-                    onLatestSeeAllClick = {
-                        onLatestSeeAllClick.invoke()
-                    }
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Absolute.SpaceBetween
+        ) {
+            IconButton(
+                onClick = {  },
+                modifier = modifier
+                    .wrapContentSize()
+                    .weight(1f)
+            ) {
+                AsyncImage(
+                    model = profileImageAuthUser,
+                    contentDescription = "",
+                    modifier = modifier
+                        .height(28.dp)
+                        .width(28.dp)
+                        .clip(RoundedCornerShape(64.dp))
+                        .border(2.dp, Color.DarkGray, shape = RoundedCornerShape(64.dp))
                 )
             }
+
+            Text(
+                modifier = modifier.weight(6f),
+                text = stringResource(id = R.string.app_name),
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                fontSize = 16.sp,
+                fontFamily = medium,
+                maxLines = 1,
+                textAlign = TextAlign.Center
+            )
+
+            IconButton(
+                onClick = { onSearchClick.invoke() },
+                modifier = modifier
+                    .wrapContentSize()
+                    .weight(1f)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.search),
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = modifier.wrapContentSize()
+                )
+            }
+        }
+    }) {
+        Column(modifier = modifier
+            .fillMaxSize()
+            .padding(it)) {
+            HomeScreenContent(
+                homeUiState = homeUiState,
+                modifier = modifier,
+                onTopicSeeAllClick = {
+                    onTopicSeeAllClick.invoke()
+                },
+                onTopicDetailListClick = { id ->
+                    onTopicDetailListClick.invoke(id)
+                },
+                onPopularClick = { id ->
+                    onPopularClick.invoke(id)
+                },
+                onLatestClick = { id -> onLatestClick.invoke(id) },
+                onPopularSeeAllClick = {
+                    onPopularSeeAllClick.invoke()
+                },
+                onLatestSeeAllClick = {
+                    onLatestSeeAllClick.invoke()
+                }
+            )
         }
     }
 }
@@ -309,9 +357,11 @@ private fun LatestLayoutContainer(
                 fontFamily = medium,
                 fontSize = 12.sp,
                 color = Color.Unspecified,
-                modifier = modifier.padding(end = 8.dp, top = 16.dp, bottom = 8.dp).clickable {
-                    onLatestSeeAllClick.invoke()
-                }
+                modifier = modifier
+                    .padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
+                    .clickable {
+                        onLatestSeeAllClick.invoke()
+                    }
             )
         }
 

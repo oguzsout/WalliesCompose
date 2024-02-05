@@ -1,10 +1,11 @@
 package com.oguzdogdu.walliescompose.data.model.topics
 
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import com.oguzdogdu.walliescompose.domain.model.topics.TopicDetail
 
-
+@kotlinx.parcelize.Parcelize
 data class CoverPhoto(
     @SerializedName("alt_description") val altDescription: String?,
     @SerializedName("blur_hash") val blurHash: String?,
@@ -22,5 +23,5 @@ data class CoverPhoto(
     @SerializedName("urls") val urls: Urls?,
     @SerializedName("user") val user: User?,
     @SerializedName("width") val width: Int?
-)
+):Parcelable
 fun CoverPhoto.toDomainTopicList() = TopicDetail(id = id, url = urls?.regular)

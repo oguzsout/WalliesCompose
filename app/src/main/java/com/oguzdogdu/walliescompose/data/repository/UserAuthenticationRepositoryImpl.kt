@@ -6,9 +6,13 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.oguzdogdu.walliescompose.data.common.Constants.COLLECTION_PATH
 import com.oguzdogdu.walliescompose.data.common.Constants.EMAIL
+import com.oguzdogdu.walliescompose.data.common.Constants.FAVORITES
 import com.oguzdogdu.walliescompose.data.common.Constants.ID
 import com.oguzdogdu.walliescompose.data.common.Constants.IMAGE
 import com.oguzdogdu.walliescompose.data.common.Constants.NAME
+import com.oguzdogdu.walliescompose.data.common.Constants.SURNAME
+import com.oguzdogdu.walliescompose.data.model.auth.User
+import com.oguzdogdu.walliescompose.data.model.auth.toUserDomain
 import com.oguzdogdu.walliescompose.domain.repository.UserAuthenticationRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.Resource
 import com.oguzdogdu.walliescompose.domain.wrapper.toResource
@@ -24,6 +28,11 @@ class UserAuthenticationRepositoryImpl @Inject constructor(
 ) : UserAuthenticationRepository {
     override suspend fun isUserAuthenticatedInFirebase(): Flow<Boolean> = flow {
         emit(auth.currentUser != null)
+    }
+
+    override suspend fun isUserAuthenticatedWithGoogle(): Flow<Boolean> = flow {
+        val user = FirebaseAuth.getInstance().currentUser
+        emit(user?.providerData?.any { it.providerId == GoogleAuthProvider.PROVIDER_ID } == true)
     }
 
     override suspend fun signIn(userEmail: String?, password: String?):Flow<Resource<AuthResult>> {
@@ -49,5 +58,28 @@ class UserAuthenticationRepositoryImpl @Inject constructor(
                 }
             }
         }.await()) .toResource()
+    }
+
+    override suspend fun fetchUserInfos(): Flow<Resource<com.oguzdogdu.domain.model.auth.User?>> {
+        val user = FirebaseAuth.getInstance().currentUser
+        val id = user?.uid ?: ""
+
+        val db = FirebaseFirestore.getInstance()
+        val userDocument = db.collection(COLLECTION_PATH).document(id).get().await()
+
+        val name = userDocument?.getString(NAME)
+        val email = userDocument?.getString(EMAIL)
+        val profileImageUrl = userDocument?.getString(IMAGE)
+        val surname = userDocument?.getString(SURNAME)
+        val favorites = userDocument?.get(FAVORITES) as? List<HashMap<String, String>>?
+
+        val result = User(
+            name = name,
+            surname = surname,
+            email = email,
+            image = profileImageUrl,
+            favorites = favorites
+        )
+        return flowOf(result.toUserDomain()).toResource()
     }
 }

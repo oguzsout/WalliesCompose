@@ -1,8 +1,9 @@
 package com.oguzdogdu.walliescompose.data.model.maindto
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import com.oguzdogdu.walliescompose.domain.model.collections.CollectionList
-
+@kotlinx.parcelize.Parcelize
 data class Photo(
     @SerializedName("id")
     val id: String?,
@@ -38,6 +39,6 @@ data class Photo(
     val links: Link?,
     @SerializedName("user")
     val user: User?,
-)
+):Parcelable
 
 fun Photo.toDomainCollectionDetailList() = CollectionList(id = id, url = urls?.regular,desc = description)

@@ -20,7 +20,8 @@ fun NavGraphBuilder.homeScreen(
     onTopicDetailListClick: (String?) -> Unit,
     onPopularClick: (String) -> Unit,
     onLatestClick: (String) -> Unit,
-    onSearchClick: () -> Unit
+    onSearchClick: () -> Unit,
+    navigateBack:() -> Unit
 ) {
     composable(
         HomeScreenNavigationRoute
@@ -40,6 +41,8 @@ fun NavGraphBuilder.homeScreen(
             },
             onLatestSeeAllClick = {
                 onLatestSeeAllClick.invoke()
+            }, navigateBack = {
+                navigateBack.invoke()
             }
         )
     }

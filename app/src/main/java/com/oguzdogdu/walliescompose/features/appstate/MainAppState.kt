@@ -77,4 +77,7 @@ class MainAppState(
     fun onBackPress() {
         navController.popBackStack()
     }
+    fun canNavigateBack(): Boolean {
+        return navController.previousBackStackEntry != null
+    }
 }

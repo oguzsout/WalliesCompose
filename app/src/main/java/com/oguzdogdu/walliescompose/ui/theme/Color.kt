@@ -8,12 +8,12 @@ val RowColorDark = Color(0xFF30363D)
 val MenuButtonDark = Color(0xFF7539C6)
 
 val Background = Color(0xFFF3F3F3)
-val PurpleLight = Color(0x407E01FD)
+val PurpleLight = Color(0x405D02B9)
 val RowColor = Color(0xFFE3E4E9)
 val MenuButton = Color(0x407E01FD)
 
 // Light
-val PrimaryLight = PurpleLight
+val PrimaryLight = Color(0xFF4F1F91)
 val OnPrimaryLight = RowColor
 val PrimaryContainerLight = Color(0xFFd1e4ff)
 val OnPrimaryContainerLight = Color(0xFF001d36)
