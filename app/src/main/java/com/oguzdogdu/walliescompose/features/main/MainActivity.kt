@@ -20,6 +20,7 @@ import com.oguzdogdu.walliescompose.WalliesApplication
 import com.oguzdogdu.walliescompose.features.appstate.WalliesApp
 import com.oguzdogdu.walliescompose.ui.theme.WalliesComposeTheme
 import com.oguzdogdu.walliescompose.util.LocaleHelper
+import com.oguzdogdu.walliescompose.util.NetworkMonitor
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -28,6 +29,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var application: WalliesApplication
+
+    @Inject
+    lateinit var networkMonitor: NetworkMonitor
 
     private val viewModel: MainViewModel by viewModels()
 
@@ -63,7 +67,7 @@ class MainActivity : ComponentActivity() {
                     Surface(
                         modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                     ) {
-                        WalliesApp(isAuthenticated = mainState.userAuth)
+                        WalliesApp(isAuthenticated = mainState.userAuth, networkMonitor = networkMonitor)
                     }
                 }
             }
