@@ -21,19 +21,28 @@ import com.oguzdogdu.walliescompose.features.favorites.navigateToFavoritesScreen
 import com.oguzdogdu.walliescompose.features.home.navigateToHomeScreen
 import com.oguzdogdu.walliescompose.features.settings.navigateToSettingsScreen
 import com.oguzdogdu.walliescompose.navigation.TopLevelDestination
+import com.oguzdogdu.walliescompose.util.NetworkMonitor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 @Composable
 fun rememberMainAppState(
     navController: NavHostController = rememberNavController(),
+     coroutineScope: CoroutineScope,
+    networkMonitor: NetworkMonitor,
 ): MainAppState {
     return remember(navController) {
-        MainAppState(navController)
+        MainAppState(navController,coroutineScope, networkMonitor)
     }
 }
 
 @Stable
 class MainAppState(
-    val navController: NavHostController
+    val navController: NavHostController,
+    val coroutineScope: CoroutineScope,
+    networkMonitor: NetworkMonitor,
 ) {
     val currentDestination: NavDestination?
         @Composable get() = navController
@@ -45,6 +54,14 @@ class MainAppState(
                 destination.route?.contains(it.route) ?: false
             }
         } ?: false
+
+    val isOffline = networkMonitor.isOnline
+        .map(Boolean::not)
+        .stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = false,
+        )
 
     val topLevelDestinations: List<TopLevelDestination> = TopLevelDestination.entries
 
