@@ -1,6 +1,8 @@
 package com.oguzdogdu.walliescompose.navigation
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,7 +60,16 @@ fun WalliesNavHost(
         NavHost(
         navController = navController,
         startDestination,
-        modifier = modifier
+        modifier = modifier,
+            enterTransition = {
+                EnterTransition.None
+            }, exitTransition = {
+                ExitTransition.None
+            }, popEnterTransition = {
+                EnterTransition.None
+            }, popExitTransition = {
+                ExitTransition.None
+            }
     ) {
 
             splashScreen(goToLoginFlow = {
