@@ -1,5 +1,8 @@
 package com.oguzdogdu.walliescompose.features.detail
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +26,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -48,6 +55,7 @@ import com.oguzdogdu.walliescompose.features.detail.component.WalliesFavoriteBut
 import com.oguzdogdu.walliescompose.features.home.LoadingState
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
+import com.oguzdogdu.walliescompose.util.shareExternal
 
 
 @Composable
@@ -65,6 +73,11 @@ fun DetailScreenRoute(
     }
     LaunchedEffect(key1 = state.favorites) {
         detailViewModel.handleScreenEvents(DetailScreenEvent.GetFavoriteCheckStat)
+    }
+
+    var shareEnabled by remember { mutableStateOf(true) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        shareEnabled = true
     }
 
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
@@ -135,7 +148,9 @@ fun DetailScreenRoute(
             PostView(modifier = modifier, state = state,
                 onSetWallpaperClick = {
 
-                }, onShareClick = {
+                }, onShareClick = { url ->
+                    shareEnabled = false
+                    launcher.launch(url.shareExternal())
 
                 }, onDownloadClick = {
 
@@ -176,7 +191,7 @@ fun PostView(
     modifier: Modifier,
     state: DetailState,
     onSetWallpaperClick: () -> Unit,
-    onShareClick: () -> Unit,
+    onShareClick: (String) -> Unit,
     onDownloadClick: () -> Unit,
     onAddFavoriteClick: (FavoriteImages) -> Unit,
     onRemoveFavoriteClick: (FavoriteImages) -> Unit,
@@ -263,7 +278,7 @@ fun PostView(
         DetailTripleActionButtons(modifier = modifier, setWallpaperButtonClick = {
             onSetWallpaperClick.invoke()
         }, shareButtonClick = {
-            onShareClick.invoke()
+            onShareClick.invoke(state.detail?.urls.orEmpty())
         }, downloadButtonClick = {
             onDownloadClick.invoke()
         })

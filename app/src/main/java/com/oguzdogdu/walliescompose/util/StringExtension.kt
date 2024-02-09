@@ -1,6 +1,7 @@
 package com.oguzdogdu.walliescompose.util
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.text.Spannable
@@ -65,4 +66,13 @@ enum class ThemeKeys(val value: String) {
     LIGHT_THEME("1"),
     DARK_THEME("2"),
     SYSTEM_THEME("3")
+}
+fun String.shareExternal(): Intent {
+    val dataToShare = this
+    val sendIntent: Intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, dataToShare)
+        type = "text/plain"
+    }
+    return Intent.createChooser(sendIntent, null)
 }
