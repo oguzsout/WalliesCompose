@@ -27,6 +27,7 @@ paging-runtime = "3.2.1"
 retrofit = "2.9.0"
 coil = "2.5.0"
 work-runtime-ktx = "2.9.0"
+material3-android = "1.2.0"
 
 [libraries]
 accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanist-swiperefresh" }
@@ -74,6 +75,7 @@ ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3-android" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
