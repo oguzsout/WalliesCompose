@@ -17,7 +17,7 @@ fun NavController.navigateToDetailScreen(
     this.navigate("$DetailScreenNavigationRoute/$photoId", navOptions)
 }
 
-fun NavGraphBuilder.detailScreen(onBackClick: () -> Unit,onTagClick:(String) -> Unit) {
+fun NavGraphBuilder.detailScreen(onBackClick: () -> Unit,onTagClick:(String) -> Unit,onProfileDetailClick: (String) -> Unit) {
     composable(
         "$DetailScreenNavigationRoute/{photoId}",
         arguments = listOf(
@@ -28,8 +28,8 @@ fun NavGraphBuilder.detailScreen(onBackClick: () -> Unit,onTagClick:(String) -> 
     ) {
         DetailScreenRoute(
             onBackClick = onBackClick,
-            onProfileDetailClick = {
-                println(it)
+            onProfileDetailClick = {username ->
+                onProfileDetailClick.invoke(username)
             },
             onTagClick = { tag ->
                 onTagClick.invoke(tag)

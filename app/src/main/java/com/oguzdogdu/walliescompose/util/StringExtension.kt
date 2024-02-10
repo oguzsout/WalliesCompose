@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
@@ -75,4 +76,22 @@ fun String.shareExternal(): Intent {
         type = "text/plain"
     }
     return Intent.createChooser(sendIntent, null)
+}
+
+ fun String.openInstagramProfile() : Intent {
+    val url = "https://instagram.com/$this"
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+     return Intent.createChooser(intent, null)
+}
+
+ fun String.openTwitterProfile() :Intent {
+    val url = "https://twitter.com/$this"
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+     return Intent.createChooser(intent, null)
+}
+
+
+ fun String.openPortfolioUrl() :Intent {
+     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(this))
+     return Intent.createChooser(intent, null)
 }

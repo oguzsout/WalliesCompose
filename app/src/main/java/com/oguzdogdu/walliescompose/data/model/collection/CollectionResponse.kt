@@ -6,6 +6,7 @@ import com.oguzdogdu.walliescompose.data.model.maindto.Link
 import com.oguzdogdu.walliescompose.data.model.maindto.Photo
 import com.oguzdogdu.walliescompose.data.model.maindto.User
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
+import com.oguzdogdu.walliescompose.domain.model.userdetail.UserCollections
 
 @kotlinx.parcelize.Parcelize
 data class CollectionResponse(
@@ -39,3 +40,10 @@ fun CollectionResponse.toCollectionDomain() =
         desc = description,
         likes = cover_photo?.likes
     )
+fun CollectionResponse.toUserCollection() = UserCollections(
+    id = id,
+    title = title,
+    photo = cover_photo?.urls?.regular,
+    desc = description,
+    likes = cover_photo?.likes
+)

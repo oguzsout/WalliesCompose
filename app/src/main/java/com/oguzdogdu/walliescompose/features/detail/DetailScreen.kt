@@ -75,7 +75,7 @@ fun DetailScreenRoute(
         detailViewModel.handleScreenEvents(DetailScreenEvent.GetFavoriteCheckStat)
     }
 
-    var shareEnabled by remember { mutableStateOf(true) }
+    var shareEnabled by remember { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         shareEnabled = true
     }
@@ -116,7 +116,7 @@ fun DetailScreenRoute(
             )
 
             IconButton(
-                onClick = { onProfileDetailClick.invoke(state.detail?.id.orEmpty()) },
+                onClick = { onProfileDetailClick.invoke(state.detail?.username.orEmpty()) },
                 modifier = modifier
                     .wrapContentSize()
                     .weight(1f)
@@ -149,7 +149,6 @@ fun DetailScreenRoute(
                 onSetWallpaperClick = {
 
                 }, onShareClick = { url ->
-                    shareEnabled = false
                     launcher.launch(url.shareExternal())
 
                 }, onDownloadClick = {

@@ -1,5 +1,6 @@
 package com.oguzdogdu.walliescompose.data.di
 
+import com.oguzdogdu.walliescompose.data.service.UnsplashUserService
 import com.oguzdogdu.walliescompose.data.service.WallpaperService
 import dagger.Module
 import dagger.Provides
@@ -15,4 +16,9 @@ object ServiceModule {
     @Singleton
     fun provideWallpaperService(@WalliesRetrofit retrofit: Retrofit): WallpaperService =
         retrofit.create(WallpaperService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideUnsplashUserService(@WalliesRetrofit retrofit: Retrofit): UnsplashUserService =
+        retrofit.create(UnsplashUserService::class.java)
 }
