@@ -1,6 +1,5 @@
 package com.oguzdogdu.walliescompose.navigation
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
@@ -28,6 +27,8 @@ import com.oguzdogdu.walliescompose.features.login.LoginScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.login.loginScreen
 import com.oguzdogdu.walliescompose.features.popular.navigateToPopularScreen
 import com.oguzdogdu.walliescompose.features.popular.popularScreen
+import com.oguzdogdu.walliescompose.features.profiledetail.navigation.navigateToProfileDetailScreen
+import com.oguzdogdu.walliescompose.features.profiledetail.navigation.profileDetailScreen
 import com.oguzdogdu.walliescompose.features.search.navigateToSearchScreen
 import com.oguzdogdu.walliescompose.features.search.searchScreen
 import com.oguzdogdu.walliescompose.features.settings.settingsScreen
@@ -40,8 +41,6 @@ import com.oguzdogdu.walliescompose.features.topics.topicsScreen
 import com.oguzdogdu.walliescompose.navigation.utils.NavigationConstants.AUTH
 import com.oguzdogdu.walliescompose.navigation.utils.NavigationConstants.CONTENT
 
-
-@SuppressLint("RestrictedApi")
 @Composable
 fun WalliesNavHost(
     appState: MainAppState,
@@ -152,6 +151,9 @@ fun WalliesNavHost(
                 },
                 onTagClick = {
                     navController.navigateToSearchScreen(queryFromDetail = it)
+                },
+                onProfileDetailClick = {
+                    navController.navigateToProfileDetailScreen(username = it)
                 }
             )
             topicsScreen(onBackClick = {
@@ -181,6 +183,17 @@ fun WalliesNavHost(
                 onBackClick = {
                     navController.popBackStack()
                 })
+            profileDetailScreen(onUserPhotoListClick = { id ->
+                navController.navigateToDetailScreen(photoId = id)
+
+            }, onCollectionItemClick = { id, title ->
+                navController.navigateToCollectionDetailListScreen(
+                    collectionDetailListId = id,
+                    collectionDetailListTitle = title
+                )
+            }, onBackClick = {
+                navController.popBackStack()
+            })
         }
     }
 }
