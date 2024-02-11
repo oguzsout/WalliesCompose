@@ -36,19 +36,27 @@ data class UserDetailResponse(
     val username: String?
 ) : Parcelable
 
-fun UserDetailResponse.toDomain() = UserDetails(
-    name = name,
-    bio = bio,
-    profileImage = profile_image?.large,
-    postCount = total_photos,
-    followersCount = followers_count,
-    followingCount = following_count,
-    portfolioUrl = portfolio_url,
-    location = location,
-    username = username,
-    totalPhotos = total_photos,
-    totalCollections = total_collections,
-    instagram = social?.instagram_username,
-    twitter = social?.twitter_username,
-    portfolio = social?.portfolio_url
-)
+fun UserDetailResponse.toDomain() : UserDetails {
+    val nonNullPortfolioList = listOfNotNull(
+        social?.portfolio_url,
+        social?.twitter_username,
+        social?.instagram_username
+    )
+    return UserDetails(
+        name = name,
+        bio = bio,
+        profileImage = profile_image?.large,
+        postCount = total_photos,
+        followersCount = followers_count,
+        followingCount = following_count,
+        portfolioUrl = portfolio_url,
+        location = location,
+        username = username,
+        totalPhotos = total_photos,
+        totalCollections = total_collections,
+        instagram = social?.instagram_username,
+        twitter = social?.twitter_username,
+        portfolioList = nonNullPortfolioList,
+        portfolio = social?.portfolio_url
+    )
+}
