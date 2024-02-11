@@ -132,7 +132,7 @@ internal fun AppNavBar(
                         text = stringResource(id = destination.iconTextId),
                         fontSize = 11.sp,
                         fontFamily = medium,
-                        color = Color.Unspecified
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
             )
