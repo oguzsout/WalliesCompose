@@ -20,11 +20,14 @@ class WalliesApplication : Application(), ImageLoaderFactory {
     val theme = mutableStateOf("")
     val language = mutableStateOf("")
     override fun newImageLoader(): ImageLoader {
-        return ImageLoader.Builder(this).memoryCache {
-            MemoryCache.Builder(this).maxSizePercent(0.1).strongReferencesEnabled(true).build()
-        }.diskCachePolicy(CachePolicy.ENABLED).diskCache {
-            DiskCache.Builder().directory(cacheDir.resolve("image_cache"))
-                .maxSizeBytes(5 * 1024 * 1024).build()
-        }.logger(DebugLogger()).respectCacheHeaders(false).build()
+        return ImageLoader.Builder(this)
+            .networkObserverEnabled(true)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .diskCachePolicy(CachePolicy.ENABLED)
+            .diskCache(
+                DiskCache.Builder().directory(cacheDir.resolve("image_cache"))
+                    .maxSizeBytes(50 * 1024 * 1024).build()
+            )
+            .build()
     }
 }

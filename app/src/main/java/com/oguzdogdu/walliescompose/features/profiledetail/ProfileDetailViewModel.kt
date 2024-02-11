@@ -9,14 +9,24 @@ import com.oguzdogdu.walliescompose.domain.wrapper.onLoading
 import com.oguzdogdu.walliescompose.domain.wrapper.onSuccess
 import com.oguzdogdu.walliescompose.features.profiledetail.event.ProfileDetailEvent
 import com.oguzdogdu.walliescompose.features.profiledetail.state.ProfileDetailState
+import com.oguzdogdu.walliescompose.features.profiledetail.state.ProfileDetailUIState
 import com.oguzdogdu.walliescompose.features.profiledetail.state.UserCollectionState
 import com.oguzdogdu.walliescompose.features.profiledetail.state.UserPhotosState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,6 +36,9 @@ class ProfileDetailViewModel @Inject constructor(
 ) : ViewModel() {
 
     val username: String = checkNotNull(savedStateHandle["username"])
+
+    private val _getProfileDetailState = MutableStateFlow<ProfileDetailUIState?>(null)
+    val getProfileDetailState = _getProfileDetailState.asStateFlow()
 
     private val _getUserDetails = MutableStateFlow(ProfileDetailState())
     val getUserDetails = _getUserDetails.asStateFlow()
@@ -38,20 +51,35 @@ class ProfileDetailViewModel @Inject constructor(
 
     fun handleUIEvent(event: ProfileDetailEvent) {
         when (event) {
-            is ProfileDetailEvent.FetchUserDetailInfos -> getUserDetails()
-            ProfileDetailEvent.FetchUserCollectionsList -> getUsersCollections()
-            ProfileDetailEvent.FetchUserPhotosList -> getUsersPhotos()
+            is ProfileDetailEvent.FetchUserDetailInfos -> profileDetailScreenState()
         }
     }
 
-    private fun getUserDetails() {
+    private fun profileDetailScreenState() {
+        viewModelScope.launch {
+            try {
+                _getProfileDetailState.update { ProfileDetailUIState.Loading }
+                delay(1000)
+                val userDetailsDeferred = async { getUserDetails() }
+                val usersPhotosDeferred = async { getUsersPhotos() }
+                val usersCollectionsDeferred = async { getUsersCollections() }
+
+                awaitAll(userDetailsDeferred,usersPhotosDeferred,usersCollectionsDeferred)
+
+                _getProfileDetailState.update {
+                    ProfileDetailUIState.ReadyForShown
+                }
+            } catch (e: Exception) {
+                _getProfileDetailState.update {
+                    ProfileDetailUIState.Error("An error occurred: ${e.message}")
+                }
+            }
+        }
+    }
+
+    private fun getUserDetails() =
         viewModelScope.launch {
             unsplashUserRepository.getUserDetails(username).collectLatest { result ->
-                result.onLoading {
-                    _getUserDetails.update {
-                        it.copy(loading = true)
-                    }
-                }
                 result.onSuccess { userDetails ->
                     _getUserDetails.update {
                         it.copy(loading = false, userDetails = userDetails)
@@ -64,13 +92,13 @@ class ProfileDetailViewModel @Inject constructor(
                 }
             }
         }
-    }
 
-    private fun getUsersPhotos() {
+
+    private fun getUsersPhotos() =
         viewModelScope.launch {
             _getUserPhotoList.update { it.copy(loading = true) }
 
-            unsplashUserRepository.getUsersPhotos(username).collectLatest { result ->
+            unsplashUserRepository.getUsersPhotos(username).collect { result ->
                 result.onSuccess { list ->
                     _getUserPhotoList.update { it.copy(loading = false, usersPhotos = list) }
                 }
@@ -80,13 +108,13 @@ class ProfileDetailViewModel @Inject constructor(
                 }
             }
         }
-    }
 
-    private fun getUsersCollections() {
+
+    private fun getUsersCollections() =
         viewModelScope.launch {
             _getUserCollectionList.update { it.copy(loading = true) }
 
-            unsplashUserRepository.getUsersCollections(username).collectLatest { result ->
+            unsplashUserRepository.getUsersCollections(username).collect { result ->
                 result.onSuccess { list ->
                     _getUserCollectionList.update {
                         it.copy(loading = false, usersCollection = list)
@@ -99,4 +127,3 @@ class ProfileDetailViewModel @Inject constructor(
             }
         }
     }
-}

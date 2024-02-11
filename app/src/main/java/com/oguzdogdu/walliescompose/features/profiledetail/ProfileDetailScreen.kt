@@ -1,6 +1,9 @@
 package com.oguzdogdu.walliescompose.features.profiledetail
 
 import android.content.Context
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,6 +30,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -70,14 +76,20 @@ import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.domain.model.userdetail.UserCollections
 import com.oguzdogdu.walliescompose.domain.model.userdetail.UsersPhotos
+import com.oguzdogdu.walliescompose.features.home.LoadingState
 import com.oguzdogdu.walliescompose.features.profiledetail.event.ProfileDetailEvent
 import com.oguzdogdu.walliescompose.features.profiledetail.state.ProfileDetailState
+import com.oguzdogdu.walliescompose.features.profiledetail.state.ProfileDetailUIState
 import com.oguzdogdu.walliescompose.features.profiledetail.state.UserCollectionState
 import com.oguzdogdu.walliescompose.features.profiledetail.state.UserPhotosState
 import com.oguzdogdu.walliescompose.ui.theme.bold
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
+import com.oguzdogdu.walliescompose.util.openInstagramProfile
+import com.oguzdogdu.walliescompose.util.openPortfolioUrl
+import com.oguzdogdu.walliescompose.util.openTwitterProfile
 import kotlinx.coroutines.launch
+import okhttp3.internal.immutableListOf
 
 @Composable
 fun ProfileDetailScreenRoute(
@@ -89,14 +101,13 @@ fun ProfileDetailScreenRoute(
 ) {
     val context = LocalContext.current
 
+    val stateOfUiState by viewModel.getProfileDetailState.collectAsStateWithLifecycle()
     val stateOfProfileDetail by viewModel.getUserDetails.collectAsStateWithLifecycle()
     val stateOfProfilePhotoList by viewModel.getUserPhotoList.collectAsStateWithLifecycle()
     val stateOfProfileCollectionList by viewModel.getUserCollectionList.collectAsStateWithLifecycle()
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
         viewModel.handleUIEvent(ProfileDetailEvent.FetchUserDetailInfos)
-        viewModel.handleUIEvent(ProfileDetailEvent.FetchUserPhotosList)
-        viewModel.handleUIEvent(ProfileDetailEvent.FetchUserCollectionsList)
     }
 
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
@@ -134,27 +145,41 @@ fun ProfileDetailScreenRoute(
             )
         }
     }) {
-        ProfileDetailScreen(
-            modifier = modifier,
-            paddingValues = it,
-            profileDetailState = stateOfProfileDetail,
-            userPhotosState = stateOfProfilePhotoList,
-            userCollectionState = stateOfProfileCollectionList,
-            onUserPhotoListClick = { id ->
-                onUserPhotoListClick.invoke(id)
-            },
-            onCollectionItemClick = { id, title ->
-                onCollectionItemClick.invoke(id, title)
-            },
-            context = context,
-        )
+        Box(modifier = modifier
+            .padding(it)
+            .fillMaxSize(), contentAlignment = Alignment.Center){
+            when(stateOfUiState) {
+                is ProfileDetailUIState.Loading -> {
+                    LoadingState(modifier = modifier)
+                }
+                is ProfileDetailUIState.Error -> {
+
+                }
+                is ProfileDetailUIState.ReadyForShown -> ProfileDetailScreen(
+                    modifier = modifier,
+                    profileDetailState = stateOfProfileDetail,
+                    userPhotosState = stateOfProfilePhotoList,
+                    userCollectionState = stateOfProfileCollectionList,
+                    onUserPhotoListClick = { id ->
+                        onUserPhotoListClick.invoke(id)
+                    },
+                    onCollectionItemClick = { id, title ->
+                        onCollectionItemClick.invoke(id, title)
+                    },
+                    context = context,
+                )
+
+                else -> {
+
+                }
+            }
+        }
     }
 }
 
 @Composable
 fun ProfileDetailScreen(
     modifier: Modifier,
-    paddingValues: PaddingValues,
     profileDetailState: ProfileDetailState?,
     userPhotosState: UserPhotosState?,
     userCollectionState: UserCollectionState?,
@@ -164,7 +189,6 @@ fun ProfileDetailScreen(
 ) {
     Column(
         modifier = modifier
-            .padding(paddingValues)
             .fillMaxSize()
     ) {
 
@@ -274,89 +298,180 @@ fun PersonalInfoOfUser(
     profileDetailState: ProfileDetailState?,
     context: Context
 ) {
-
-    val fullText = context.getString(R.string.connect_with_user, profileDetailState?.userDetails?.username.orEmpty())
-
-    Column(
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(8.dp),
-        horizontalAlignment = Alignment.Start
+            .wrapContentHeight(), contentAlignment = Alignment.CenterStart
     ) {
-        if (profileDetailState?.userDetails?.name?.isNotEmpty() == true) {
-            Text(
-                modifier = modifier.padding(horizontal = 16.dp),
-                text = profileDetailState.userDetails.name,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                fontSize = 14.sp,
-                fontFamily = bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = modifier.size(8.dp))
-        }
-        if (profileDetailState?.userDetails?.bio?.isNotEmpty() == true) {
-            Text(
-                modifier = modifier.padding(horizontal = 16.dp),
-                text = profileDetailState.userDetails.bio,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                fontSize = 14.sp,
-                fontFamily = regular,
-                maxLines = 4,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Start,
-                lineHeight = TextUnit(16f, TextUnitType.Sp)
-            )
-            Spacer(modifier = modifier.size(8.dp))
-        }
-
-        if (profileDetailState?.userDetails?.location?.isNotEmpty() == true) {
-            Row(
-                modifier = modifier
-                    .wrapContentSize()
-                    .padding(horizontal = 16.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.location),
-                    contentDescription = "Location Icon"
-                )
-                Spacer(modifier = modifier.size(4.dp))
+        Column(
+            modifier = modifier
+                .wrapContentSize()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            if (profileDetailState?.userDetails?.name?.isNotEmpty() == true) {
                 Text(
-                    modifier = modifier,
-                    text = profileDetailState.userDetails.location,
+                    modifier = modifier.padding(horizontal = 16.dp),
+                    text = profileDetailState.userDetails.name,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    fontSize = 14.sp,
+                    fontFamily = bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = modifier.size(8.dp))
+            }
+            if (profileDetailState?.userDetails?.bio?.isNotEmpty() == true) {
+                Text(
+                    modifier = modifier.padding(horizontal = 16.dp),
+                    text = profileDetailState.userDetails.bio,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontSize = 14.sp,
                     fontFamily = regular,
                     maxLines = 4,
                     overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Start,
+                    lineHeight = TextUnit(16f, TextUnitType.Sp)
                 )
                 Spacer(modifier = modifier.size(8.dp))
             }
-            Spacer(modifier = modifier.size(8.dp))
-                val coloredText = buildAnnotatedString {
-                    withStyle(
-                        style = SpanStyle(
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        append(fullText)
-                    }
-                }
-                Text(
-                    modifier = modifier
-                        .padding(horizontal = 16.dp)
-                        .clickable {},
-                    text = coloredText,
-                    fontSize = 14.sp,
-                    fontFamily = medium,
-                    maxLines = 4,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Start,
-                )
 
+            if (profileDetailState?.userDetails?.location?.isNotEmpty() == true) {
+                Row(
+                    modifier = modifier
+                        .wrapContentSize()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.location),
+                        contentDescription = "Location Icon"
+                    )
+                    Spacer(modifier = modifier.size(4.dp))
+                    Text(
+                        modifier = modifier,
+                        text = profileDetailState.userDetails.location,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontSize = 14.sp,
+                        fontFamily = regular,
+                        maxLines = 4,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Start,
+                    )
+                    Spacer(modifier = modifier.size(8.dp))
+                }
+            }
+            Spacer(modifier = modifier.size(8.dp))
+            if (profileDetailState?.userDetails?.portfolioList?.isNotEmpty() == true) {
+                PersonalAccountMenu(modifier = modifier, profileDetailState = profileDetailState, context = context)
+            }
+        }
+    }
+}
+
+@Composable
+fun PersonalAccountMenu(modifier: Modifier,profileDetailState: ProfileDetailState?,context: Context) {
+    val listItem = mutableListOf<UserSocialAccountsMenu>()
+    val openProfileLinks = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) {
+
+    }
+    val fullText = context.getString(R.string.connect_with_user, profileDetailState?.userDetails?.username.orEmpty())
+
+    var expanded by remember {
+        mutableStateOf(false)
+    }
+
+    if (profileDetailState?.userDetails?.instagram?.isNotEmpty() == true) {
+        listItem.add(UserSocialAccountsMenu(
+            title = "Instagram", titleIcon = painterResource(
+                id = R.drawable.icons8_instagram
+            )
+        ))
+    }
+    if (profileDetailState?.userDetails?.twitter?.isNotEmpty() == true) {
+        listItem.add(UserSocialAccountsMenu(
+            title = "Twitter", titleIcon = painterResource(
+                id = R.drawable.icons8_twitterx
+            )
+        ))
+    }
+    if (profileDetailState?.userDetails?.portfolio?.isNotEmpty() == true) {
+        listItem.add(UserSocialAccountsMenu(
+            title = "Portfolio", titleIcon = painterResource(
+                id = R.drawable.portfolio_svgrepo_com
+            )
+        ))
+    }
+
+    Box(modifier = modifier.wrapContentSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        val coloredText = buildAnnotatedString {
+            withStyle(
+                style = SpanStyle(
+                    color = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                append(fullText)
+            }
+        }
+        Text(
+            modifier = modifier
+                .padding(horizontal = 16.dp)
+                .clickable {
+                    expanded = !expanded
+                },
+            text = coloredText,
+            fontSize = 14.sp,
+            fontFamily = medium,
+            maxLines = 4,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Start,
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = {
+                expanded = false
+            }
+        ) {
+            listItem.forEach {  itemValue ->
+                DropdownMenuItem(
+                    onClick = {
+                        when(itemValue.title) {
+                            "Instagram" -> {
+                                openProfileLinks.launch(profileDetailState?.userDetails?.instagram?.openInstagramProfile())
+                                Toast.makeText(context,"in",Toast.LENGTH_SHORT).show()
+                            }
+                            "Twitter" -> {
+                                openProfileLinks.launch(profileDetailState?.userDetails?.twitter?.openTwitterProfile())
+                                Toast.makeText(context,"tw",Toast.LENGTH_SHORT).show()
+
+                            }
+                            "Portfolio" -> {
+                                openProfileLinks.launch(profileDetailState?.userDetails?.portfolio?.openPortfolioUrl())
+                                Toast.makeText(context,"pr",Toast.LENGTH_SHORT).show()
+
+                            }
+                        }
+
+                        expanded = false
+                    }, text = {
+                        Row(
+                            modifier.wrapContentSize(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(painter = itemValue.titleIcon, contentDescription = "", tint = Color.Unspecified)
+                            Spacer(modifier = modifier.size(8.dp))
+                            Text(text = itemValue.title,fontSize = 14.sp, fontFamily = regular,)
+                        }
+                    }
+                )
+            }
         }
     }
 }
@@ -584,91 +699,3 @@ fun CollectionListItem(modifier: Modifier, userCollection: UserCollections?, onC
         }
     }
 }
-
-
-// TODO: Text sizes for DropDown menu should be calculated, this feature will be developed later.         
-/*
-@Composable
-fun DropdownMenuOfUserAccounts(
-    modifier: Modifier, profileDetailState: ProfileDetailState?, onItemClick: (Int) -> Unit,
-    menuVisible:Boolean
-) {
-
-    val items = remember { mutableListOf<UserSocialAccountsMenu>() }
-    profileDetailState?.userDetails?.instagram?.let {
-        items.add(
-            0, UserSocialAccountsMenu(
-                title = "Instagram",
-                titleIcon = painterResource(id = R.drawable.icons8_instagram),
-                UserSocialAccountsMenu.MenuItemType.INSTAGRAM
-            )
-        )
-    }
-    profileDetailState?.userDetails?.twitter?.let {
-        items.add(
-            1, UserSocialAccountsMenu(
-                title = "Twitter",
-                titleIcon = painterResource(id = R.drawable.icons8_twitterx),
-                UserSocialAccountsMenu.MenuItemType.TWITTER
-            )
-        )
-    }
-    profileDetailState?.userDetails?.portfolio?.let {
-        items.add(
-            2, UserSocialAccountsMenu(
-                title = "Portfolio",
-                titleIcon = painterResource(id = R.drawable.portfolio_svgrepo_com),
-                UserSocialAccountsMenu.MenuItemType.PORTFOLIO
-            )
-        )
-    }
-
-    var isContextMenuVisible by rememberSaveable {
-        mutableStateOf(menuVisible)
-    }
-    var pressOffset by remember {
-        mutableStateOf(DpOffset.Zero)
-    }
-    var itemHeight by remember {
-        mutableStateOf(0.dp)
-    }
-
-        DropdownMenu(
-            expanded = isContextMenuVisible, onDismissRequest = {
-                isContextMenuVisible = false
-            }, offset = pressOffset.copy(
-                y = pressOffset.y - itemHeight
-            )
-        ) {
-            items.forEach { title ->
-                DropdownMenuItem(onClick = {
-                    onItemClick(items.indexOf(title))
-                    isContextMenuVisible = false
-                }, text = {
-                    Row(
-                        modifier = modifier
-                            .wrapContentSize()
-                            .padding(horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            painter = title.titleIcon, contentDescription = "UserAccounts"
-                        )
-                        Spacer(modifier = modifier.size(4.dp))
-                        Text(
-                            modifier = modifier,
-                            text = title.title,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            fontSize = 14.sp,
-                            fontFamily = regular,
-                            maxLines = 4,
-                            overflow = TextOverflow.Ellipsis,
-                            textAlign = TextAlign.Start,
-                        )
-                        Spacer(modifier = modifier.size(8.dp))
-                    }
-                })
-            }
-        }
-    }*/
