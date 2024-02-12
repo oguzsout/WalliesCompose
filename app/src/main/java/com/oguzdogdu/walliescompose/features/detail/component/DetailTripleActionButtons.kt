@@ -11,6 +11,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,8 +30,9 @@ fun DetailTripleActionButtons(
     modifier: Modifier,
     setWallpaperButtonClick: () -> Unit,
     shareButtonClick: () -> Unit,
-    downloadButtonClick: () -> Unit
+    downloadButtonClick: (Boolean) -> Unit
 ) {
+    val openBottomSheet by remember { mutableStateOf(false) }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -54,7 +59,7 @@ fun DetailTripleActionButtons(
                 Icon(painter = painterResource(id = R.drawable.share) , contentDescription = "")
             }
             Spacer(modifier = modifier.padding(horizontal = 8.dp))
-            IconButton(modifier = modifier.wrapContentSize(), onClick = { downloadButtonClick.invoke() }) {
+            IconButton(modifier = modifier.wrapContentSize(), onClick = { downloadButtonClick.invoke(!openBottomSheet) }) {
                 Icon(painter = painterResource(id = R.drawable.download), contentDescription = "")
             }
         }

@@ -1,8 +1,17 @@
 package com.oguzdogdu.walliescompose.features.detail
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.media.MediaScannerConnection
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import coil.ImageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
+import com.oguzdogdu.walliescompose.WalliesApplication
 import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.onFailure
@@ -15,15 +24,25 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import javax.inject.Inject
 
 @HiltViewModel
 class DetailViewModel@Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val repository: WallpaperRepository
+    private val repository: WallpaperRepository,
+    private val application: WalliesApplication,
 ) : ViewModel() {
     private val _getPhoto = MutableStateFlow(DetailState())
     val photo = _getPhoto.asStateFlow()
+
+    private val _downloadBottomSheetOpenStat = MutableStateFlow(false)
+    val downloadBottomSheetOpenStat = _downloadBottomSheetOpenStat.asStateFlow()
+
+    private val _photoQualityType = MutableStateFlow("")
+    val photoQualityType = _photoQualityType.asStateFlow()
 
      val id: String = checkNotNull(savedStateHandle["photoId"])
 
@@ -42,6 +61,13 @@ class DetailViewModel@Inject constructor(
             )
 
             is DetailScreenEvent.GetFavoriteCheckStat -> getFavoritesFromRoom(id)
+            is DetailScreenEvent.OpenDownloadBottomSheet -> {
+                _downloadBottomSheetOpenStat.value = event.isOpen
+            }
+
+            is DetailScreenEvent.PhotoQualityType ->  {
+                _photoQualityType.value = event.type.toString()
+            }
         }
     }
 

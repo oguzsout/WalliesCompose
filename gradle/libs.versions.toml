@@ -1,4 +1,5 @@
 [versions]
+accompanist-permissions = "0.35.0-alpha"
 accompanist-swiperefresh = "0.28.0"
 agp = "8.2.0"
 datastore-preferences = "1.0.0"
@@ -30,6 +31,7 @@ work-runtime-ktx = "2.9.0"
 material3-android = "1.2.0"
 
 [libraries]
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist-permissions" }
 accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanist-swiperefresh" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore-preferences" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hilt-work" }
