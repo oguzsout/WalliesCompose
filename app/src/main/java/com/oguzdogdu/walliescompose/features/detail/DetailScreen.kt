@@ -1,6 +1,7 @@
 package com.oguzdogdu.walliescompose.features.detail
 
-import android.content.Intent
+import android.content.Context
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -34,27 +35,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.data.common.Constants.FILE_NAME_SUFFIX
 import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.features.detail.component.DetailPhotoAttributesRow
 import com.oguzdogdu.walliescompose.features.detail.component.DetailTagsRow
 import com.oguzdogdu.walliescompose.features.detail.component.DetailTripleActionButtons
 import com.oguzdogdu.walliescompose.features.detail.component.WalliesFavoriteButton
+import com.oguzdogdu.walliescompose.features.downloadimage.DownloadImageScreenRoute
 import com.oguzdogdu.walliescompose.features.home.LoadingState
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
+import com.oguzdogdu.walliescompose.util.downloadImage
 import com.oguzdogdu.walliescompose.util.shareExternal
 
 
@@ -66,7 +71,11 @@ fun DetailScreenRoute(
     onProfileDetailClick: (String) -> Unit,
     onTagClick: (String) -> Unit
 ) {
+
     val state by detailViewModel.photo.collectAsStateWithLifecycle()
+    val stateOfBottomSheet by detailViewModel.downloadBottomSheetOpenStat.collectAsStateWithLifecycle()
+    val photoQuality by detailViewModel.photoQualityType.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
         detailViewModel.handleScreenEvents(DetailScreenEvent.GetPhotoDetails)
         detailViewModel.handleScreenEvents(DetailScreenEvent.GetFavoriteCheckStat)
@@ -75,8 +84,69 @@ fun DetailScreenRoute(
         detailViewModel.handleScreenEvents(DetailScreenEvent.GetFavoriteCheckStat)
     }
 
+    LaunchedEffect(key1 = photoQuality) {
+        when (photoQuality) {
+            "raw" -> {
+                downloadImageFromWeb(
+                    context = context,
+                    imageTitle = state.detail?.desc.orEmpty(),
+                    url = state.detail?.rawQuality.orEmpty(),
+                    onDismiss = {
+                        detailViewModel.handleScreenEvents(
+                            DetailScreenEvent.OpenDownloadBottomSheet(
+                                isOpen = false
+                            )
+                        )
+                    })
+            }
+
+            "high" -> {
+                downloadImageFromWeb(
+                    context = context,
+                    imageTitle = state.detail?.desc.orEmpty(),
+                    url = state.detail?.highQuality.orEmpty(),
+                    onDismiss = {
+                        detailViewModel.handleScreenEvents(
+                            DetailScreenEvent.OpenDownloadBottomSheet(
+                                isOpen = false
+                            )
+                        )
+                    })
+            }
+
+            "medium" -> {
+                downloadImageFromWeb(
+                    context = context,
+                    imageTitle = state.detail?.desc.orEmpty(),
+                    url = state.detail?.mediumQuality.orEmpty(),
+                    onDismiss = {
+                        detailViewModel.handleScreenEvents(
+                            DetailScreenEvent.OpenDownloadBottomSheet(
+                                isOpen = false
+                            )
+                        )
+                    })
+
+            }
+
+            "low" -> {
+                downloadImageFromWeb(
+                    context = context,
+                    imageTitle = state.detail?.desc.orEmpty(),
+                    url = state.detail?.lowQuality.orEmpty(),
+                    onDismiss = {
+                        detailViewModel.handleScreenEvents(
+                            DetailScreenEvent.OpenDownloadBottomSheet(
+                                isOpen = false
+                            )
+                        )
+                    })
+            }
+        }
+    }
+
     var shareEnabled by remember { mutableStateOf(false) }
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+    val launcherOfShare = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         shareEnabled = true
     }
 
@@ -131,56 +201,69 @@ fun DetailScreenRoute(
             }
         }
     }) {
-        Column(
-            modifier = modifier
-                .padding(it)
-                .wrapContentSize(),
-        ) {
-            SubcomposeAsyncImage(
-                model = state.detail?.highQuality,
-                contentDescription = "",
+        Box(modifier = modifier.padding(it), contentAlignment = Alignment.Center){
+            DownloadImageScreenRoute(modifier = modifier, isOpen = stateOfBottomSheet, onDismiss = {
+                detailViewModel.handleScreenEvents(DetailScreenEvent.OpenDownloadBottomSheet(isOpen = false))
+            }, onRawButtonClick = {
+                detailViewModel.handleScreenEvents(DetailScreenEvent.PhotoQualityType(type = "raw"))
+            },
+                onFullButtonClick = {
+                    detailViewModel.handleScreenEvents(DetailScreenEvent.PhotoQualityType(type = "high"))
+                }, onMediumButtonClick = {
+                    detailViewModel.handleScreenEvents(DetailScreenEvent.PhotoQualityType(type = "medium"))
+                }, onLowButtonClick = {
+                    detailViewModel.handleScreenEvents(DetailScreenEvent.PhotoQualityType(type = "low"))
+                })
+            Column(
                 modifier = modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentScale = ContentScale.FillBounds,
-                loading = { LoadingState(modifier = modifier) }
-            )
-            PostView(modifier = modifier, state = state,
-                onSetWallpaperClick = {
-
-                }, onShareClick = { url ->
-                    launcher.launch(url.shareExternal())
-
-                }, onDownloadClick = {
-
-                },
-                onAddFavoriteClick = { photo ->
-                detailViewModel.handleScreenEvents(
-                    DetailScreenEvent.AddFavorites(
-                        FavoriteImages(id = state.detail?.id,
-                            url = state.detail?.urls,
-                            profileImage = state.detail?.profileimage,
-                            name = state.detail?.name,
-                            portfolioUrl = state.detail?.portfolio,
-                            isChecked = true)
-                    )
+                    .wrapContentSize(),
+            ) {
+                SubcomposeAsyncImage(
+                    model = state.detail?.highQuality,
+                    contentDescription = "",
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentScale = ContentScale.FillBounds,
+                    loading = { LoadingState(modifier = modifier) }
                 )
-            }, onRemoveFavoriteClick = { photo ->
-                    detailViewModel.handleScreenEvents(
-                        DetailScreenEvent.DeleteFavorites(
-                            FavoriteImages(
-                                id = state.detail?.id,
-                                url = state.detail?.urls,
-                                profileImage = state.detail?.profileimage,
-                                name = state.detail?.name,
-                                portfolioUrl = state.detail?.portfolio,
-                                isChecked = false
+                PostView(modifier = modifier, state = state,
+                    onSetWallpaperClick = {
+
+                    }, onShareClick = { url ->
+                        launcherOfShare.launch(url.shareExternal())
+
+                    }, onDownloadClick = {isOpen ->
+                        detailViewModel.handleScreenEvents(DetailScreenEvent.OpenDownloadBottomSheet(isOpen = isOpen))
+                    },
+                    onAddFavoriteClick = { photo ->
+                        detailViewModel.handleScreenEvents(
+                            DetailScreenEvent.AddFavorites(
+                                FavoriteImages(id = state.detail?.id,
+                                    url = state.detail?.urls,
+                                    profileImage = state.detail?.profileimage,
+                                    name = state.detail?.name,
+                                    portfolioUrl = state.detail?.portfolio,
+                                    isChecked = true)
                             )
                         )
-                    )
-                },onTagClick = {tag ->
-                    onTagClick.invoke(tag)
-                })
+                    }, onRemoveFavoriteClick = { photo ->
+                        detailViewModel.handleScreenEvents(
+                            DetailScreenEvent.DeleteFavorites(
+                                FavoriteImages(
+                                    id = state.detail?.id,
+                                    url = state.detail?.urls,
+                                    profileImage = state.detail?.profileimage,
+                                    name = state.detail?.name,
+                                    portfolioUrl = state.detail?.portfolio,
+                                    isChecked = false
+                                )
+                            )
+                        )
+                    },onTagClick = {tag ->
+                        onTagClick.invoke(tag)
+                    })
+            }
         }
     }
 }
@@ -191,7 +274,7 @@ fun PostView(
     state: DetailState,
     onSetWallpaperClick: () -> Unit,
     onShareClick: (String) -> Unit,
-    onDownloadClick: () -> Unit,
+    onDownloadClick: (Boolean) -> Unit,
     onAddFavoriteClick: (FavoriteImages) -> Unit,
     onRemoveFavoriteClick: (FavoriteImages) -> Unit,
     onTagClick:(String) -> Unit
@@ -279,7 +362,17 @@ fun PostView(
         }, shareButtonClick = {
             onShareClick.invoke(state.detail?.urls.orEmpty())
         }, downloadButtonClick = {
-            onDownloadClick.invoke()
+            onDownloadClick.invoke(it)
         })
+    }
+}
+private fun downloadImageFromWeb(context: Context,imageTitle:String,url: String?,onDismiss:() -> Unit) {
+    val directory: String = context.getString(R.string.app_name)
+    val fileName = imageTitle + FILE_NAME_SUFFIX
+    Toast.makeText(context, R.string.downloading_text, Toast.LENGTH_LONG).show()
+    val downloadableImage = url?.let { context.downloadImage(it, directory, fileName) }
+    if (downloadableImage == true) {
+        Toast.makeText(context, R.string.download_photo_success, Toast.LENGTH_LONG).show()
+        onDismiss.invoke()
     }
 }
