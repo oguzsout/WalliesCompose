@@ -1,6 +1,7 @@
 package com.oguzdogdu.walliescompose.util
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -8,7 +9,11 @@ import android.net.Uri
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
+import android.util.DisplayMetrics
+import android.view.WindowManager
 import androidx.core.view.ContentInfoCompat.Flags
+import com.oguzdogdu.walliescompose.data.common.Constants.AUTO
+import com.oguzdogdu.walliescompose.data.common.Constants.FIT
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -95,4 +100,13 @@ fun String.shareExternal(): Intent {
  fun String.openPortfolioUrl() :Intent {
      val intent = Intent(Intent.ACTION_VIEW, Uri.parse(this))
      return Intent.createChooser(intent, null)
+}
+
+fun String.adjustUrlForScreenConstraints(context: Context): String {
+    val displayMetrics = DisplayMetrics()
+    val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    windowManager.defaultDisplay.getMetrics(displayMetrics)
+    val width = displayMetrics.widthPixels
+    val height = displayMetrics.heightPixels
+    return "$this&w=$width&h=$height$FIT$AUTO"
 }

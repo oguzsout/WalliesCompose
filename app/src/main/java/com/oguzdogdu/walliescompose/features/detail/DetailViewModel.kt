@@ -33,7 +33,6 @@ import javax.inject.Inject
 class DetailViewModel@Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val repository: WallpaperRepository,
-    private val application: WalliesApplication,
 ) : ViewModel() {
     private val _getPhoto = MutableStateFlow(DetailState())
     val photo = _getPhoto.asStateFlow()
@@ -41,8 +40,14 @@ class DetailViewModel@Inject constructor(
     private val _downloadBottomSheetOpenStat = MutableStateFlow(false)
     val downloadBottomSheetOpenStat = _downloadBottomSheetOpenStat.asStateFlow()
 
+    private val _setWallpaperBottomSheetOpenStat = MutableStateFlow(false)
+    val setWallpaperBottomSheetOpenStat = _setWallpaperBottomSheetOpenStat.asStateFlow()
+
     private val _photoQualityType = MutableStateFlow("")
     val photoQualityType = _photoQualityType.asStateFlow()
+
+    private val _setWallpaperPlace = MutableStateFlow("")
+    val setWallpaperPlace = _setWallpaperPlace.asStateFlow()
 
      val id: String = checkNotNull(savedStateHandle["photoId"])
 
@@ -67,6 +72,14 @@ class DetailViewModel@Inject constructor(
 
             is DetailScreenEvent.PhotoQualityType ->  {
                 _photoQualityType.value = event.type.toString()
+            }
+
+            is DetailScreenEvent.OpenSetWallpaperBottomSheet -> {
+                _setWallpaperBottomSheetOpenStat.value = event.isOpen
+            }
+
+            is DetailScreenEvent.SetWallpaperPlace -> {
+                _setWallpaperPlace.value = event.place.toString()
             }
         }
     }
