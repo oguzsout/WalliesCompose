@@ -1,6 +1,10 @@
 package com.oguzdogdu.walliescompose.features.detail
 
+import android.app.WallpaperManager
 import android.content.Context
+import android.os.Build
+import android.util.DisplayMetrics
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,20 +40,28 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toBitmapOrNull
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.Coil
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import coil.request.CachePolicy
+import coil.request.ImageRequest
+import coil.size.Scale
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.data.common.Constants.AUTO
 import com.oguzdogdu.walliescompose.data.common.Constants.FILE_NAME_SUFFIX
+import com.oguzdogdu.walliescompose.data.common.Constants.FIT
 import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.features.detail.component.DetailPhotoAttributesRow
 import com.oguzdogdu.walliescompose.features.detail.component.DetailTagsRow
@@ -57,10 +69,13 @@ import com.oguzdogdu.walliescompose.features.detail.component.DetailTripleAction
 import com.oguzdogdu.walliescompose.features.detail.component.WalliesFavoriteButton
 import com.oguzdogdu.walliescompose.features.downloadimage.DownloadImageScreenRoute
 import com.oguzdogdu.walliescompose.features.home.LoadingState
+import com.oguzdogdu.walliescompose.features.setwallpaper.SetWallpaperImageScreenRoute
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
+import com.oguzdogdu.walliescompose.util.adjustUrlForScreenConstraints
 import com.oguzdogdu.walliescompose.util.downloadImage
 import com.oguzdogdu.walliescompose.util.shareExternal
+import kotlinx.coroutines.Dispatchers
 
 
 @Composable
@@ -71,11 +86,13 @@ fun DetailScreenRoute(
     onProfileDetailClick: (String) -> Unit,
     onTagClick: (String) -> Unit
 ) {
-
     val state by detailViewModel.photo.collectAsStateWithLifecycle()
-    val stateOfBottomSheet by detailViewModel.downloadBottomSheetOpenStat.collectAsStateWithLifecycle()
+    val stateOfDownloadBottomSheet by detailViewModel.downloadBottomSheetOpenStat.collectAsStateWithLifecycle()
+    val stateOfSetWallpaperBottomSheet by detailViewModel.setWallpaperBottomSheetOpenStat.collectAsStateWithLifecycle()
     val photoQuality by detailViewModel.photoQualityType.collectAsStateWithLifecycle()
+    val wallpaperPlace by detailViewModel.setWallpaperPlace.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
         detailViewModel.handleScreenEvents(DetailScreenEvent.GetPhotoDetails)
         detailViewModel.handleScreenEvents(DetailScreenEvent.GetFavoriteCheckStat)
@@ -145,6 +162,17 @@ fun DetailScreenRoute(
         }
     }
 
+    LaunchedEffect(key1 = wallpaperPlace) {
+        if (wallpaperPlace.isNotEmpty()) {
+            setWallpaperFromUrl(
+                context = context,
+                lifecycleOwner = lifecycleOwner,
+                imageUrl = state.detail?.rawQuality?.adjustUrlForScreenConstraints(context),
+                place = wallpaperPlace
+            )
+        }
+    }
+
     var shareEnabled by remember { mutableStateOf(false) }
     val launcherOfShare = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         shareEnabled = true
@@ -202,7 +230,7 @@ fun DetailScreenRoute(
         }
     }) {
         Box(modifier = modifier.padding(it), contentAlignment = Alignment.Center){
-            DownloadImageScreenRoute(modifier = modifier, isOpen = stateOfBottomSheet, onDismiss = {
+            DownloadImageScreenRoute(modifier = modifier, isOpen = stateOfDownloadBottomSheet, onDismiss = {
                 detailViewModel.handleScreenEvents(DetailScreenEvent.OpenDownloadBottomSheet(isOpen = false))
             }, onRawButtonClick = {
                 detailViewModel.handleScreenEvents(DetailScreenEvent.PhotoQualityType(type = "raw"))
@@ -213,6 +241,37 @@ fun DetailScreenRoute(
                     detailViewModel.handleScreenEvents(DetailScreenEvent.PhotoQualityType(type = "medium"))
                 }, onLowButtonClick = {
                     detailViewModel.handleScreenEvents(DetailScreenEvent.PhotoQualityType(type = "low"))
+                })
+            SetWallpaperImageScreenRoute(
+                modifier = modifier,
+                isOpen = stateOfSetWallpaperBottomSheet,
+                onDismiss = {
+                    detailViewModel.handleScreenEvents(
+                        DetailScreenEvent.OpenSetWallpaperBottomSheet(
+                            isOpen = false
+                        )
+                    )
+                },
+                onSetLockButtonClick = {
+                    detailViewModel.handleScreenEvents(
+                        DetailScreenEvent.SetWallpaperPlace(
+                            place = "Lock"
+                        )
+                    )
+                },
+                onSetHomeButtonClick = {
+                    detailViewModel.handleScreenEvents(
+                        DetailScreenEvent.SetWallpaperPlace(
+                            place = "Home"
+                        )
+                    )
+                },
+                onSetHomeAndLockButtonClick = {
+                    detailViewModel.handleScreenEvents(
+                        DetailScreenEvent.SetWallpaperPlace(
+                            place = "Home and Lock"
+                        )
+                    )
                 })
             Column(
                 modifier = modifier
@@ -228,8 +287,8 @@ fun DetailScreenRoute(
                     loading = { LoadingState(modifier = modifier) }
                 )
                 PostView(modifier = modifier, state = state,
-                    onSetWallpaperClick = {
-
+                    onSetWallpaperClick = {isOpen ->
+                        detailViewModel.handleScreenEvents(DetailScreenEvent.OpenSetWallpaperBottomSheet(isOpen = isOpen))
                     }, onShareClick = { url ->
                         launcherOfShare.launch(url.shareExternal())
 
@@ -272,7 +331,7 @@ fun DetailScreenRoute(
 fun PostView(
     modifier: Modifier,
     state: DetailState,
-    onSetWallpaperClick: () -> Unit,
+    onSetWallpaperClick: (Boolean) -> Unit,
     onShareClick: (String) -> Unit,
     onDownloadClick: (Boolean) -> Unit,
     onAddFavoriteClick: (FavoriteImages) -> Unit,
@@ -357,8 +416,8 @@ fun PostView(
         DetailTagsRow(modifier = modifier, detail = state.detail, onTagClick = {
             onTagClick.invoke(it)
         })
-        DetailTripleActionButtons(modifier = modifier, setWallpaperButtonClick = {
-            onSetWallpaperClick.invoke()
+        DetailTripleActionButtons(modifier = modifier, setWallpaperButtonClick = {isOpen ->
+            onSetWallpaperClick.invoke(isOpen)
         }, shareButtonClick = {
             onShareClick.invoke(state.detail?.urls.orEmpty())
         }, downloadButtonClick = {
@@ -375,4 +434,51 @@ private fun downloadImageFromWeb(context: Context,imageTitle:String,url: String?
         Toast.makeText(context, R.string.download_photo_success, Toast.LENGTH_LONG).show()
         onDismiss.invoke()
     }
+}
+private fun setWallpaperFromUrl(context: Context,lifecycleOwner: LifecycleOwner,imageUrl: String?, place: String?) {
+    val imageLoader = Coil.imageLoader(context)
+    val request = ImageRequest.Builder(context)
+        .data(imageUrl)
+        .transformationDispatcher(Dispatchers.Main.immediate)
+        .lifecycle(lifecycleOwner)
+        .allowConversionToBitmap(true)
+        .memoryCachePolicy(CachePolicy.READ_ONLY)
+        .target(
+            onSuccess = { result ->
+                val wallpaperManager = WallpaperManager.getInstance(context)
+                try {
+                    when (place.orEmpty()) {
+                        "Lock" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            wallpaperManager
+                                .setBitmap(
+                                    result.toBitmapOrNull(),
+                                    null,
+                                    true,
+                                    WallpaperManager.FLAG_LOCK
+                                )
+                        }
+
+                        "Home and Lock" ->
+                            wallpaperManager.setBitmap(result.toBitmapOrNull())
+
+                        "Home" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            wallpaperManager.setBitmap(
+                                result.toBitmapOrNull(),
+                                null,
+                                true,
+                                WallpaperManager.FLAG_SYSTEM
+                            )
+                        }
+                    }
+                    Toast.makeText(context,"Success",Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    Toast.makeText(context,e.message,Toast.LENGTH_SHORT).show()
+                }
+            },
+            onError = { error ->
+                Toast.makeText(context,"Something Went Wrong",Toast.LENGTH_SHORT).show()
+            }
+        )
+        .build()
+    imageLoader.enqueue(request)
 }

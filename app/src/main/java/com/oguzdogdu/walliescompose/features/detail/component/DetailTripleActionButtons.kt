@@ -28,11 +28,12 @@ import com.oguzdogdu.walliescompose.ui.theme.regular
 @Composable
 fun DetailTripleActionButtons(
     modifier: Modifier,
-    setWallpaperButtonClick: () -> Unit,
+    setWallpaperButtonClick: (Boolean) -> Unit,
     shareButtonClick: () -> Unit,
     downloadButtonClick: (Boolean) -> Unit
 ) {
-    val openBottomSheet by remember { mutableStateOf(false) }
+    val openBottomSheetOfDownload by remember { mutableStateOf(false) }
+    val openBottomSheetOfSetWallpaper by remember { mutableStateOf(false) }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -40,7 +41,7 @@ fun DetailTripleActionButtons(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Button(onClick = { setWallpaperButtonClick.invoke() }) {
+        Button(onClick = { setWallpaperButtonClick.invoke(!openBottomSheetOfSetWallpaper) }) {
             Icon(
                 painter = painterResource(id = R.drawable.wallpaper),
                 tint = Color.White,
@@ -59,7 +60,7 @@ fun DetailTripleActionButtons(
                 Icon(painter = painterResource(id = R.drawable.share) , contentDescription = "")
             }
             Spacer(modifier = modifier.padding(horizontal = 8.dp))
-            IconButton(modifier = modifier.wrapContentSize(), onClick = { downloadButtonClick.invoke(!openBottomSheet) }) {
+            IconButton(modifier = modifier.wrapContentSize(), onClick = { downloadButtonClick.invoke(!openBottomSheetOfDownload) }) {
                 Icon(painter = painterResource(id = R.drawable.download), contentDescription = "")
             }
         }
