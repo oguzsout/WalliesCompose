@@ -3,12 +3,16 @@ package com.oguzdogdu.walliescompose.features.settings
 import android.app.Activity
 import android.content.Context
 import android.util.Log
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -21,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -78,10 +83,18 @@ fun SettingsScreenRoute(
     }
 
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
-        BaseCenteredToolbar(modifier = Modifier,
-            title = stringResource(id = R.string.settings),
-            leftClick = {},
-            rightClick = {})
+        Row(
+            modifier = modifier
+                .wrapContentWidth()
+                .padding(start = 16.dp, top = 16.dp, bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(id = R.string.settings_title),
+                style = MaterialTheme.typography.titleMedium,
+            )
+        }
     }, snackbarHost = {
         SnackbarHost(
             hostState = snackState
