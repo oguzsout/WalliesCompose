@@ -9,7 +9,7 @@ data class User(
 )
 
 fun User.toUserDomain() =
-    com.oguzdogdu.domain.model.auth.User(
+    com.oguzdogdu.walliescompose.domain.model.auth.User(
         name = name,
         surname = surname,
         email = email,

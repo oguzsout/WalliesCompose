@@ -60,7 +60,7 @@ class UserAuthenticationRepositoryImpl @Inject constructor(
         }.await()) .toResource()
     }
 
-    override suspend fun fetchUserInfos(): Flow<Resource<com.oguzdogdu.domain.model.auth.User?>> {
+    override suspend fun fetchUserInfos(): Flow<Resource<com.oguzdogdu.walliescompose.domain.model.auth.User?>> {
         val user = FirebaseAuth.getInstance().currentUser
         val id = user?.uid ?: ""
 
