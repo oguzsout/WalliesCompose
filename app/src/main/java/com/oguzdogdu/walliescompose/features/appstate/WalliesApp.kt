@@ -29,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Unspecified
 import androidx.compose.ui.graphics.Color.Companion.Yellow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -124,7 +125,8 @@ internal fun AppNavBar(
                 icon = {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = destination.icon),
-                        contentDescription = ""
+                        contentDescription = "",
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
                 },
                 label = {
