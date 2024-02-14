@@ -1,4 +1,4 @@
-package com.oguzdogdu.domain.model.auth
+package com.oguzdogdu.walliescompose.domain.model.auth
 
 data class User(
     val name: String? = null,
