@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -33,13 +32,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.features.component.BaseCenteredToolbar
 import com.oguzdogdu.walliescompose.features.settings.components.MenuRowItems
 import com.oguzdogdu.walliescompose.features.settings.components.SingleSelectDialog
-import com.oguzdogdu.walliescompose.util.OptionLists
+import com.oguzdogdu.walliescompose.navigation.utils.WalliesIcons
+import com.oguzdogdu.walliescompose.util.MenuRow
 import com.oguzdogdu.walliescompose.util.ReusableMenuRow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import okhttp3.internal.immutableListOf
 
 
 @Composable
@@ -177,7 +177,20 @@ fun SettingsScreen(
     viewModel: SettingsViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val optionList = OptionLists.appOptionsList
+    val optionList = immutableListOf(
+        MenuRow(
+            icon = WalliesIcons.DarkMode,
+            titleRes = R.string.theme_text
+        ),
+        MenuRow(
+            icon = WalliesIcons.Language,
+            titleRes = R.string.language_title_text
+        ),
+        MenuRow(
+            icon = WalliesIcons.Cache,
+            titleRes = R.string.clear_cache_title
+        )
+    )
     LazyColumn(
         modifier = modifier
             .fillMaxWidth()

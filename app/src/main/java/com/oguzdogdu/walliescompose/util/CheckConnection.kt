@@ -6,6 +6,7 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
+import androidx.compose.runtime.Stable
 import androidx.core.content.getSystemService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.conflate
 import javax.inject.Inject
 
+@Stable
  class ConnectivityManagerNetworkMonitor @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : NetworkMonitor {

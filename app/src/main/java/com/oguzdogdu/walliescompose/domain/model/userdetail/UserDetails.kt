@@ -1,5 +1,8 @@
 package com.oguzdogdu.walliescompose.domain.model.userdetail
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class UserDetails(
     val name: String?,
     val bio: String?,

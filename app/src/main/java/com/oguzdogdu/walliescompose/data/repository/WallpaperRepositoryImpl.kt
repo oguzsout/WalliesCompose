@@ -1,5 +1,6 @@
 package com.oguzdogdu.walliescompose.data.repository
 
+import androidx.compose.runtime.Stable
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData

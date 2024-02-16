@@ -1,5 +1,8 @@
 package com.oguzdogdu.domain.model.auth
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class User(
     val name: String? = null,
     val surname: String? = null,
