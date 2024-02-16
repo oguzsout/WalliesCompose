@@ -1,5 +1,8 @@
 package com.oguzdogdu.walliescompose.domain.model.detail
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class Photo(
     val id: String?,
     val username: String?,

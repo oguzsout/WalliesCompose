@@ -2,10 +2,13 @@ package com.oguzdogdu.walliescompose.util
 
 import android.content.Context
 import android.os.Build
+import androidx.compose.runtime.Stable
 import com.oguzdogdu.walliescompose.util.ILocaleHelper
 import java.util.*
+import javax.inject.Inject
 
-class LocaleHelper(private val context: Context) : ILocaleHelper {
+@Stable
+class LocaleHelper @Inject constructor(@Stable private val context: Context) : ILocaleHelper {
 
     override fun onAttach(defaultLanguage: String): Context {
         return setLocale(defaultLanguage)

@@ -1,5 +1,8 @@
 package com.oguzdogdu.walliescompose.domain.model.favorites
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class FavoriteImages(
     val id: String? = null,
     val url: String? = null,
