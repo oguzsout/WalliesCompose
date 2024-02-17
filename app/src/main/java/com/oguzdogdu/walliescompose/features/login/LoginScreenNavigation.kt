@@ -4,6 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
 
 const val LoginScreenNavigationRoute = "login_screen_route"
 
@@ -13,11 +14,16 @@ fun NavController.navigateToLoginScreen(
     this.navigate(LoginScreenNavigationRoute, navOptions)
 }
 
-fun NavGraphBuilder.loginScreen(navigateToHome:() -> Unit,onContinueWithoutLoginClick: () -> Unit,navigateBack:() -> Unit) {
+fun NavGraphBuilder.loginScreen(
+    googleAuthUiClient: GoogleAuthUiClient,
+    navigateToHome: () -> Unit,
+    onContinueWithoutLoginClick: () -> Unit,
+    navigateBack: () -> Unit
+) {
     composable(
         LoginScreenNavigationRoute
     ) {
-       LoginScreenRoute(navigateToHome = {
+       LoginScreenRoute(googleAuthUiClient = googleAuthUiClient,navigateToHome = {
            navigateToHome.invoke()
        },
            onContinueWithoutLoginClick = {

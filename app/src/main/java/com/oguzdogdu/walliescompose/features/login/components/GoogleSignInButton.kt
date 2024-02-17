@@ -1,5 +1,6 @@
 package com.oguzdogdu.walliescompose.features.login.components
 
+import android.app.Activity
 import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -7,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -46,6 +48,7 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -62,7 +65,12 @@ fun ButtonGoogleSignIn(
         },
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .border(
+                width = 1.dp,
+                color = Color.Gray,
+                shape = RoundedCornerShape(16.dp)
+            ) ,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.background
         ),
@@ -100,12 +108,12 @@ fun ButtonGoogleSignIn(
 }
 
 @Composable
-fun rememberFirebaseAuthLauncher(
+fun RememberFirebaseAuthLauncher(
     onAuthComplete: (String) -> Unit,
-    onAuthError: (ApiException) -> Unit
-): ManagedActivityResultLauncher<Intent, ActivityResult> {
+    onAuthError: (ApiException) -> Unit,
+) {
     val scope = rememberCoroutineScope()
-    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+     rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
             val account = task.getResult(ApiException::class.java)!!
