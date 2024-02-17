@@ -16,8 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.android.gms.auth.api.identity.Identity
 import com.oguzdogdu.walliescompose.WalliesApplication
 import com.oguzdogdu.walliescompose.features.appstate.WalliesApp
+import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
 import com.oguzdogdu.walliescompose.ui.theme.WalliesComposeTheme
 import com.oguzdogdu.walliescompose.util.LocaleHelper
 import com.oguzdogdu.walliescompose.util.NetworkMonitor
@@ -35,10 +37,17 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
 
+    private val googleAuthUiClient by lazy {
+        GoogleAuthUiClient(
+            context = applicationContext,
+            oneTapClient = Identity.getSignInClient(applicationContext)
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val mainState by viewModel.mainState.collectAsStateWithLifecycle()
+            val mainState by viewModel.appPreferencesState.collectAsStateWithLifecycle()
             LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
                 viewModel.handleScreenEvents(MainScreenEvent.CheckUserAuthState)
                 viewModel.handleScreenEvents(MainScreenEvent.ThemeChanged)
@@ -49,7 +58,7 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(application.theme.value) {
                 viewModel.handleScreenEvents(MainScreenEvent.ThemeChanged)
             }
-            val LocalApplication = staticCompositionLocalOf {
+            val localApplication = staticCompositionLocalOf {
                 WalliesApplication()
             }
             LaunchedEffect(application.language.value) {
@@ -60,14 +69,18 @@ class MainActivity : ComponentActivity() {
                     LocaleHelper(context = this@MainActivity).updateResources(application.language.value)
                 }
             }
-            CompositionLocalProvider(LocalApplication provides application) {
+            CompositionLocalProvider(localApplication provides application) {
                 WalliesComposeTheme(
                     appTheme = application.theme.value
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                     ) {
-                        WalliesApp(isAuthenticated = mainState.userAuth, networkMonitor = networkMonitor)
+                        WalliesApp(
+                            isAuthenticated = mainState.userAuth,
+                            networkMonitor = networkMonitor,
+                            googleAuthUiClient = googleAuthUiClient
+                        )
                     }
                 }
             }

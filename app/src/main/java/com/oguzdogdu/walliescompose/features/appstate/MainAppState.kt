@@ -19,6 +19,7 @@ import androidx.navigation.navOptions
 import com.oguzdogdu.walliescompose.features.collections.navigateToCollectionScreen
 import com.oguzdogdu.walliescompose.features.favorites.navigateToFavoritesScreen
 import com.oguzdogdu.walliescompose.features.home.navigateToHomeScreen
+import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
 import com.oguzdogdu.walliescompose.features.settings.navigateToSettingsScreen
 import com.oguzdogdu.walliescompose.navigation.TopLevelDestination
 import com.oguzdogdu.walliescompose.util.NetworkMonitor
@@ -34,7 +35,7 @@ fun rememberMainAppState(
     networkMonitor: NetworkMonitor,
 ): MainAppState {
     return remember(navController) {
-        MainAppState(navController,coroutineScope, networkMonitor)
+        MainAppState(navController,coroutineScope,networkMonitor)
     }
 }
 

@@ -43,6 +43,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
 import com.oguzdogdu.walliescompose.navigation.TopLevelDestination
 import com.oguzdogdu.walliescompose.navigation.WalliesNavHost
 import com.oguzdogdu.walliescompose.ui.theme.medium
@@ -55,6 +56,7 @@ fun WalliesApp(
     modifier: Modifier = Modifier,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     networkMonitor: NetworkMonitor,
+    googleAuthUiClient: GoogleAuthUiClient,
     appState: MainAppState = rememberMainAppState(
         coroutineScope = coroutineScope,
         networkMonitor = networkMonitor
@@ -83,7 +85,9 @@ fun WalliesApp(
         }
     },snackbarHost = {SnackbarHost(snackbarHostState) {
         Snackbar(
-            modifier = modifier.padding(8.dp).wrapContentSize(),
+            modifier = modifier
+                .padding(8.dp)
+                .wrapContentSize(),
             containerColor = MaterialTheme.colorScheme.background
         ) {
             Row(
@@ -101,7 +105,10 @@ fun WalliesApp(
         }
     } }) {
         WalliesNavHost(
-            appState = appState, modifier = modifier.padding(it), isAuthenticated = isAuthenticated
+            appState = appState,
+            modifier = modifier.padding(it),
+            isAuthenticated = isAuthenticated,
+            googleAuthUiClient = googleAuthUiClient
         )
     }
 }

@@ -1,8 +1,13 @@
 package com.oguzdogdu.walliescompose.features.login
 
-import android.annotation.SuppressLint
+import android.app.Activity
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,56 +17,55 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ShapeDefaults
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.features.home.LoadingState
 import com.oguzdogdu.walliescompose.features.login.components.ButtonGoogleSignIn
-import com.oguzdogdu.walliescompose.features.login.components.EmailTextField
-import com.oguzdogdu.walliescompose.features.login.components.PasswordTextField
-import com.oguzdogdu.walliescompose.features.login.components.rememberFirebaseAuthLauncher
+import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
 import com.oguzdogdu.walliescompose.ui.theme.bold
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreenRoute(
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = hiltViewModel(),
+    googleAuthUiClient: GoogleAuthUiClient,
     navigateToHome: () -> Unit,
     onContinueWithoutLoginClick: () -> Unit,
     navigateBack:() -> Unit
@@ -84,7 +88,7 @@ fun LoginScreenRoute(
                 .padding(it)
                 .fillMaxSize()
         ) {
-            LoginScreenContent(state = loginState,modifier = modifier, onEmailChange = { email ->
+            LoginScreenContent(state = loginState,modifier = modifier, googleAuthUiClient = googleAuthUiClient,onEmailChange = { email ->
                 viewModel.setEmail(email)
                 viewModel.handleUIEvent(LoginScreenEvent.ButtonState)
             },
@@ -112,11 +116,12 @@ fun LoginScreenRoute(
 fun LoginScreenContent(
     state: LoginState,
     modifier: Modifier,
+    googleAuthUiClient: GoogleAuthUiClient,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    onLoginButtonClick:(String,String) -> Unit,
+    onLoginButtonClick: (String, String) -> Unit,
     onContinueWithoutLoginClick: () -> Unit,
-    onGoogleSignInButtonClicked:(String) -> Unit,
+    onGoogleSignInButtonClicked: (String) -> Unit,
     navigateToHome: () -> Unit
 ) {
     var buttonEnabled by remember { mutableStateOf(false) }
@@ -130,177 +135,154 @@ fun LoginScreenContent(
         mutableStateOf(false)
     }
     val context = LocalContext.current
-    val launcher = rememberFirebaseAuthLauncher(
-        onAuthComplete = { result ->
-            onGoogleSignInButtonClicked.invoke(result)
-        },
-        onAuthError = {
-            Toast.makeText(context,it.message,Toast.LENGTH_LONG).show()
-        }
-    )
+    val scope = rememberCoroutineScope()
+
+    val launcher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartIntentSenderForResult(),
+            onResult = { result ->
+                Log.d("TAG", "Activity")
+                if (result.resultCode == Activity.RESULT_OK) {
+                    scope.launch {
+                        val signInResult =
+                            googleAuthUiClient.signInWithIntent(
+                                intent = result.data ?: return@launch
+                            )
+                        onGoogleSignInButtonClicked.invoke(signInResult.orEmpty())
+                    }
+                }
+            }
+        )
     LaunchedEffect(state) {
-        when(state) {
+        when (state) {
             is LoginState.UserSignIn -> {
                 navigateToHome.invoke()
             }
+
             is LoginState.ErrorSignIn -> {
-                Toast.makeText(context, state.errorMessage,Toast.LENGTH_LONG).show()
+                Toast.makeText(context, state.errorMessage, Toast.LENGTH_LONG).show()
             }
+
             is LoginState.UserNotSignIn -> {}
             is LoginState.Loading -> {
-               loading = state.loading
+                loading = state.loading
             }
+
             is LoginState.ButtonEnabled -> {
                 buttonEnabled = state.isEnabled
             }
+
             else -> {}
         }
     }
+    Box(modifier = modifier.fillMaxSize()) {
 
-    Box(
-        modifier = modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(start = 32.dp, top = 32.dp)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.login_title),
-                    fontSize = 24.sp,
-                    fontFamily = bold
-                )
-                Text(
-                    text = stringResource(id = R.string.please_sign_in_to_continue),
-                    fontSize = 16.sp,
-                    fontFamily = bold
-                )
-            }
-
-            Card(
-                modifier = modifier
-                    .wrapContentHeight()
-                    .fillMaxWidth()
-                    .align(Alignment.BottomEnd),
-                shape = RoundedCornerShape(
-                    topStart = 16.dp,
-                    topEnd = 16.dp,
+        Column(
+            modifier = modifier
+                .align(Alignment.Center)
+                .padding(16.dp)
+                .wrapContentSize(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.logo_color__1_),
+                contentDescription = stringResource(
+                    id = R.string.app_logo
                 ),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer
-                )
+                tint = Color.Unspecified,
+                modifier = modifier
+                    .size(width = 72.dp, height = 72.dp))
+            Text(
+                text = stringResource(R.string.sign_in_to_wallies),
+                fontSize = 24.sp,
+                fontFamily = bold
+            )
+            Text(
+                text = stringResource(R.string.sign_in_desc),
+                fontSize = 16.sp,
+                fontFamily = regular,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        Column(
+            modifier = modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
+                .wrapContentSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ButtonGoogleSignIn(
+                modifier = modifier, onGoogleSignInButtonClick = {
+                    scope.launch {
+                        val intentSender = googleAuthUiClient.signIn()
+                        launcher.launch(IntentSenderRequest.Builder(intentSender = intentSender ?: return@launch).build())
+                    }
+                },
+                loading = loading
+            )
+
+            Button(
+                onClick = {
+
+                },
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(id = R.color.crimson)
+                ),
+                shape = RoundedCornerShape(16.dp),
+                contentPadding = PaddingValues(16.dp)
             ) {
-                Column(
-                    modifier = modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    EmailTextField(modifier = modifier, onChangeEmail = {
-                        email = it
-                        onEmailChange.invoke(it)
-                    })
-
-                    PasswordTextField(modifier = modifier, onChangePassword = {
-                        password = it
-                        onPasswordChange.invoke(it)
-                    })
-
-                    Text(
-                        text = stringResource(id = R.string.forgot_password_title),
-                        fontSize = 12.sp,
-                        fontFamily = medium,
-                        modifier = modifier
-                            .align(Alignment.End)
-                            .padding(end = 16.dp)
-                    )
-
-                    Button(
-                        onClick = {
-                            onLoginButtonClick.invoke(email,password)
-                        },
-                        enabled = buttonEnabled,
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer
-                        ),
-                        shape = RoundedCornerShape(16.dp),
-                        contentPadding = PaddingValues(16.dp)
-                    ) {
-                        Text(
-                            text = "Login",
-                            fontSize = 14.sp,
-                            fontFamily = medium,
-                            color = Color.Black
-                        )
-                    }
-                    ButtonGoogleSignIn(modifier = modifier, onGoogleSignInButtonClick = {
-                        val gso =
-                            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                .requestEmail()
-                                .requestIdToken("225181955346-optbgqie0019o21o6d77h7b5inf7op6s.apps.googleusercontent.com")
-                                .build()
-                        val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                        launcher.launch(googleSignInClient.signInIntent)
-                    },
-                        loading = loading)
-
-                    Text(
-                        buildAnnotatedString {
-                            append(stringResource(id = R.string.not_registered))
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                append(" ")
-                                append(stringResource(id = R.string.sign_up_title))
-                                append(" ! ")
-                            }
-                        },
-                        fontSize = 16.sp,
-                        fontFamily = regular,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    )
-                    Row(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .wrapContentHeight(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Divider(
-                            modifier = modifier
-                                .weight(1f)
-                                .fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-
-                        Text(
-                            text = stringResource(id = R.string.or),
-                            modifier = modifier.padding(horizontal = 12.dp),
-                            fontSize = 16.sp,
-                            fontFamily = regular,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
-
-                        Divider(
-                            modifier = modifier
-                                .weight(1f)
-                                .fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                    Text(
-                        text = stringResource(id = R.string.continue_without_registration),
-                        fontSize = 16.sp,
-                        fontFamily = regular,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = modifier.clickable {
-                            onContinueWithoutLoginClick.invoke()
-                        }
-                    )
-                }
+                Text(
+                    text = stringResource(R.string.continue_with_email),
+                    fontSize = 14.sp,
+                    fontFamily = medium,
+                    color = Color.White
+                )
             }
+            Row(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .wrapContentHeight(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                HorizontalDivider(
+                    modifier = modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+
+                Text(
+                    text = stringResource(id = R.string.or),
+                    modifier = modifier.padding(horizontal = 12.dp),
+                    fontSize = 16.sp,
+                    fontFamily = bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+
+                HorizontalDivider(
+                    modifier = modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+            Text(
+                text = stringResource(id = R.string.continue_without_registration),
+                fontSize = 16.sp,
+                fontFamily = bold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                textAlign = TextAlign.Center,
+                modifier = modifier.clickable {
+                    onContinueWithoutLoginClick.invoke()
+                }
+            )
         }
     }
+}

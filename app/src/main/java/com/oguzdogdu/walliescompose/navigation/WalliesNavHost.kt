@@ -24,6 +24,7 @@ import com.oguzdogdu.walliescompose.features.home.navigateToHomeScreen
 import com.oguzdogdu.walliescompose.features.latest.latestScreen
 import com.oguzdogdu.walliescompose.features.latest.navigateToLatestScreen
 import com.oguzdogdu.walliescompose.features.login.LoginScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
 import com.oguzdogdu.walliescompose.features.login.loginScreen
 import com.oguzdogdu.walliescompose.features.popular.navigateToPopularScreen
 import com.oguzdogdu.walliescompose.features.popular.popularScreen
@@ -46,7 +47,8 @@ fun WalliesNavHost(
     appState: MainAppState,
     modifier: Modifier = Modifier,
     startDestination: String = SplashScreenNavigationRoute,
-    isAuthenticated:Boolean
+    isAuthenticated:Boolean,
+    googleAuthUiClient: GoogleAuthUiClient
 ) {
 
     val navController = appState.navController
@@ -85,7 +87,7 @@ fun WalliesNavHost(
                 }
             })
         navigation(startDestination = LoginScreenNavigationRoute, route = AUTH) {
-            loginScreen(navigateToHome = {
+            loginScreen(googleAuthUiClient = googleAuthUiClient,navigateToHome = {
                 navController.navigate(HomeScreenNavigationRoute) {
                     popUpTo(LoginScreenNavigationRoute){
                         inclusive = true
