@@ -69,7 +69,7 @@
     <string name="password_must_contain_upper_and_lower_case_letters">Password must contain upper and lower case letters !</string>
     <string name="one_special_character_required">One special character required !</string>
     <string name="forgot_password">I forgot my password</string>
-    <string name="forgot_password_title">Change Password</string>
+    <string name="forgot_password_title">Forgot your password?</string>
     <string name="password_change">Your Password Has Been Changed</string>
     <string name="email_send">Password recovery mail has been sent</string>
     <string name="en_language">English</string>
@@ -122,5 +122,8 @@
     <string name="sign_in_to_wallies">Sign in to Wallies</string>
     <string name="sign_in_desc">You can use your account to use and save different wallpapers</string>
     <string name="web_client_id" translatable="false">225181955346-optbgqie0019o21o6d77h7b5inf7op6s.apps.googleusercontent.com</string>
+    <string name="sign_in_desc_title">You can log in with your existing account or create a new account.</string>
+    <string name="sign_in">Sign in</string>
+    <string name="reset_here">Reset here</string>
 
 </resources>
