@@ -78,7 +78,6 @@ fun HomeScreenRoute(
     onSearchClick: () -> Unit,
     navigateBack:() -> Unit
 ) {
-    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val homeUiState by viewModel.homeListState.collectAsStateWithLifecycle()
     val authUserProfileImage by viewModel.userProfileImage.collectAsStateWithLifecycle()
