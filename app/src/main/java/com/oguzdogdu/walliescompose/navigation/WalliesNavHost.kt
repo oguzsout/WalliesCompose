@@ -26,6 +26,8 @@ import com.oguzdogdu.walliescompose.features.latest.navigateToLatestScreen
 import com.oguzdogdu.walliescompose.features.login.LoginScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
 import com.oguzdogdu.walliescompose.features.login.loginScreen
+import com.oguzdogdu.walliescompose.features.login.signinwithemail.SignInWithEmailScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.login.signinwithemail.signInWithEmailScreen
 import com.oguzdogdu.walliescompose.features.popular.navigateToPopularScreen
 import com.oguzdogdu.walliescompose.features.popular.popularScreen
 import com.oguzdogdu.walliescompose.features.profiledetail.navigation.navigateToProfileDetailScreen
@@ -72,7 +74,6 @@ fun WalliesNavHost(
                 ExitTransition.None
             }
     ) {
-
             splashScreen(goToLoginFlow = {
                 navController.navigate(LoginScreenNavigationRoute) {
                     popUpTo(SplashScreenNavigationRoute) {
@@ -86,6 +87,7 @@ fun WalliesNavHost(
                     }
                 }
             })
+
         navigation(startDestination = LoginScreenNavigationRoute, route = AUTH) {
             loginScreen(googleAuthUiClient = googleAuthUiClient,navigateToHome = {
                 navController.navigate(HomeScreenNavigationRoute) {
@@ -101,8 +103,20 @@ fun WalliesNavHost(
                         }
                     }
                 }, navigateBack = {
-                    appState.onBackPress()
+                    navController.popBackStack()
+                }, navigateToSignInEmail = {
+                    navController.navigate(SignInWithEmailScreenNavigationRoute)
                 })
+
+            signInWithEmailScreen(navigateToHome = {
+                navController.navigate(HomeScreenNavigationRoute) {
+                    popUpTo(LoginScreenNavigationRoute){
+                        inclusive = true
+                    }
+                }
+            }, navigateBack = {
+                navController.popBackStack()
+            })
         }
 
         navigation(startDestination = HomeScreenNavigationRoute, route = CONTENT) {

@@ -70,7 +70,7 @@
     <string name="password_must_contain_upper_and_lower_case_letters">Şifren büyük ve küçük harf içermeli !</string>
     <string name="one_special_character_required">Şifren 1 özel karakter içermeli !</string>
     <string name="forgot_password">Şifremi unuttum</string>
-    <string name="forgot_password_title">Şifre Değiştir</string>
+    <string name="forgot_password_title">Şifrenizi mi unuttunuz?</string>
     <string name="password_change">Şifren Değiştirildi</string>
     <string name="email_send">Şifre sıfırlama maili gönderildi</string>
     <string name="en_language">İngilizce</string>
@@ -122,4 +122,7 @@
     <string name="continue_with_email">E-posta ile devam edin</string>
     <string name="sign_in_to_wallies">Wallies\'te oturum açın</string>
     <string name="sign_in_desc">Hesabınızı farklı duvar kağıtlarını kullanmak ve kaydetmek için kullanabilirsiniz.</string>
+    <string name="sign_in_desc_title">Mevcut hesabınızla giriş yapabilir veya yeni bir hesap oluşturabilirsiniz.</string>
+    <string name="sign_in">Oturum aç</string>
+    <string name="reset_here">Buradan sıfırlayın</string>
 </resources>

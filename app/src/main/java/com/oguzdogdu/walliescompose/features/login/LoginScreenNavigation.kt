@@ -17,6 +17,7 @@ fun NavController.navigateToLoginScreen(
 fun NavGraphBuilder.loginScreen(
     googleAuthUiClient: GoogleAuthUiClient,
     navigateToHome: () -> Unit,
+    navigateToSignInEmail: () -> Unit,
     onContinueWithoutLoginClick: () -> Unit,
     navigateBack: () -> Unit
 ) {
@@ -31,6 +32,8 @@ fun NavGraphBuilder.loginScreen(
            },
            navigateBack = {
                navigateBack.invoke()
+           }, navigateToSignInEmail = {
+               navigateToSignInEmail.invoke()
            })
     }
 }

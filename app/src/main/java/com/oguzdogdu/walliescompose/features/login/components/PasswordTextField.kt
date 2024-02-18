@@ -2,6 +2,7 @@ package com.oguzdogdu.walliescompose.features.login.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
@@ -29,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.util.FieldValidators
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PasswordTextField(modifier: Modifier, onChangePassword: (String) -> Unit) {
 
@@ -84,6 +84,7 @@ fun PasswordTextField(modifier: Modifier, onChangePassword: (String) -> Unit) {
         },
         modifier = modifier
             .fillMaxWidth()
+            .wrapContentHeight()
             .padding(horizontal = 16.dp)
     )
 }

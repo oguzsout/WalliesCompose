@@ -7,7 +7,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -28,8 +26,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ShapeDefaults
-import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,7 +36,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -67,47 +62,40 @@ fun LoginScreenRoute(
     viewModel: LoginViewModel = hiltViewModel(),
     googleAuthUiClient: GoogleAuthUiClient,
     navigateToHome: () -> Unit,
+    navigateToSignInEmail: () -> Unit,
     onContinueWithoutLoginClick: () -> Unit,
-    navigateBack:() -> Unit
+    navigateBack: () -> Unit
 ) {
 
     val loginState by viewModel.loginState.collectAsStateWithLifecycle()
-
-    LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
-        viewModel.handleUIEvent(LoginScreenEvent.ButtonState)
-    }
 
     BackHandler(enabled = true) {
         navigateBack.invoke()
     }
 
-    Scaffold(modifier = modifier
-        .fillMaxSize()) {
+    Scaffold(
+        modifier = modifier.fillMaxSize()
+    ) {
         Column(
             modifier = modifier
                 .padding(it)
                 .fillMaxSize()
         ) {
-            LoginScreenContent(state = loginState,modifier = modifier, googleAuthUiClient = googleAuthUiClient,onEmailChange = { email ->
-                viewModel.setEmail(email)
-                viewModel.handleUIEvent(LoginScreenEvent.ButtonState)
-            },
-                onPasswordChange = { password ->
-                    viewModel.setPassword(password)
-                    viewModel.handleUIEvent(LoginScreenEvent.ButtonState)
-                }, onLoginButtonClick = { email, password ->
-                    viewModel.handleUIEvent(LoginScreenEvent.UserSignIn(email, password))
-                },
+            LoginScreenContent(state = loginState,
+                modifier = modifier,
+                googleAuthUiClient = googleAuthUiClient,
                 onContinueWithoutLoginClick = {
                     onContinueWithoutLoginClick.invoke()
                 },
-                onGoogleSignInButtonClicked = {idToken ->
+                onGoogleSignInButtonClicked = { idToken ->
                     viewModel.handleUIEvent(LoginScreenEvent.GoogleButton(idToken = idToken))
                 },
                 navigateToHome = {
                     navigateToHome.invoke()
-                }
-            )
+                },
+                navigateToSignInEmail = {
+                    navigateToSignInEmail.invoke()
+                })
         }
     }
 }
@@ -117,20 +105,12 @@ fun LoginScreenContent(
     state: LoginState,
     modifier: Modifier,
     googleAuthUiClient: GoogleAuthUiClient,
-    onEmailChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit,
-    onLoginButtonClick: (String, String) -> Unit,
     onContinueWithoutLoginClick: () -> Unit,
     onGoogleSignInButtonClicked: (String) -> Unit,
+    navigateToSignInEmail: () -> Unit,
     navigateToHome: () -> Unit
 ) {
-    var buttonEnabled by remember { mutableStateOf(false) }
-    var email by remember {
-        mutableStateOf("")
-    }
-    var password by remember {
-        mutableStateOf("")
-    }
+
     var loading by remember {
         mutableStateOf(false)
     }
@@ -138,21 +118,19 @@ fun LoginScreenContent(
     val scope = rememberCoroutineScope()
 
     val launcher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.StartIntentSenderForResult(),
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartIntentSenderForResult(),
             onResult = { result ->
                 Log.d("TAG", "Activity")
                 if (result.resultCode == Activity.RESULT_OK) {
                     scope.launch {
-                        val signInResult =
-                            googleAuthUiClient.signInWithIntent(
-                                intent = result.data ?: return@launch
-                            )
+                        val signInResult = googleAuthUiClient.signInWithIntent(
+                            intent = result.data ?: return@launch
+                        )
                         onGoogleSignInButtonClicked.invoke(signInResult.orEmpty())
                     }
                 }
-            }
-        )
+            })
+
     LaunchedEffect(state) {
         when (state) {
             is LoginState.UserSignIn -> {
@@ -168,13 +146,10 @@ fun LoginScreenContent(
                 loading = state.loading
             }
 
-            is LoginState.ButtonEnabled -> {
-                buttonEnabled = state.isEnabled
-            }
-
             else -> {}
         }
     }
+
     Box(modifier = modifier.fillMaxSize()) {
 
         Column(
@@ -191,8 +166,8 @@ fun LoginScreenContent(
                     id = R.string.app_logo
                 ),
                 tint = Color.Unspecified,
-                modifier = modifier
-                    .size(width = 72.dp, height = 72.dp))
+                modifier = modifier.size(width = 72.dp, height = 72.dp)
+            )
             Text(
                 text = stringResource(R.string.sign_in_to_wallies),
                 fontSize = 24.sp,
@@ -218,15 +193,18 @@ fun LoginScreenContent(
                 modifier = modifier, onGoogleSignInButtonClick = {
                     scope.launch {
                         val intentSender = googleAuthUiClient.signIn()
-                        launcher.launch(IntentSenderRequest.Builder(intentSender = intentSender ?: return@launch).build())
+                        launcher.launch(
+                            IntentSenderRequest.Builder(
+                                intentSender = intentSender ?: return@launch
+                            ).build()
+                        )
                     }
-                },
-                loading = loading
+                }, loading = loading
             )
 
             Button(
                 onClick = {
-
+                    navigateToSignInEmail.invoke()
                 },
                 modifier = modifier
                     .fillMaxWidth()
@@ -273,16 +251,14 @@ fun LoginScreenContent(
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
-            Text(
-                text = stringResource(id = R.string.continue_without_registration),
+            Text(text = stringResource(id = R.string.continue_without_registration),
                 fontSize = 16.sp,
                 fontFamily = bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 textAlign = TextAlign.Center,
                 modifier = modifier.clickable {
                     onContinueWithoutLoginClick.invoke()
-                }
-            )
+                })
         }
     }
 }
