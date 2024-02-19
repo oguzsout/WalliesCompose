@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -45,6 +46,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.features.component.ValidateStateSnackbar
+import com.oguzdogdu.walliescompose.features.component.WalliesSnackbar
 import com.oguzdogdu.walliescompose.features.login.components.EmailTextField
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import kotlinx.coroutines.launch
@@ -60,6 +63,9 @@ fun ForgotPasswordScreenRoute(
     val forgotPasswordScreenState by viewModel.forgotPasswordState.collectAsStateWithLifecycle()
     val snackState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    var snackbarState by remember {
+        mutableStateOf(false)
+    }
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
         viewModel.handleUIEvent(ForgotPasswordScreenEvent.ButtonState)
@@ -102,10 +108,13 @@ fun ForgotPasswordScreenRoute(
             )
         }
     }, snackbarHost = {
-        SnackbarHost(
-            hostState = snackState
-        )
-    }) {
+        SnackbarHost(snackState) { data ->
+            WalliesSnackbar(
+                snackbarData = data,
+                validateStateSnackbar = if (snackbarState == true) ValidateStateSnackbar.SUCCESS else ValidateStateSnackbar.ERROR,
+                shape = RoundedCornerShape(16.dp)
+            )
+    }}) {
         Column(
             modifier = modifier
                 .padding(it)
@@ -121,7 +130,8 @@ fun ForgotPasswordScreenRoute(
                 navigateToHome = {
                     navigateToHome.invoke()
                 },
-                showMessage = {message ->
+                showMessage = {message, status ->
+                    snackbarState = status
                     coroutineScope.launch {
                         snackState.showSnackbar(message)
                     }
@@ -138,7 +148,7 @@ fun ForgotPasswordScreenContent(
     modifier: Modifier,
     onEmailChange: (String) -> Unit,
     onSendToEmailButtonClick: (String) -> Unit,
-    showMessage: (String) -> Unit,
+    showMessage: (String,Boolean) -> Unit,
     navigateToHome: () -> Unit,
 ) {
     var buttonEnabled by remember { mutableStateOf(false) }
@@ -158,7 +168,7 @@ fun ForgotPasswordScreenContent(
             }
 
             is ForgotPasswordScreenState.SendEmailError -> {
-                Toast.makeText(context, state.error,Toast.LENGTH_SHORT).show()
+                showMessage.invoke(state.error,false)
             }
 
             is ForgotPasswordScreenState.Loading -> {
@@ -166,7 +176,7 @@ fun ForgotPasswordScreenContent(
             }
             is ForgotPasswordScreenState.ProcessStat -> {
                 if (state.isCompleted){
-                    showMessage.invoke(context.getString(R.string.reset_password_validation_desc))
+                    showMessage.invoke(context.getString(R.string.reset_password_validation_desc),true)
                 }
             }
 
