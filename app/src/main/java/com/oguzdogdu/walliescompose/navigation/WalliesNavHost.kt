@@ -24,6 +24,9 @@ import com.oguzdogdu.walliescompose.features.home.navigateToHomeScreen
 import com.oguzdogdu.walliescompose.features.latest.latestScreen
 import com.oguzdogdu.walliescompose.features.latest.navigateToLatestScreen
 import com.oguzdogdu.walliescompose.features.login.LoginScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.login.forgotpassword.ForgotPasswordScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.login.forgotpassword.forgotPasswordScreen
+import com.oguzdogdu.walliescompose.features.login.forgotpassword.navigateToForgotPasswordScreen
 import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
 import com.oguzdogdu.walliescompose.features.login.loginScreen
 import com.oguzdogdu.walliescompose.features.login.signinwithemail.SignInWithEmailScreenNavigationRoute
@@ -115,6 +118,12 @@ fun WalliesNavHost(
                     }
                 }
             }, navigateBack = {
+                navController.popBackStack()
+            }, navigateToForgotPassword = {
+                navController.navigateToForgotPasswordScreen()
+            }
+            )
+            forgotPasswordScreen(navigateToHome = {}, navigateBack = {
                 navController.popBackStack()
             })
         }

@@ -1,5 +1,6 @@
 package com.oguzdogdu.walliescompose.data.repository
 
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -81,5 +82,9 @@ class UserAuthenticationRepositoryImpl @Inject constructor(
             favorites = favorites
         )
         return flowOf(result.toUserDomain()).toResource()
+    }
+
+    override suspend fun forgotMyPassword(email: String): Task<Void> {
+        return auth.sendPasswordResetEmail(email)
     }
 }

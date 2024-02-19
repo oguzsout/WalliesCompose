@@ -3,6 +3,7 @@ package com.oguzdogdu.walliescompose.features.login.signinwithemail
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,6 +57,7 @@ fun SignInWithEmailScreenRoute(
     viewModel: SignInWithEmailViewModel = hiltViewModel(),
     navigateToHome: () -> Unit,
     onCreateNewAccountClick: () -> Unit,
+    navigateToForgotPassword: () -> Unit,
     navigateBack:() -> Unit
 ) {
 
@@ -90,6 +92,9 @@ fun SignInWithEmailScreenRoute(
                     navigateToHome.invoke()
                 }, navigateToBack = {
                     navigateBack.invoke()
+                },
+                navigateToForgotPassword = {
+                    navigateToForgotPassword.invoke()
                 }
             )
         }
@@ -104,7 +109,8 @@ fun SignInWithEmailScreenContent(
     onPasswordChange: (String) -> Unit,
     onLoginButtonClick: (String, String) -> Unit,
     navigateToHome: () -> Unit,
-    navigateToBack: () -> Unit
+    navigateToBack: () -> Unit,
+    navigateToForgotPassword: () -> Unit
 ) {
     var buttonEnabled by remember { mutableStateOf(false) }
     var email by remember {
@@ -196,7 +202,9 @@ fun SignInWithEmailScreenContent(
                 fontSize = 14.sp,
                 fontFamily = medium,
                 modifier = modifier
-                    .align(Alignment.CenterHorizontally)
+                    .align(Alignment.CenterHorizontally).clickable {
+                        navigateToForgotPassword.invoke()
+                    }
             )
         }
 
