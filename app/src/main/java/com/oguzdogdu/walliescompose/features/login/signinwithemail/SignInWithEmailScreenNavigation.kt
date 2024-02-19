@@ -15,7 +15,8 @@ fun NavController.navigateToSignInWithEmailScreen(
 
 fun NavGraphBuilder.signInWithEmailScreen(
     navigateToHome: () -> Unit,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    navigateToForgotPassword: () -> Unit
 ) {
     composable(
         SignInWithEmailScreenNavigationRoute
@@ -23,6 +24,8 @@ fun NavGraphBuilder.signInWithEmailScreen(
         SignInWithEmailScreenRoute(
             navigateToHome = { navigateToHome.invoke() },
             onCreateNewAccountClick = { },
-            navigateBack = { navigateBack.invoke() })
+            navigateBack = { navigateBack.invoke() },
+            navigateToForgotPassword = { navigateToForgotPassword.invoke() }
+        )
     }
 }

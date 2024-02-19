@@ -125,5 +125,6 @@
     <string name="sign_in_desc_title">You can log in with your existing account or create a new account.</string>
     <string name="sign_in">Sign in</string>
     <string name="reset_here">Reset here</string>
+    <string name="reset_password_validation_desc">We have sent a password change link to your e-mail. Please check your inbox.</string>
 
 </resources>
