@@ -125,4 +125,5 @@
     <string name="sign_in_desc_title">Mevcut hesabınızla giriş yapabilir veya yeni bir hesap oluşturabilirsiniz.</string>
     <string name="sign_in">Oturum aç</string>
     <string name="reset_here">Buradan sıfırlayın</string>
+    <string name="reset_password_validation_desc">E-mailine şifre değiştirme linkini gönderdik. Lütfen gelen kutusunu kontrol et.</string>
 </resources>
