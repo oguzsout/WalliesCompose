@@ -30,5 +30,3 @@ This project uses many of the popular libraries, plugins and tools of the androi
 - [Paging 3](https://developer.android.com/jetpack/androidx/releases/paging) - The Paging library helps you load and display pages of data from a larger dataset from local storage or over network.
 - [Room](https://developer.android.com/training/data-storage/room) - The room persistence library it is an abstraction layer over SQLite.
 - [Coil](https://github.com/coil-kt/coil) - Image loading for Android backed by Kotlin Coroutines.
-- [Balloon](https://github.com/skydoves/Balloon) - Modernized and sophisticated tooltips, fully customizable with an arrow and animations on Android.
-- [PowerMenu](https://github.com/skydoves/PowerMenu) - PowerMenu is a modernized and fully customizable popup menu, which can be displayed on top of layouts.
