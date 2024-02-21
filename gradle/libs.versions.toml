@@ -2,6 +2,7 @@
 accompanist-permissions = "0.35.0-alpha"
 accompanist-swiperefresh = "0.34.0"
 agp = "8.2.2"
+balloon-compose = "1.6.4"
 datastore-preferences = "1.0.0"
 firebase-bom = "32.7.2"
 firebase-auth-ktx = "22.3.1"
@@ -38,6 +39,7 @@ androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref =
 androidx-material3-window-size = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "windowsize" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-work" }
 androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hilt-work" }
+balloon-compose = { module = "com.github.skydoves:balloon-compose", version.ref = "balloon-compose" }
 compose-coil = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle-runtime-ktx" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle-runtime-ktx" }

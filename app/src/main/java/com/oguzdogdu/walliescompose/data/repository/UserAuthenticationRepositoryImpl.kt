@@ -87,4 +87,6 @@ class UserAuthenticationRepositoryImpl @Inject constructor(
     override suspend fun forgotMyPassword(email: String): Task<Void> {
         return auth.sendPasswordResetEmail(email)
     }
+
+    override suspend fun signOut() = auth.signOut()
 }

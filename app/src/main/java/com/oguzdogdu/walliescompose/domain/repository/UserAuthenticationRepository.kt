@@ -13,4 +13,5 @@ interface UserAuthenticationRepository {
     suspend fun signInWithGoogle(idToken: String?):Flow<Resource<AuthResult>>
     suspend fun fetchUserInfos():Flow<Resource<User?>>
     suspend fun forgotMyPassword(email: String): Task<Void>
+    suspend fun signOut()
 }
