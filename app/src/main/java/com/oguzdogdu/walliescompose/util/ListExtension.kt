@@ -11,12 +11,15 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import com.oguzdogdu.walliescompose.R
 
 
 @Composable
@@ -41,14 +44,14 @@ fun <T> LazyItemScope.ReusableMenuRow(
                         .height(64.dp)
                         .clickable { onClick.invoke(itemIndex) }
                         .background(
-                            color = MaterialTheme.colorScheme.outlineVariant,
+                            color = MaterialTheme.colorScheme.surfaceVariant,
                             shape = mediumBackground(index = itemIndex, size = data.size)
                         )
                 ) {
                     itemContent(data[itemIndex])
                 }
                 if (index < size - 1 && columnIndex < size - 1) {
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier.fillMaxWidth(), thickness = 1.dp, color = Color.Gray
                     )
                 }

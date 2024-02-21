@@ -76,6 +76,7 @@ fun HomeScreenRoute(
     onLatestClick: (String) -> Unit,
     onPopularClick: (String) -> Unit,
     onSearchClick: () -> Unit,
+    onUserPhotoClick: () -> Unit,
     navigateBack:() -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -115,7 +116,7 @@ fun HomeScreenRoute(
             horizontalArrangement = Arrangement.Absolute.SpaceBetween
         ) {
             IconButton(
-                onClick = {  },
+                onClick = { onUserPhotoClick.invoke() },
                 modifier = modifier
                     .wrapContentSize()
                     .weight(1f)

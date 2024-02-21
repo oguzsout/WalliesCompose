@@ -237,7 +237,7 @@ private fun clearAppCache(context: Context, viewModel: SettingsViewModel) {
         else -> Log.d("AppCache", "Cache directory does not exist")
     }
 }
-fun handleMenuItemClick(
+private fun handleMenuItemClick(
     itemIndex: Int,
     coroutineScope: CoroutineScope,
     openThemeDialog: (Boolean) -> Unit,
