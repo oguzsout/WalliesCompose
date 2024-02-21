@@ -12,6 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.navigation
 import com.oguzdogdu.walliescompose.features.appstate.MainAppState
+import com.oguzdogdu.walliescompose.features.authenticateduser.AuthenticatedUserScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.authenticateduser.authenticatedUserScreen
+import com.oguzdogdu.walliescompose.features.authenticateduser.navigateToAuthenticatedUserScreen
 import com.oguzdogdu.walliescompose.features.collections.collectionScreen
 import com.oguzdogdu.walliescompose.features.collections.detaillist.collectionDetailListScreen
 import com.oguzdogdu.walliescompose.features.collections.detaillist.navigateToCollectionDetailListScreen
@@ -153,6 +156,9 @@ fun WalliesNavHost(
                 },
                 navigateBack = {
                     appState.onBackPress()
+                },
+                onUserPhotoClick = {
+                    navController.navigateToAuthenticatedUserScreen()
                 }
             )
             collectionScreen(onCollectionClick = {id,title ->
@@ -218,6 +224,15 @@ fun WalliesNavHost(
                 )
             }, onBackClick = {
                 navController.popBackStack()
+            })
+            authenticatedUserScreen(navigateBack = {
+                navController.popBackStack()
+            }, navigateToLogin = {
+                navController.navigate(LoginScreenNavigationRoute) {
+                    popUpTo(AuthenticatedUserScreenNavigationRoute){
+                        inclusive = true
+                    }
+                }
             })
         }
     }
