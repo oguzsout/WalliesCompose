@@ -21,6 +21,7 @@ fun NavGraphBuilder.homeScreen(
     onPopularClick: (String) -> Unit,
     onLatestClick: (String) -> Unit,
     onSearchClick: () -> Unit,
+    onUserPhotoClick: () -> Unit,
     navigateBack:() -> Unit
 ) {
     composable(
@@ -43,6 +44,9 @@ fun NavGraphBuilder.homeScreen(
                 onLatestSeeAllClick.invoke()
             }, navigateBack = {
                 navigateBack.invoke()
+            },
+            onUserPhotoClick = {
+                onUserPhotoClick.invoke()
             }
         )
     }
