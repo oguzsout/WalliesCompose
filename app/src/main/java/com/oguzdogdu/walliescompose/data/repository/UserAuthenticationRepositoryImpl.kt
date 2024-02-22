@@ -89,4 +89,10 @@ class UserAuthenticationRepositoryImpl @Inject constructor(
     }
 
     override suspend fun signOut() = auth.signOut()
+
+    override suspend fun changeProfilePhoto(photo: String?) {
+        auth.currentUser?.uid?.let {
+            firebaseFirestore.collection(COLLECTION_PATH).document(it).update(IMAGE, photo)
+        }?.await()
+    }
 }
