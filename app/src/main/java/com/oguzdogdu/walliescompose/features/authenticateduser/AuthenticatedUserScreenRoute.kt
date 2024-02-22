@@ -1,13 +1,14 @@
 package com.oguzdogdu.walliescompose.features.authenticateduser
 
-import android.annotation.SuppressLint
+import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -36,7 +37,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,6 +59,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.features.authenticateduser.changeprofilephoto.ChangeProfilePhotoDialog
 import com.oguzdogdu.walliescompose.features.settings.components.MenuRowItems
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.util.MenuRow
@@ -82,6 +83,19 @@ fun AuthenticatedUserScreenRoute(
 ) {
 
     val userState by viewModel.userState.collectAsStateWithLifecycle()
+    val dialogState by viewModel.changeProfilePhotoBottomSheetOpenStat.collectAsStateWithLifecycle()
+
+    var imageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let {
+                imageUri = it
+            }
+        }
+    )
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
         viewModel.handleUiEvents(AuthenticatedUserEvent.CheckUserAuth)
@@ -130,10 +144,27 @@ fun AuthenticatedUserScreenRoute(
                 .padding(it)
                 .fillMaxSize()
         ) {
-       AuthenticatedUserScreenContent(userScreenState = userState, modifier = modifier, onSignOutClick = {
-           viewModel.handleUiEvents(AuthenticatedUserEvent.SignOut)
-           navigateToLogin.invoke()
-       })
+            AuthenticatedUserScreenContent(
+                userScreenState = userState,
+                modifier = modifier,
+                profilePhotoUri = imageUri,
+                onSignOutClick = {
+                    viewModel.handleUiEvents(AuthenticatedUserEvent.SignOut)
+                    navigateToLogin.invoke()
+                },
+                onChangeProfilePhotoClick = { dialog ->
+                    viewModel.handleUiEvents(
+                        AuthenticatedUserEvent.OpenChangeProfileBottomSheet(
+                            isOpen = dialog
+                        )
+                    )
+                }, onProfilePhotoClick = {
+                    galleryLauncher.launch("image/*")
+                }, onChangeProfilePhotoButtonClick = {
+                    viewModel.handleUiEvents(AuthenticatedUserEvent.ChangeProfileImage(photoUri = imageUri))
+                } ,dismissDialog = {dialog ->
+                                   viewModel.handleUiEvents(AuthenticatedUserEvent.OpenChangeProfileBottomSheet(dialog))
+                },showDialog = dialogState)
         }
     }
 }
@@ -142,7 +173,13 @@ fun AuthenticatedUserScreenRoute(
 fun AuthenticatedUserScreenContent(
     userScreenState: AuthenticatedUserScreenState?,
     modifier: Modifier,
-    onSignOutClick: () -> Unit
+    profilePhotoUri: Uri?,
+    onSignOutClick: () -> Unit,
+    onChangeProfilePhotoClick: (Boolean) -> Unit,
+    onProfilePhotoClick: () -> Unit,
+    onChangeProfilePhotoButtonClick: () -> Unit,
+    dismissDialog: (Boolean) -> Unit,
+    showDialog: Boolean
 ) {
     var isGoogleSign by remember {
         mutableStateOf(false)
@@ -174,10 +211,20 @@ fun AuthenticatedUserScreenContent(
                             AuthenticatedUserWelcomeCard(
                                 modifier = modifier,
                                 userInfos = userScreenState,
-                                isGoogleSignIn = isGoogleSign
+                                isGoogleSignIn = isGoogleSign,
+                                onChangeProfilePhotoClick = {
+                                    onChangeProfilePhotoClick.invoke(it)
+                                }
                             )
                             EditProfileInformationContent(modifier = modifier)
                         }
+                        ChangeProfilePhotoDialog(userInfos = userScreenState, modifier = modifier, profilePhotoUri = profilePhotoUri ,isOpen = showDialog, onDismiss = {
+                           dismissDialog.invoke(false)
+                        }, onProfilePhotoClick = {
+                            onProfilePhotoClick.invoke()
+                        }, onChangeProfilePhotoButtonClick = {
+                            onChangeProfilePhotoButtonClick.invoke()
+                        })
                         Button(
                             onClick = {
                                       onSignOutClick.invoke()
@@ -230,8 +277,10 @@ fun UserNotAuthenticatedInfo(
 fun AuthenticatedUserWelcomeCard(
     modifier: Modifier,
     userInfos: AuthenticatedUserScreenState.UserInfos,
-    isGoogleSignIn: Boolean
+    isGoogleSignIn: Boolean,
+    onChangeProfilePhotoClick: (Boolean) -> Unit
 ) {
+    val openBottomSheetOfProfilePhotoChange by remember { mutableStateOf(false) }
 
     var balloonWindow: BalloonWindow? by remember { mutableStateOf(null) }
 
@@ -306,7 +355,7 @@ fun AuthenticatedUserWelcomeCard(
                                 .clip(RoundedCornerShape(32.dp))
                                 .background(Color.White)
                                 .clickable {
-
+                                    onChangeProfilePhotoClick.invoke(!openBottomSheetOfProfilePhotoChange)
                                 },
                         )
                     }

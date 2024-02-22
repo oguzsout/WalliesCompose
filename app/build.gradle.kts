@@ -99,6 +99,7 @@ dependencies {
     implementation(libs.material3)
     implementation (libs.androidx.material3.window.size)
     implementation(libs.androidx.material3.android)
+    implementation(libs.firebase.storage.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)

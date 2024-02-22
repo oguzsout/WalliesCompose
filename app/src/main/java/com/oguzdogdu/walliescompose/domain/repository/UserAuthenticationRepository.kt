@@ -14,4 +14,5 @@ interface UserAuthenticationRepository {
     suspend fun fetchUserInfos():Flow<Resource<User?>>
     suspend fun forgotMyPassword(email: String): Task<Void>
     suspend fun signOut()
+    suspend fun changeProfilePhoto(photo: String?)
 }

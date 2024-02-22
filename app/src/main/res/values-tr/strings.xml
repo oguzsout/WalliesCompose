@@ -126,4 +126,5 @@
     <string name="sign_in">Oturum aç</string>
     <string name="reset_here">Buradan sıfırlayın</string>
     <string name="reset_password_validation_desc">E-mailine şifre değiştirme linkini gönderdik. Lütfen gelen kutusunu kontrol et.</string>
+    <string name="change_profile_photo_title">Aşağıda bulunan fotoğrafa tıklayarak profil fotoğrafını güncelleyebilirsin.</string>
 </resources>
