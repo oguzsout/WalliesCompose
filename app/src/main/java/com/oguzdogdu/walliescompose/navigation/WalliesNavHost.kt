@@ -228,8 +228,8 @@ fun WalliesNavHost(
             authenticatedUserScreen(navigateBack = {
                 navController.popBackStack()
             }, navigateToLogin = {
-                navController.navigate(LoginScreenNavigationRoute) {
-                    popUpTo(AuthenticatedUserScreenNavigationRoute){
+                navController.navigate(AUTH) {
+                    popUpTo(CONTENT){
                         inclusive = true
                     }
                 }
