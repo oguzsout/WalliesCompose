@@ -6,18 +6,17 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -44,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.ui.theme.medium
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,19 +56,21 @@ fun SetWallpaperImageScreenRoute(
     onSetHomeAndLockButtonClick: () -> Unit
 ) {
     var openBottomSheet by remember { mutableStateOf(isOpen) }
+    val bottomSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
-    val bottomSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
+
     LaunchedEffect(key1 = isOpen) {
         openBottomSheet = isOpen
     }
     if (openBottomSheet) {
+
         ModalBottomSheet(
             modifier = modifier,
             sheetState = bottomSheetState,
+            windowInsets = WindowInsets(0, 0, 0, 0),
             onDismissRequest = {
-                openBottomSheet = false
+                scope.launch { bottomSheetState.hide() }
+                    .invokeOnCompletion { openBottomSheet = false }
                 onDismiss.invoke()
             },
             dragHandle = {
@@ -103,7 +105,7 @@ fun SetWallpaperImageScreenRoute(
                     .padding(8.dp)
                     .wrapContentHeight(),
             ) {
-                BottomSheetContent(modifier,
+                BottomSheetContent(modifier.navigationBarsPadding(),
                     onSetLockButtonClick = {
                     onSetLockButtonClick.invoke()
                 },
