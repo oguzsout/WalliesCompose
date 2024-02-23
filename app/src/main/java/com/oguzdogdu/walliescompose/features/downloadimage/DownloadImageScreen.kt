@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.ui.theme.medium
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,19 +59,22 @@ fun DownloadImageScreenRoute(
     onLowButtonClick: () -> Unit,
 ) {
     var openBottomSheet by remember { mutableStateOf(isOpen) }
+    val bottomSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
-    val bottomSheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
+
     LaunchedEffect(key1 = isOpen) {
         openBottomSheet = isOpen
     }
+
     if (openBottomSheet) {
+
         ModalBottomSheet(
             modifier = modifier,
             sheetState = bottomSheetState,
+            windowInsets = WindowInsets(0, 0, 0, 0),
             onDismissRequest = {
-                openBottomSheet = false
+                scope.launch { bottomSheetState.hide() }
+                    .invokeOnCompletion { openBottomSheet = false }
                 onDismiss.invoke()
             },
             dragHandle = {
@@ -104,7 +109,7 @@ fun DownloadImageScreenRoute(
                     .padding(8.dp)
                     .wrapContentHeight(),
             ) {
-                BottomSheetContent(modifier,
+                BottomSheetContent(modifier.navigationBarsPadding(),
                     onRawButtonClick = {
                     onRawButtonClick.invoke()
                 },
