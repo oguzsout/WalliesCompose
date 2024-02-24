@@ -1,4 +1,7 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import com.android.builder.compiling.BuildConfigType
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -8,8 +11,7 @@ plugins {
     id("dagger.hilt.android.plugin")
     id("com.google.gms.google-services")
 }
-val debugApiKey: String = gradleLocalProperties(rootDir).getProperty("DEBUG_API_KEY")
-val releaseApiKey: String = gradleLocalProperties(rootDir).getProperty("RELEASE_API_KEY")
+
 android {
     namespace = "com.oguzdogdu.walliescompose"
     compileSdk = 34
@@ -30,7 +32,7 @@ android {
 
     buildTypes {
         release {
-            buildConfigField ("String", "API_KEY", releaseApiKey)
+            buildConfigField ("String", "API_KEY", getApiKey())
             isMinifyEnabled = true
             isDebuggable = false
             isShrinkResources = true
@@ -40,7 +42,7 @@ android {
             )
         }
         debug {
-            buildConfigField ("String", "API_KEY", debugApiKey)
+            buildConfigField ("String", "API_KEY", getApiKey())
             isMinifyEnabled = false
             isShrinkResources = false
             isDebuggable = true
@@ -83,6 +85,21 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+fun getApiKey(): String {
+    val propFile = rootProject.file("./local.properties")
+    val properties = Properties()
+
+    properties.load(FileInputStream(propFile))
+
+    return when (BuildConfigType.JAR.name) {
+        "release" -> properties.getProperty(
+            "RELEASE_API_KEY",
+            ""
+        )
+        else -> properties.getProperty("DEBUG_API_KEY", "")
     }
 }
 
