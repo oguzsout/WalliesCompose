@@ -20,10 +20,10 @@ jobs:
              distribution: 'adopt'
              gradle-version: 8.2
          - name: local.properties from secrets
-           run: echo "${{secrets.LOCAL_PROPERTIES }}" > $GITHUB_WORKSPACE/debugapikey.properties
+           run: echo "${{secrets.DEBUG_API_KEY_PROPERTIES }}" > $GITHUB_WORKSPACE/debugapikey.properties
 
          - name: local.properties from secrets
-           run: echo "${{secrets.LOCAL_PROPERTIES }}" > $GITHUB_WORKSPACE/releaseapikey.properties
+           run: echo "${{secrets.RELEASE_API_KEY_PROPERTIES }}" > $GITHUB_WORKSPACE/releaseapikey.properties
 
          - name: Setup Gradle Cache
            uses: actions/cache@v2
