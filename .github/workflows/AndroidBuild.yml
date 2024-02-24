@@ -25,6 +25,14 @@ jobs:
          - name: local.properties from secrets
            run: echo "${{secrets.LOCAL_PROPERTIES }}" > $GITHUB_WORKSPACE/releaseapikey.properties
 
+         - name: Setup Gradle Cache
+           uses: actions/cache@v2
+           with:
+             path: |
+               ~/.gradle/caches
+               ~/.gradle/wrapper
+             key: ${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/**/*.kt') }}
+
          - name: Make gradlew executable
            run: chmod +x ./gradlew
 
