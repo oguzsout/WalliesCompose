@@ -19,11 +19,12 @@ jobs:
              java-version: '19'
              distribution: 'adopt'
              gradle-version: 8.2
-         - name: Get local.properties from secrets
-           run: echo "${{ secrets.DEBUG_API_KEY }}" > $GITHUB_WORKSPACE/debugapikey
+         - name: Access API_KEY
+           run: bundle exec fastlane android deploy
+           env:
+             DEBUG_API_KEY: ${{ secrets.DEBUG_API_KEY }}
+             RELEASE_API_KEY: ${{ secrets.RELEASE_API_KEY }}
 
-         - name: Get local.properties from secrets
-           run: echo "${{ secrets.RELEASE_API_KEY }}" > $GITHUB_WORKSPACE/releaseapikey
 
          - name: Setup Gradle Cache
            uses: actions/cache@v2
