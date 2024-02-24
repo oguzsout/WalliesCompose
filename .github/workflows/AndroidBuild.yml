@@ -31,10 +31,17 @@ jobs:
          - name: Make gradlew executable
            run: chmod +x ./gradlew
 
-         - name: Build with Gradle
+         - name: Access DEBUG_API_KEY
            env:
-               RELEASE_API_KEY: ${{ secrets.RELEASE_API_KEY }}
-               DEBUG_API_KEY: ${{ secrets.DEBUG_API_KEY }}
+             DEBUG_API_KEY: ${{ secrets.DEBUG_API_KEY }}
+           run: echo DEBUG_API_KEY=\"DEBUG_API_KEY\" > ./local.properties
+
+         - name: Access RELEASE_API_KEY
+           env:
+             RELEASE_API_KEY: ${{ secrets.RELEASE_API_KEY }}
+           run: echo RELEASE_API_KEY=\"RELEASE_API_KEY\" > ./local.properties
+
+         - name: Build with Gradle
            run: ./gradlew build
 
          - name: Upload a Build Artifact
