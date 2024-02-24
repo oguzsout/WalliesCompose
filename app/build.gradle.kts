@@ -89,7 +89,7 @@ android {
 }
 
 fun getApiKey(): String {
-    return if (BuildConfigType.JAR.name == "release")
+    return if (BuildConfigType.JAVA_SOURCE.name == "release")
         gradleLocalProperties(rootDir).getProperty("RELEASE_API_KEY")
     else gradleLocalProperties(
         rootDir
