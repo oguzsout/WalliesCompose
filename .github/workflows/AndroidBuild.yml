@@ -1,0 +1,39 @@
+name: AndroidBuild
+on:
+  pull_request:
+    branches: [ develop ]
+  push:
+   branches:
+      - '**'
+
+jobs:
+      build:
+       runs-on : ubuntu-latest
+       steps:
+         - name: Checkout
+           uses: actions/checkout@v4.1.1
+
+         - name: Setup Java JDK
+           uses: actions/setup-java@v4.0.0
+           with:
+             java-version: '19'
+             distribution: 'adopt'
+             gradle-version: 8.2
+         - name: Access DEBUG_API_KEY from Secrets
+           env:
+             DEBUG_API_KEY: ${{ secrets.DEBUG_API_KEY }}
+           run: echo DEBUG_API_KEY=\"DEBUG_API_KEY\" > $GITHUB_WORKSPACE/debugapikey.properties
+
+         - name: Access RELEASE_API_KEY from Secrets
+           env:
+             RELEASE_API_KEY: ${{ secrets.RELEASE_API_KEY }}
+           run: echo RELEASE_API_KEY=\"RELEASE_API_KEY\" > $GITHUB_WORKSPACE/releaseapikey.properties
+
+         - name: Build with Gradle
+           run: ./gradlew assembleDebug
+
+         - name: Upload a Build Artifact
+           uses: actions/upload-artifact@v4.3.1
+           with:
+            name: WalliesCompose.apk
+            path: app/build/outputs/apk/debug/app-debug.apk
