@@ -30,7 +30,10 @@ jobs:
            run: echo RELEASE_API_KEY=\"RELEASE_API_KEY\" > $GITHUB_WORKSPACE/releaseapikey.properties
 
          - name: Build with Gradle
-           run: chmod +x ./gradlew build
+           run: ./gradlew build
+
+         - name: Make gradlew executable
+           run: chmod +x ./gradlew
 
          - name: Upload a Build Artifact
            uses: actions/upload-artifact@v4.3.1
