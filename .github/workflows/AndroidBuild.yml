@@ -22,12 +22,12 @@ jobs:
          - name: Access DEBUG_API_KEY from Secrets
            env:
              DEBUG_API_KEY: ${{ secrets.DEBUG_API_KEY }}
-           run: echo DEBUG_API_KEY=\"DEBUG_API_KEY\" > $GITHUB_WORKSPACE/debugapikey.properties
+           run: echo DEBUG_API_KEY=\"DEBUG_API_KEY\" > ./local.properties
 
          - name: Access RELEASE_API_KEY from Secrets
            env:
              RELEASE_API_KEY: ${{ secrets.RELEASE_API_KEY }}
-           run: echo RELEASE_API_KEY=\"RELEASE_API_KEY\" > $GITHUB_WORKSPACE/releaseapikey.properties
+           run: echo RELEASE_API_KEY=\"RELEASE_API_KEY\" > ./local.properties
 
          - name: Make gradlew executable
            run: chmod +x ./gradlew
