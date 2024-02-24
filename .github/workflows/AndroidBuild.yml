@@ -43,6 +43,9 @@ jobs:
 
          - name: Build with Gradle
            run: ./gradlew build
+           env:
+               RELEASE_API_KEY: ${{ secrets.RELEASE_API_KEY }}
+               DEBUG_API_KEY: ${{ secrets.DEBUG_API_KEY }}
 
          - name: Upload a Build Artifact
            uses: actions/upload-artifact@v4.3.1
