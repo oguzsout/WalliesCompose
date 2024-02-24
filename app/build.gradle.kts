@@ -89,18 +89,11 @@ android {
 }
 
 fun getApiKey(): String {
-    val propFile = rootProject.file("./local.properties")
-    val properties = Properties()
-
-    properties.load(FileInputStream(propFile))
-
-    return when (BuildConfigType.JAR.name) {
-        "release" -> properties.getProperty(
-            "RELEASE_API_KEY",
-            ""
-        )
-        else -> properties.getProperty("DEBUG_API_KEY", "")
-    }
+    return if (BuildConfigType.JAR.name == "release")
+        gradleLocalProperties(rootDir).getProperty("RELEASE_API_KEY")
+    else gradleLocalProperties(
+        rootDir
+    ).getProperty("DEBUG_API_KEY")
 }
 
 
