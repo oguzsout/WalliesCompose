@@ -35,7 +35,7 @@ jobs:
 
          - name: Access RELEASE_API_KEY
            env:
-             RELEASE_API_KEY: ${{ secrets.RELEASE_API_KEY }}
+            RELEASE_API_KEY: ${{ secrets.RELEASE_API_KEY }}
            run: echo RELEASE_API_KEY=\"$RELEASE_API_KEY\" > ./local.properties
 
          - name: Make gradlew executable
