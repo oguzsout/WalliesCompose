@@ -19,15 +19,11 @@ jobs:
              java-version: '19'
              distribution: 'adopt'
              gradle-version: 8.2
-         - name: Access DEBUG_API_KEY
-           env:
-            DEBUG_API_KEY: ${{ secrets.DEBUG_API_KEY }}
-           run: echo DEBUG_API_KEY=\"DEBUG_API_KEY\" > ./local.properties
+         - name: Access DEBUG_API_KEY_PROPERTIES
+           run: echo "${{secrets.DEBUG_API_KEY_PROPERTIES }}" > $GITHUB_WORKSPACE/DEBUG_API_KEY_PROPERTIES
 
-         - name: Access RELEASE_API_KEY
-           env:
-            RELEASE_API_KEY: ${{ secrets.RELEASE_API_KEY }}
-           run: echo RELEASE_API_KEY=\"RELEASE_API_KEY\" > ./local.properties
+         - name: Access RELEASE_API_KEY_PROPERTIES
+           run: echo "${{secrets.RELEASE_API_KEY_PROPERTIES }}" > $GITHUB_WORKSPACE/RELEASE_API_KEY_PROPERTIES
 
 
          - name: Setup Gradle Cache
