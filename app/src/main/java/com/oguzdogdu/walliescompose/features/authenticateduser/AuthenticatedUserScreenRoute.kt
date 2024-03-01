@@ -79,7 +79,8 @@ fun AuthenticatedUserScreenRoute(
     modifier: Modifier = Modifier,
     viewModel: AuthenticatedUserViewModel = hiltViewModel(),
     navigateBack:() -> Unit,
-    navigateToLogin: () -> Unit
+    navigateToLogin: () -> Unit,
+    navigateToChangePassword: () -> Unit
 ) {
 
     val userState by viewModel.userState.collectAsStateWithLifecycle()
@@ -164,6 +165,8 @@ fun AuthenticatedUserScreenRoute(
                     viewModel.handleUiEvents(AuthenticatedUserEvent.ChangeProfileImage(photoUri = imageUri))
                 } ,dismissDialog = {dialog ->
                                    viewModel.handleUiEvents(AuthenticatedUserEvent.OpenChangeProfileBottomSheet(dialog))
+                }, onChangePasswordClick = {
+                    navigateToChangePassword.invoke()
                 },showDialog = dialogState)
         }
     }
@@ -179,6 +182,7 @@ fun AuthenticatedUserScreenContent(
     onProfilePhotoClick: () -> Unit,
     onChangeProfilePhotoButtonClick: () -> Unit,
     dismissDialog: (Boolean) -> Unit,
+    onChangePasswordClick: () -> Unit,
     showDialog: Boolean
 ) {
     var isGoogleSign by remember {
@@ -216,7 +220,9 @@ fun AuthenticatedUserScreenContent(
                                     onChangeProfilePhotoClick.invoke(it)
                                 }
                             )
-                            EditProfileInformationContent(modifier = modifier)
+                            EditProfileInformationContent(modifier = modifier, onChangePasswordClick = {
+                                onChangePasswordClick.invoke()
+                            })
                         }
                         ChangeProfilePhotoDialog(userInfos = userScreenState, modifier = modifier, profilePhotoUri = profilePhotoUri ,isOpen = showDialog, onDismiss = {
                            dismissDialog.invoke(false)
@@ -393,7 +399,7 @@ fun AuthenticatedUserWelcomeCard(
 }
 
 @Composable
-fun EditProfileInformationContent(modifier: Modifier) {
+fun EditProfileInformationContent(modifier: Modifier,onChangePasswordClick: () -> Unit) {
     val scope = rememberCoroutineScope()
     val profileOptionsList = immutableListOf(
         MenuRow(
@@ -434,7 +440,7 @@ fun EditProfileInformationContent(modifier: Modifier) {
                         openEditEmail = {
 
                         }, openChangePassword = {
-
+                            onChangePasswordClick.invoke()
                         }
                     )
                 })
