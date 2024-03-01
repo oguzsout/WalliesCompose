@@ -88,6 +88,13 @@ class UserAuthenticationRepositoryImpl @Inject constructor(
         return auth.sendPasswordResetEmail(email)
     }
 
+    override suspend fun updatePassword(password: String?) : Flow<Resource<Task<Void>?>> = flow {
+        password?.let { newPassword ->
+            val updateTask = auth.currentUser?.updatePassword(newPassword)
+            emit(updateTask)
+        }
+    }.toResource()
+
     override suspend fun signOut() = auth.signOut()
 
     override suspend fun changeProfilePhoto(photo: String?) {

@@ -15,4 +15,5 @@ interface UserAuthenticationRepository {
     suspend fun forgotMyPassword(email: String): Task<Void>
     suspend fun signOut()
     suspend fun changeProfilePhoto(photo: String?)
+    suspend fun updatePassword(password: String?): Flow<Resource<Task<Void>?>>
 }
