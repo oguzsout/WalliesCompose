@@ -103,7 +103,7 @@ fun SignInWithEmailScreenRoute(
 
 @Composable
 fun SignInWithEmailScreenContent(
-    state: SignInWithEmailState?,
+    state: SignInWithEmailState,
     modifier: Modifier,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
