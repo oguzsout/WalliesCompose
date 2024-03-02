@@ -3,6 +3,7 @@ package com.oguzdogdu.walliescompose.features.login.signinwithemail
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.AuthCredential
 import com.oguzdogdu.walliescompose.domain.repository.UserAuthenticationRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.onFailure
 import com.oguzdogdu.walliescompose.domain.wrapper.onLoading
@@ -23,7 +24,7 @@ class SignInWithEmailViewModel @Inject constructor(
     private val authenticationRepository: UserAuthenticationRepository
 ) : ViewModel() {
 
-    private val _signInEmailState: MutableStateFlow<SignInWithEmailState?> = MutableStateFlow(null)
+    private val _signInEmailState: MutableStateFlow<SignInWithEmailState> = MutableStateFlow(SignInWithEmailState.Start)
     val signInEmailState = _signInEmailState.asStateFlow()
 
      private var userEmail = MutableStateFlow("")
@@ -74,15 +75,18 @@ class SignInWithEmailViewModel @Inject constructor(
                 delay(1000)
                 response.onSuccess {
                     _signInEmailState.update {
-                        SignInWithEmailState.Loading(false)
                         SignInWithEmailState.UserSignIn
                     }
                 }
                 response.onFailure {error ->
-                    _signInEmailState.update {
+                    _signInEmailState.update { state ->
                         SignInWithEmailState.ErrorSignIn(
                             errorMessage = error
                         )
+                    }
+                    delay(1000)
+                    _signInEmailState.update {
+                        SignInWithEmailState.Loading(false)
                     }
                 }
             }
