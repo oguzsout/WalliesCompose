@@ -1,8 +1,11 @@
 package com.oguzdogdu.walliescompose.data.repository
 
 import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.oguzdogdu.walliescompose.data.common.Constants.COLLECTION_PATH
@@ -92,6 +95,21 @@ class UserAuthenticationRepositoryImpl @Inject constructor(
         password?.let { newPassword ->
             val updateTask = auth.currentUser?.updatePassword(newPassword)
             emit(updateTask)
+        }
+    }.toResource()
+
+    override suspend fun changeEmail(email: String?, password: String?) : Flow<Resource<Task<Void>?>> = flow {
+        val credential =
+            auth.currentUser?.email?.let { password?.let { password ->
+                EmailAuthProvider.getCredential(it,
+                    password
+                )
+            } }
+        credential?.let {
+            auth.currentUser?.reauthenticate(it)?.await()
+            emit(auth.currentUser?.updateEmail(email.orEmpty()))
+            firebaseFirestore.collection(COLLECTION_PATH).document(auth.currentUser!!.uid)
+                .update(EMAIL, email)
         }
     }.toResource()
 

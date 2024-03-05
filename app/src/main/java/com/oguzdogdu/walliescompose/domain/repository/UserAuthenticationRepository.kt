@@ -1,6 +1,7 @@
 package com.oguzdogdu.walliescompose.domain.repository
 
 import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
 import com.oguzdogdu.walliescompose.domain.model.auth.User
 import com.oguzdogdu.walliescompose.domain.wrapper.Resource
@@ -16,4 +17,5 @@ interface UserAuthenticationRepository {
     suspend fun signOut()
     suspend fun changeProfilePhoto(photo: String?)
     suspend fun updatePassword(password: String?): Flow<Resource<Task<Void>?>>
+    suspend fun changeEmail(email:String?,password: String?): Flow<Resource<Task<Void>?>>
 }
