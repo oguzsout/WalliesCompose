@@ -14,6 +14,8 @@ import androidx.navigation.compose.navigation
 import com.oguzdogdu.walliescompose.features.appstate.MainAppState
 import com.oguzdogdu.walliescompose.features.authenticateduser.AuthenticatedUserScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.authenticateduser.authenticatedUserScreen
+import com.oguzdogdu.walliescompose.features.authenticateduser.changeemail.changeEmailScreen
+import com.oguzdogdu.walliescompose.features.authenticateduser.changeemail.navigateToChangeEmailScreen
 import com.oguzdogdu.walliescompose.features.authenticateduser.changepassword.changePasswordScreen
 import com.oguzdogdu.walliescompose.features.authenticateduser.changepassword.navigateToChangePasswordScreen
 import com.oguzdogdu.walliescompose.features.authenticateduser.navigateToAuthenticatedUserScreen
@@ -237,8 +239,13 @@ fun WalliesNavHost(
                 }
             }, navigateToChangePassword = {
                 navController.navigateToChangePasswordScreen()
+            }, navigateToChangeEmail = {
+                navController.navigateToChangeEmailScreen()
             })
             changePasswordScreen(navigateBack = {
+                navController.popBackStack()
+            })
+            changeEmailScreen(navigateBack = {
                 navController.popBackStack()
             })
         }

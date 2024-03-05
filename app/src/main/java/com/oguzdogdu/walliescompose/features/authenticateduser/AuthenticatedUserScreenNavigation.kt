@@ -16,8 +16,10 @@ fun NavController.navigateToAuthenticatedUserScreen(
 fun NavGraphBuilder.authenticatedUserScreen(
     navigateBack: () -> Unit,
     navigateToLogin: () -> Unit,
-    navigateToChangePassword: () -> Unit
-) {
+    navigateToChangePassword: () -> Unit,
+    navigateToChangeEmail: () -> Unit,
+
+    ) {
     composable(
         AuthenticatedUserScreenNavigationRoute
     ) {
@@ -30,6 +32,8 @@ fun NavGraphBuilder.authenticatedUserScreen(
             },
             navigateToChangePassword = {
                 navigateToChangePassword.invoke()
+            }, navigateToChangeEmail = {
+                navigateToChangeEmail.invoke()
             }
         )
     }
