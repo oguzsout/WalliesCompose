@@ -123,7 +123,8 @@ fun HomeScreenRoute(
             ) {
                 AsyncImage(
                     model = profileImageAuthUser,
-                    contentDescription = "",
+                    contentScale = ContentScale.FillBounds,
+                    contentDescription = "Profile Image",
                     modifier = modifier
                         .height(28.dp)
                         .width(28.dp)
