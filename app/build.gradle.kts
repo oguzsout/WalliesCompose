@@ -100,6 +100,7 @@ dependencies {
     implementation (libs.androidx.material3.window.size)
     implementation(libs.androidx.material3.android)
     implementation(libs.firebase.storage.ktx)
+    implementation(libs.androidx.navigation.testing)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -107,6 +108,7 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.44")
 
     implementation (libs.retrofit)
     implementation (libs.converter.gson)

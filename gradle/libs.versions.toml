@@ -31,6 +31,7 @@ coil = "2.5.0"
 work-runtime-ktx = "2.9.0"
 material3-android = "1.2.0"
 firebase-storage-ktx = "20.3.0"
+navigation-testing = "2.7.7"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist-permissions" }
@@ -82,6 +83,7 @@ ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3-android" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebase-storage-ktx" }
+androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigation-testing" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
