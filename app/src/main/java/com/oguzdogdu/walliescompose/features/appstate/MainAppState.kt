@@ -4,10 +4,12 @@ import android.app.Activity
 import android.content.Context
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -31,7 +33,7 @@ import kotlinx.coroutines.flow.stateIn
 @Composable
 fun rememberMainAppState(
     navController: NavHostController = rememberNavController(),
-     coroutineScope: CoroutineScope,
+    coroutineScope: CoroutineScope = rememberCoroutineScope(),
     networkMonitor: NetworkMonitor,
 ): MainAppState {
     return remember(navController) {
