@@ -10,6 +10,7 @@ import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.util.DebugLogger
+import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
 import com.oguzdogdu.walliescompose.features.settings.ThemeValues
 import com.oguzdogdu.walliescompose.util.LocaleHelper
 import dagger.hilt.android.HiltAndroidApp
@@ -19,6 +20,7 @@ import dagger.hilt.android.HiltAndroidApp
 class WalliesApplication : Application(), ImageLoaderFactory {
     val theme = mutableStateOf("")
     val language = mutableStateOf("")
+    val imagesList = mutableListOf<String?>()
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(this)
             .networkObserverEnabled(true)

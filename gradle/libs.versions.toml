@@ -7,6 +7,7 @@ datastore-preferences = "1.0.0"
 firebase-bom = "32.7.2"
 firebase-auth-ktx = "22.3.1"
 firebase-firestore-ktx = "24.10.2"
+glance-appwidget = "1.0.0"
 gson = "2.10.1"
 hilt-android = "2.49"
 hilt-work = "1.1.0"
@@ -32,11 +33,15 @@ work-runtime-ktx = "2.9.0"
 material3-android = "1.2.0"
 firebase-storage-ktx = "20.3.0"
 navigation-testing = "2.7.7"
+kotlinx-serialization-json = "1.5.1"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist-permissions" }
 accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanist-swiperefresh" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore-preferences" }
+androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance-appwidget" }
+glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance-appwidget" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hilt-work" }
 androidx-material3-window-size = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "windowsize" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hilt-work" }
