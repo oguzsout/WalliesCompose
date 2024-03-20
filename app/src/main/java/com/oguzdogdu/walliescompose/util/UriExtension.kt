@@ -4,14 +4,30 @@ import android.app.DownloadManager
 import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
+import coil.ImageLoader
+import coil.request.ErrorResult
+import coil.request.ImageRequest
+import coil.request.SuccessResult
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.URL
+
 
 fun Context.downloadImage(url: String, directoryName: String, fileName: String): Boolean {
     val directory = File(
@@ -71,4 +87,25 @@ fun Uri.toBitmap(context: Context): Bitmap? {
         }
     }
     return bitmap
+}
+
+fun String.urlToBitmap(
+    scope: CoroutineScope,
+    context: Context,
+): Deferred<Bitmap> {
+    return scope.async(Dispatchers.IO) {
+        val loader = ImageLoader(context)
+        val request = ImageRequest.Builder(context)
+            .data(this@urlToBitmap)
+            .allowHardware(false)
+            .build()
+        val result = loader.execute(request)
+        if (result is SuccessResult) {
+            return@async (result.drawable as BitmapDrawable).bitmap
+        } else if (result is ErrorResult) {
+            throw result.throwable ?: IllegalStateException("Unknown error occurred")
+        } else {
+            throw IllegalStateException("Unknown result type")
+        }
+    }
 }

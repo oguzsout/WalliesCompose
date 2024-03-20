@@ -7,6 +7,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("dagger.hilt.android.plugin")
     id("com.google.gms.google-services")
+    id ("kotlinx-serialization")
 }
 val debugApiKey: String = gradleLocalProperties(rootDir).getProperty("DEBUG_API_KEY")
 val releaseApiKey: String = gradleLocalProperties(rootDir).getProperty("RELEASE_API_KEY")
@@ -133,6 +134,9 @@ dependencies {
     implementation (libs.androidx.navigation.compose)
     implementation(libs.lottie.compose)
 
+    implementation (libs.androidx.glance.appwidget)
+    implementation(libs.glance.material3)
+    implementation (libs.androidx.work.runtime.ktx)
 
     implementation (libs.play.services.auth)
     implementation (libs.firebase.auth.ktx)
@@ -151,4 +155,5 @@ dependencies {
     implementation(libs.androidx.room.ktx)
 
     implementation(libs.balloon.compose)
+    implementation(libs.kotlinx.serialization.json)
 }

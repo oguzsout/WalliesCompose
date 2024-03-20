@@ -2,6 +2,8 @@ package com.oguzdogdu.walliescompose.features.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.oguzdogdu.walliescompose.WalliesApplication
+import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
 import com.oguzdogdu.walliescompose.domain.repository.UserAuthenticationRepository
 import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.onFailure
@@ -24,7 +26,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: WallpaperRepository,
-    private val authenticationRepository: UserAuthenticationRepository
+    private val authenticationRepository: UserAuthenticationRepository,
+    private val application: WalliesApplication
 ) : ViewModel() {
     private val _homeListState = MutableStateFlow(HomeScreenState())
     val homeListState = _homeListState.asStateFlow()
@@ -57,6 +60,10 @@ class HomeViewModel @Inject constructor(
 
                 topicsResult.onSuccess { topics ->
                     _homeListState.update { it.copy(loading = false, topics = topics.orEmpty()) }
+                    topics?.forEach {
+                        val list = listOf(it.titleBackground)
+                        application.imagesList.addAll(list)
+                    }
                 }
                 popularsResult.onSuccess { populars ->
                     _homeListState.update { it.copy(loading = false, popular = populars.orEmpty()) }
