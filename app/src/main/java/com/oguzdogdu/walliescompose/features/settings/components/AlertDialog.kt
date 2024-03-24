@@ -89,7 +89,6 @@ fun SingleSelectDialog(
                         modifier = modifier
                             .height(48.dp)
                             .wrapContentWidth(),
-                        colors = ButtonDefaults.elevatedButtonColors(),
                         onClick = {
                             onDismissRequest.invoke(false)
                         },
