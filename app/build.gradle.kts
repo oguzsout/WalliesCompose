@@ -109,7 +109,7 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.44")
+    androidTestImplementation(libs.hilt.android.testing)
 
     implementation (libs.retrofit)
     implementation (libs.converter.gson)

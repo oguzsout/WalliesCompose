@@ -21,6 +21,7 @@ import com.oguzdogdu.walliescompose.domain.repository.UserAuthenticationReposito
 import com.oguzdogdu.walliescompose.domain.wrapper.Resource
 import com.oguzdogdu.walliescompose.domain.wrapper.toResource
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.tasks.await
@@ -112,6 +113,37 @@ class UserAuthenticationRepositoryImpl @Inject constructor(
                 .update(EMAIL, email)
         }
     }.toResource()
+
+    override suspend fun changeUsername(name: String?): Flow<Resource<String>> {
+        return flow {
+            val userId = auth.currentUser?.uid
+            if (userId != null) {
+                firebaseFirestore.collection(COLLECTION_PATH).document(userId).update(NAME, name)
+                    .await()
+                emit(name ?: "")
+            } else {
+                emit("User ID is null")
+            }
+        }.catch { e ->
+            emit("An error occurred: ${e.message}")
+        }.toResource()
+    }
+
+
+    override suspend fun changeSurname(surname: String?): Flow<Resource<String>> {
+        return flow {
+            val userId = auth.currentUser?.uid
+            if (userId != null) {
+                firebaseFirestore.collection(COLLECTION_PATH).document(userId).update(SURNAME, surname)
+                    .await()
+                emit(surname ?: "")
+            } else {
+                emit("User ID is null")
+            }
+        }.catch { e ->
+            emit("An error occurred: ${e.message}")
+        }.toResource()
+    }
 
     override suspend fun signOut() = auth.signOut()
 

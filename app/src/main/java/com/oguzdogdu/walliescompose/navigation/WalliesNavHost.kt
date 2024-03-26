@@ -16,6 +16,8 @@ import com.oguzdogdu.walliescompose.features.authenticateduser.AuthenticatedUser
 import com.oguzdogdu.walliescompose.features.authenticateduser.authenticatedUserScreen
 import com.oguzdogdu.walliescompose.features.authenticateduser.changeemail.changeEmailScreen
 import com.oguzdogdu.walliescompose.features.authenticateduser.changeemail.navigateToChangeEmailScreen
+import com.oguzdogdu.walliescompose.features.authenticateduser.changenameandsurname.changeNameAndSurnameScreen
+import com.oguzdogdu.walliescompose.features.authenticateduser.changenameandsurname.navigateToChangeNameAndASurnameScreen
 import com.oguzdogdu.walliescompose.features.authenticateduser.changepassword.changePasswordScreen
 import com.oguzdogdu.walliescompose.features.authenticateduser.changepassword.navigateToChangePasswordScreen
 import com.oguzdogdu.walliescompose.features.authenticateduser.navigateToAuthenticatedUserScreen
@@ -237,10 +239,15 @@ fun WalliesNavHost(
                         inclusive = true
                     }
                 }
+            }, navigateToChangeNameAndSurname = {
+                navController.navigateToChangeNameAndASurnameScreen()
             }, navigateToChangePassword = {
                 navController.navigateToChangePasswordScreen()
             }, navigateToChangeEmail = {
                 navController.navigateToChangeEmailScreen()
+            })
+            changeNameAndSurnameScreen(navigateBack = {
+                navController.popBackStack()
             })
             changePasswordScreen(navigateBack = {
                 navController.popBackStack()

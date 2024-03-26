@@ -18,4 +18,6 @@ interface UserAuthenticationRepository {
     suspend fun changeProfilePhoto(photo: String?)
     suspend fun updatePassword(password: String?): Flow<Resource<Task<Void>?>>
     suspend fun changeEmail(email:String?,password: String?): Flow<Resource<Task<Void>?>>
+    suspend fun changeUsername(name:String?): Flow<Resource<String>>
+    suspend fun changeSurname(surname:String?): Flow<Resource<String>>
 }
