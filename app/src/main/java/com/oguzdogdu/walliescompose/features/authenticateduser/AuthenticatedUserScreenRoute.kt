@@ -80,6 +80,7 @@ fun AuthenticatedUserScreenRoute(
     viewModel: AuthenticatedUserViewModel = hiltViewModel(),
     navigateBack:() -> Unit,
     navigateToLogin: () -> Unit,
+    navigateToChangeNameAndSurname: () -> Unit,
     navigateToChangePassword: () -> Unit,
     navigateToChangeEmail: () -> Unit,
     ) {
@@ -166,11 +167,14 @@ fun AuthenticatedUserScreenRoute(
                     viewModel.handleUiEvents(AuthenticatedUserEvent.ChangeProfileImage(photoUri = imageUri))
                 } ,dismissDialog = {dialog ->
                                    viewModel.handleUiEvents(AuthenticatedUserEvent.OpenChangeProfileBottomSheet(dialog))
+                }, onChangeNameAndSurnameClick = {
+                    navigateToChangeNameAndSurname.invoke()
                 }, onChangePasswordClick = {
                     navigateToChangePassword.invoke()
                 }, onChangeEmailClick = {
                     navigateToChangeEmail.invoke()
-                },showDialog = dialogState)
+                }, showDialog = dialogState
+            )
         }
     }
 }
@@ -185,6 +189,7 @@ fun AuthenticatedUserScreenContent(
     onProfilePhotoClick: () -> Unit,
     onChangeProfilePhotoButtonClick: () -> Unit,
     dismissDialog: (Boolean) -> Unit,
+    onChangeNameAndSurnameClick: () -> Unit,
     onChangePasswordClick: () -> Unit,
     onChangeEmailClick: () -> Unit,
     showDialog: Boolean
@@ -226,6 +231,9 @@ fun AuthenticatedUserScreenContent(
                             )
                             EditProfileInformationContent(
                                 modifier = modifier,
+                                onChangeNameAndSurnameClick = {
+                                    onChangeNameAndSurnameClick.invoke()
+                                },
                                 onChangePasswordClick = {
                                     onChangePasswordClick.invoke()
                                 },
@@ -411,6 +419,7 @@ fun AuthenticatedUserWelcomeCard(
 @Composable
 fun EditProfileInformationContent(
     modifier: Modifier,
+    onChangeNameAndSurnameClick: () -> Unit,
     onChangePasswordClick: () -> Unit,
     onChangeEmailClick: () -> Unit
 ) {
@@ -447,9 +456,9 @@ fun EditProfileInformationContent(
                 onClick = {
                     handleMenuItemClick(
                         itemIndex = it,
-                       coroutineScope = scope,
+                        coroutineScope = scope,
                         openPersonalInformation = {
-
+                            onChangeNameAndSurnameClick.invoke()
                         },
                         openEditEmail = {
                             onChangeEmailClick.invoke()
