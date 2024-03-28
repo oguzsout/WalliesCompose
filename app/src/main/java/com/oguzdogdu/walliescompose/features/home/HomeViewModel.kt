@@ -60,10 +60,6 @@ class HomeViewModel @Inject constructor(
 
                 topicsResult.onSuccess { topics ->
                     _homeListState.update { it.copy(loading = false, topics = topics.orEmpty()) }
-                    topics?.forEach {
-                        val list = listOf(it.titleBackground)
-                        application.imagesList.addAll(list)
-                    }
                 }
                 popularsResult.onSuccess { populars ->
                     _homeListState.update { it.copy(loading = false, popular = populars.orEmpty()) }
@@ -82,6 +78,9 @@ class HomeViewModel @Inject constructor(
                     _homeListState.update { it.copy(loading = false, error = error) }
                 }
             }.collect()
+            _homeListState.value.popular.take(10).map {
+                application.imagesList.add(it.url)
+            }
         }
     }
     private fun checkUserAuthState() {
