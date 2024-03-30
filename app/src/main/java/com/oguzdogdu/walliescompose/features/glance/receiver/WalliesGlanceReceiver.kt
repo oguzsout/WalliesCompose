@@ -11,21 +11,26 @@ import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import com.google.gson.Gson
 import com.oguzdogdu.walliescompose.WalliesApplication
+import com.oguzdogdu.walliescompose.data.repository.WallpaperRepositoryImpl
+import com.oguzdogdu.walliescompose.domain.wrapper.onSuccess
+import com.oguzdogdu.walliescompose.domain.wrapper.toResource
 import com.oguzdogdu.walliescompose.features.glance.widget.WalliesWidget
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class WalliesGlanceReceiver : GlanceAppWidgetReceiver() {
 
+    private val coroutineScope = MainScope()
+
     @Inject
     lateinit var application: WalliesApplication
 
     override val glanceAppWidget: GlanceAppWidget = WalliesWidget()
-
-    private val coroutineScope = MainScope()
 
     private fun observeData(context: Context) {
 
@@ -41,7 +46,7 @@ class WalliesGlanceReceiver : GlanceAppWidgetReceiver() {
             if (glanceId != null) {
                 updateAppWidgetState(context, PreferencesGlanceStateDefinition, glanceId) { prefs ->
                     prefs.toMutablePreferences().apply {
-                        this[allPopular] = serializedList.trim()
+                     this[allPopular] = serializedList.trim()
                     }
                 }
                 glanceAppWidget.update(context, glanceId)
