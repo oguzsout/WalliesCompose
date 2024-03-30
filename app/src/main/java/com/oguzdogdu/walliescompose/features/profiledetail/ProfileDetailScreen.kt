@@ -222,7 +222,7 @@ fun InteractionCountOfUser(modifier: Modifier,profileDetailState: ProfileDetailS
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(start = 24.dp, end = 24.dp, top = 8.dp),
+            .padding(start = 20.dp, end = 20.dp, top = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
