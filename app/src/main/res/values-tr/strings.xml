@@ -128,4 +128,6 @@
     <string name="reset_password_validation_desc">E-mailine şifre değiştirme linkini gönderdik. Lütfen gelen kutusunu kontrol et.</string>
     <string name="change_profile_photo_title">Aşağıda bulunan fotoğrafa tıklayarak profil fotoğrafını güncelleyebilirsin.</string>
     <string name="user_name_surname_update">Bilgileriniz güncellendi.</string>
+    <string name="settings_general_header">Genel</string>
+    <string name="settings_storage_header">Depolama</string>
 </resources>

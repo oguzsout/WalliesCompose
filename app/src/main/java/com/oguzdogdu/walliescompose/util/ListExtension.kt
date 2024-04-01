@@ -7,27 +7,23 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
-import com.oguzdogdu.walliescompose.R
 
 
 @Composable
-fun <T> LazyItemScope.ReusableMenuRow(
+fun <T> ReusableMenuRow(
     data: List<T>,
     index: Int,
     modifier: Modifier,
-    itemContent: @Composable BoxScope.(T) -> Unit,
+    itemContent: @Composable() (BoxScope.(T) -> Unit),
     onClick: (Int) -> Unit
 ) {
     val size = data.count()
