@@ -450,23 +450,23 @@ fun EditProfileInformationContent(
                 modifier = modifier.fillMaxWidth(),
                 itemContent = { menu ->
                     MenuRowItems(
-                        modifier = modifier, menuRow = menu
+                        modifier = modifier, menuRow = menu,arrow = true
                     )
-                },
-                onClick = {
-                    handleMenuItemClick(
-                        itemIndex = it,
-                        coroutineScope = scope,
-                        openPersonalInformation = {
-                            onChangeNameAndSurnameClick.invoke()
-                        },
-                        openEditEmail = {
-                            onChangeEmailClick.invoke()
-                        }, openChangePassword = {
-                            onChangePasswordClick.invoke()
-                        }
-                    )
-                })
+                }
+            ) {
+                handleMenuItemClick(
+                    itemIndex = it,
+                    coroutineScope = scope,
+                    openPersonalInformation = {
+                        onChangeNameAndSurnameClick.invoke()
+                    },
+                    openEditEmail = {
+                        onChangeEmailClick.invoke()
+                    }, openChangePassword = {
+                        onChangePasswordClick.invoke()
+                    }
+                )
+            }
         }
     }
 }

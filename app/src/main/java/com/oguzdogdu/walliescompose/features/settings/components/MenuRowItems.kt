@@ -25,7 +25,7 @@ import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.util.MenuRow
 
 @Composable
-fun MenuRowItems(modifier: Modifier, menuRow: MenuRow) {
+fun MenuRowItems(modifier: Modifier, menuRow: MenuRow,arrow:Boolean) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -54,11 +54,13 @@ fun MenuRowItems(modifier: Modifier, menuRow: MenuRow) {
                 }
 
             }
-            Icon(
-                painter = painterResource(id = R.drawable.arrow_small),
-                contentDescription = "",
-                modifier = modifier.align(Alignment.CenterEnd)
-            )
+            if (arrow) {
+                Icon(
+                    painter = painterResource(id = R.drawable.arrow_small),
+                    contentDescription = "",
+                    modifier = modifier.align(Alignment.CenterEnd)
+                )
+            }
         }
     }
 }

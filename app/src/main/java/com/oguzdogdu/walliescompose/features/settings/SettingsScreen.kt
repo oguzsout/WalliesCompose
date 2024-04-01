@@ -6,11 +6,14 @@ import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -18,6 +21,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -177,45 +181,84 @@ fun SettingsScreen(
     viewModel: SettingsViewModel
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val optionList = immutableListOf(
+    val generalOptionList = mutableListOf(
         MenuRow(
+            category = "General",
             icon = WalliesIcons.DarkMode,
             titleRes = R.string.theme_text
         ),
         MenuRow(
+            category = "General",
             icon = WalliesIcons.Language,
             titleRes = R.string.language_title_text
-        ),
+        )
+    )
+
+    val storageOptionList = mutableListOf(
         MenuRow(
+            category = "Storage",
             icon = WalliesIcons.Cache,
             titleRes = R.string.clear_cache_title
         )
     )
+
     LazyColumn(
         modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(16.dp)
     ) {
         items(count = 1) { index: Int ->
-            ReusableMenuRow(data = optionList,
+            Text(
+                text = stringResource(R.string.settings_general_header),
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Spacer(modifier = modifier.size(8.dp))
+            ReusableMenuRow(data = generalOptionList,
                 index = index,
                 modifier = modifier.fillMaxWidth(),
                 itemContent = { menu ->
                     MenuRowItems(
-                        modifier = modifier, menuRow = menu
+                        modifier = modifier, menuRow = menu, arrow = true
                     )
-                },
-                onClick = {
-                    handleMenuItemClick(
-                        itemIndex = it,
-                        coroutineScope,
-                        openThemeDialog,
-                        openLanguageDialog,
-                        showSnackBar,
-                        context,
-                        viewModel
+                }
+            ) {
+                handleMenuItemClick(
+                    itemIndex = it,
+                    coroutineScope,
+                    openThemeDialog,
+                    openLanguageDialog,
+                    showSnackBar,
+                    context,
+                    viewModel
+                )
+            }
+            Spacer(modifier = modifier.size(16.dp))
+        }
+        items(count = 1) { index: Int ->
+            Text(
+                text = stringResource(R.string.settings_storage_header),
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Spacer(modifier = modifier.size(8.dp))
+            ReusableMenuRow(data = storageOptionList,
+                index = index,
+                modifier = modifier.fillMaxWidth(),
+                itemContent = { menu ->
+                    MenuRowItems(
+                        modifier = modifier, menuRow = menu, arrow = false
                     )
-                })
+                }
+            ) {
+                handleMenuItemClick(
+                    itemIndex = it,
+                    coroutineScope,
+                    openThemeDialog,
+                    openLanguageDialog,
+                    showSnackBar,
+                    context,
+                    viewModel
+                )
+            }
         }
     }
 }
