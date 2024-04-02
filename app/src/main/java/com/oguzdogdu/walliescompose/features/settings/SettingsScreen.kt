@@ -222,15 +222,19 @@ fun SettingsScreen(
                     )
                 }
             ) {
-                handleMenuItemClick(
-                    itemIndex = it,
-                    coroutineScope,
-                    openThemeDialog,
-                    openLanguageDialog,
-                    showSnackBar,
-                    context,
-                    viewModel
-                )
+                when (it) {
+                    0 -> {
+                        coroutineScope.launch {
+                            openThemeDialog.invoke(true)
+                        }
+                    }
+
+                    1 -> {
+                        coroutineScope.launch {
+                            openLanguageDialog.invoke(true)
+                        }
+                    }
+                }
             }
             Spacer(modifier = modifier.size(16.dp))
         }
@@ -249,15 +253,14 @@ fun SettingsScreen(
                     )
                 }
             ) {
-                handleMenuItemClick(
-                    itemIndex = it,
-                    coroutineScope,
-                    openThemeDialog,
-                    openLanguageDialog,
-                    showSnackBar,
-                    context,
-                    viewModel
-                )
+                when(it) {
+                    0 -> {
+                        clearAppCache(context = context, viewModel = viewModel)
+                        coroutineScope.launch {
+                            showSnackBar.invoke(viewModel.settingsState.value.cache)
+                        }
+                    }
+                }
             }
         }
     }
@@ -278,35 +281,5 @@ private fun clearAppCache(context: Context, viewModel: SettingsViewModel) {
         }
 
         else -> Log.d("AppCache", "Cache directory does not exist")
-    }
-}
-private fun handleMenuItemClick(
-    itemIndex: Int,
-    coroutineScope: CoroutineScope,
-    openThemeDialog: (Boolean) -> Unit,
-    openLanguageDialog: (Boolean) -> Unit,
-    showSnackBar: (Boolean) -> Unit,
-    context: Context,
-    viewModel: SettingsViewModel
-) {
-    when (itemIndex) {
-        0 -> {
-            coroutineScope.launch {
-                openThemeDialog.invoke(true)
-            }
-        }
-
-        1 -> {
-            coroutineScope.launch {
-                openLanguageDialog.invoke(true)
-            }
-        }
-
-        2 -> {
-            clearAppCache(context = context, viewModel = viewModel)
-            coroutineScope.launch {
-                showSnackBar.invoke(viewModel.settingsState.value.cache)
-            }
-        }
     }
 }
