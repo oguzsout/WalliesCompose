@@ -7,10 +7,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,11 +28,13 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +42,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,6 +60,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -89,8 +98,8 @@ import com.oguzdogdu.walliescompose.util.openInstagramProfile
 import com.oguzdogdu.walliescompose.util.openPortfolioUrl
 import com.oguzdogdu.walliescompose.util.openTwitterProfile
 import kotlinx.coroutines.launch
-import okhttp3.internal.immutableListOf
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileDetailScreenRoute(
     modifier: Modifier = Modifier,
@@ -109,41 +118,51 @@ fun ProfileDetailScreenRoute(
     LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
         viewModel.handleUIEvent(ProfileDetailEvent.FetchUserDetailInfos)
     }
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            IconButton(
-                onClick = { onBackClick.invoke() },
-                modifier = modifier
-                    .wrapContentSize()
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.back),
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+        TopAppBar(
+            colors = TopAppBarColors(containerColor = MaterialTheme.colorScheme.background,
+                Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent),
+            title = {},
+            actions = {
+                Row(
                     modifier = modifier
-                        .wrapContentSize()
-                )
-            }
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    IconButton(
+                        onClick = { onBackClick.invoke() },
+                        modifier = modifier
+                            .wrapContentSize()
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.back),
+                            contentDescription = "",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = modifier
+                                .wrapContentSize()
+                        )
+                    }
 
-            Text(
-                modifier = modifier,
-                text = stateOfProfileDetail.userDetails?.username.orEmpty(),
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                fontSize = 14.sp,
-                fontFamily = medium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
-            )
-        }
+                    Text(
+                        modifier = modifier,
+                        text = stateOfProfileDetail.userDetails?.username.orEmpty(),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontSize = 14.sp,
+                        fontFamily = medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            },
+            scrollBehavior = scrollBehavior
+        )
+
     }) {
         Box(modifier = modifier
             .padding(it)
@@ -166,7 +185,7 @@ fun ProfileDetailScreenRoute(
                     onCollectionItemClick = { id, title ->
                         onCollectionItemClick.invoke(id, title)
                     },
-                    context = context,
+                    context = context,scrollBehavior
                 )
 
                 else -> {
@@ -177,6 +196,7 @@ fun ProfileDetailScreenRoute(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileDetailScreen(
     modifier: Modifier,
@@ -185,10 +205,12 @@ fun ProfileDetailScreen(
     userCollectionState: UserCollectionState?,
     onUserPhotoListClick: (String) -> Unit,
     onCollectionItemClick: (String, String) -> Unit,
-    context: Context
+    context: Context,
+    scrollBehavior: TopAppBarScrollBehavior
 ) {
     Column(
         modifier = modifier
+            .scrollable(rememberScrollState(), orientation = Orientation.Vertical)
             .fillMaxSize()
     ) {
 
@@ -211,7 +233,26 @@ fun ProfileDetailScreen(
             },
             onCollectionItemClick = {id, title ->
                 onCollectionItemClick.invoke(id,title)
-            }
+            },scrollBehavior
+        )
+    }
+}
+
+@Composable
+fun FullInfoCardOfUser(modifier: Modifier,profileDetailState: ProfileDetailState?,context: Context) {
+    Column(
+        modifier = modifier
+            .wrapContentHeight()
+            .background(Color.Cyan)
+    ) {
+        InteractionCountOfUser(
+            modifier = modifier,
+            profileDetailState = profileDetailState
+        )
+        PersonalInfoOfUser(
+            modifier = modifier,
+            profileDetailState = profileDetailState,
+            context = context,
         )
     }
 }
@@ -476,7 +517,7 @@ fun PersonalAccountMenu(modifier: Modifier,profileDetailState: ProfileDetailStat
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TabUI(
     modifier: Modifier,
@@ -484,7 +525,8 @@ fun TabUI(
     userPhotosState: UserPhotosState?,
     userCollectionState: UserCollectionState?,
     onUserPhotoListClick: (String) -> Unit,
-    onCollectionItemClick: (String, String) -> Unit
+    onCollectionItemClick: (String, String) -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior
 ) {
 
     val tabItems = mutableListOf(
@@ -504,30 +546,27 @@ fun TabUI(
     Column(modifier = modifier.fillMaxSize()) {
         TabRow(
             selectedTabIndex = selectedTabIndex,
-            containerColor = colorResource(id = R.color.orange),
+            containerColor = MaterialTheme.colorScheme.background,
             modifier = Modifier
                 .padding(8.dp)
                 .wrapContentHeight()
                 .clip(RoundedCornerShape(64.dp)),
-            divider = {
-            },
-            indicator = {
-
-            }
+            divider = {},
+            indicator = {}
         ) {
 
             tabItems.forEachIndexed { index, item ->
-                val backgroundColor = if (index == selectedTabIndex) {
+                val tabTextColor = if (index == selectedTabIndex) {
                     colorResource(id = R.color.white)
                 } else {
                     colorResource(id = R.color.orange)
                 }
                 val selected = selectedTabIndex == index
                 Tab(
-                    modifier = if (selected) Modifier
+                    modifier = if (selected) modifier
                         .clip(RoundedCornerShape(64))
                         .background(colorResource(id = R.color.orange))
-                    else Modifier
+                    else modifier
                         .clip(RoundedCornerShape(64))
                         .background(MaterialTheme.colorScheme.background),
                     selected = (index == selectedTabIndex),
@@ -539,7 +578,7 @@ fun TabUI(
                     },
                     text = {
                         Text(
-                            text = item, color = backgroundColor, fontSize = 14.sp,
+                            text = item, color = tabTextColor, fontSize = 14.sp,
                             fontFamily = medium,
                         )
                     },
@@ -548,7 +587,7 @@ fun TabUI(
         }
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxWidth()
+            modifier = modifier.fillMaxWidth()
         ) { index ->
             Column(
                 modifier = modifier
@@ -561,7 +600,7 @@ fun TabUI(
                    0 -> {
                        PhotoListOfUser(modifier = modifier, userPhotosState = userPhotosState, onUserPhotoListClick = {id ->
                            onUserPhotoListClick.invoke(id)
-                       })
+                       },scrollBehavior)
                    }
                     1 -> {
                         CollectionListOfUser(
@@ -569,7 +608,7 @@ fun TabUI(
                             userCollectionState = userCollectionState,
                             onCollectionItemClick = { id, title ->
                                 onCollectionItemClick.invoke(id, title)
-                            }
+                            },scrollBehavior
                         )
                     }
                 }
@@ -585,12 +624,19 @@ fun TabUI(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PhotoListOfUser(modifier: Modifier, userPhotosState: UserPhotosState?, onUserPhotoListClick: (String) -> Unit) {
+fun PhotoListOfUser(
+    modifier: Modifier,
+    userPhotosState: UserPhotosState?,
+    onUserPhotoListClick: (String) -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         modifier = modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         state = rememberLazyGridState(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -605,17 +651,20 @@ fun PhotoListOfUser(modifier: Modifier, userPhotosState: UserPhotosState?, onUse
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollectionListOfUser(
     modifier: Modifier,
     userCollectionState: UserCollectionState?,
-    onCollectionItemClick: (String, String) -> Unit
+    onCollectionItemClick: (String, String) -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior
 ) {
     LazyVerticalGrid(
+        state = rememberLazyGridState(),
         columns = GridCells.Fixed(2),
         modifier = modifier
-            .fillMaxSize(),
-        state = rememberLazyGridState(),
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     )   {
@@ -659,7 +708,11 @@ fun PhotoListItem(modifier: Modifier,userPhotosState: UsersPhotos, onUserPhotoLi
 }
 
 @Composable
-fun CollectionListItem(modifier: Modifier, userCollection: UserCollections?, onCollectionItemClick: (String, String) -> Unit) {
+fun CollectionListItem(
+    modifier: Modifier,
+    userCollection: UserCollections?,
+    onCollectionItemClick: (String, String) -> Unit
+) {
     Box(
         modifier = modifier
             .wrapContentSize()
