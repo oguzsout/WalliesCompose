@@ -204,7 +204,7 @@ fun ChangeEmailScreenContent(
                         }
                     }
                 })
-
+            Spacer(modifier = modifier.size(8.dp))
             Text(
                 text = stringResource(R.string.password),
                 fontSize = 16.sp,
