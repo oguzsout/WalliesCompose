@@ -1,5 +1,6 @@
 package com.oguzdogdu.walliescompose.data.repository
 
+import com.oguzdogdu.walliescompose.data.common.Constants.PAGE_ITEM_LIMIT
 import com.oguzdogdu.walliescompose.data.common.safeApiCall
 import com.oguzdogdu.walliescompose.data.di.Dispatcher
 import com.oguzdogdu.walliescompose.data.di.WalliesDispatchers
@@ -28,7 +29,7 @@ class UnsplashUserRepositoryImpl @Inject constructor(private val service: Unspla
 
     override suspend fun getUsersPhotos(username: String?): Flow<Resource<List<UsersPhotos>?>>{
         return safeApiCall(ioDispatcher) {
-            service.getUserPhotos(username = username).body().orEmpty().map {
+            service.getUserPhotos(username = username, perPage = PAGE_ITEM_LIMIT).body().orEmpty().map {
                 it.toDomainUsersPhotos()
             }
         }

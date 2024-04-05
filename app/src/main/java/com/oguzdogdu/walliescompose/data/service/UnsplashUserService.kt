@@ -6,6 +6,7 @@ import com.oguzdogdu.walliescompose.data.model.maindto.Photo
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface UnsplashUserService {
     @GET("users/{username}")
@@ -16,6 +17,7 @@ interface UnsplashUserService {
     @GET("users/{username}/photos")
     suspend fun getUserPhotos(
         @Path("username") username: String?,
+        @Query("per_page") perPage: Int?,
     ): Response<List<Photo>>
 
     @GET("users/{username}/collections")
