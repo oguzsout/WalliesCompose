@@ -4,11 +4,16 @@ import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +33,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,6 +53,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +68,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -109,7 +115,6 @@ fun ProfileDetailScreenRoute(
     onBackClick: () -> Unit,
 ) {
     val context = LocalContext.current
-
     val stateOfUiState by viewModel.getProfileDetailState.collectAsStateWithLifecycle()
     val stateOfProfileDetail by viewModel.getUserDetails.collectAsStateWithLifecycle()
     val stateOfProfilePhotoList by viewModel.getUserPhotoList.collectAsStateWithLifecycle()
@@ -118,7 +123,9 @@ fun ProfileDetailScreenRoute(
     LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
         viewModel.handleUIEvent(ProfileDetailEvent.FetchUserDetailInfos)
     }
+
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val isCollapsed = remember { derivedStateOf { scrollBehavior.state.collapsedFraction < 0.5 } }
 
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         TopAppBar(
@@ -185,7 +192,7 @@ fun ProfileDetailScreenRoute(
                     onCollectionItemClick = { id, title ->
                         onCollectionItemClick.invoke(id, title)
                     },
-                    context = context,scrollBehavior
+                    context = context,scrollBehavior,animatedVisibility = isCollapsed.value
                 )
 
                 else -> {
@@ -206,34 +213,50 @@ fun ProfileDetailScreen(
     onUserPhotoListClick: (String) -> Unit,
     onCollectionItemClick: (String, String) -> Unit,
     context: Context,
-    scrollBehavior: TopAppBarScrollBehavior
+    scrollBehavior: TopAppBarScrollBehavior,
+    animatedVisibility:Boolean
 ) {
     Column(
         modifier = modifier
-            .scrollable(rememberScrollState(), orientation = Orientation.Vertical)
-            .fillMaxSize()
+            .wrapContentSize()
     ) {
 
-        InteractionCountOfUser(
-            modifier = modifier,
-            profileDetailState = profileDetailState
-        )
-        PersonalInfoOfUser(
-            modifier = modifier,
-            profileDetailState = profileDetailState,
-            context = context,
-        )
+        var visible by remember { mutableStateOf(true) }
+
+        LaunchedEffect(animatedVisibility) {
+            visible = animatedVisibility
+        }
+
+        val density = LocalDensity.current
+        AnimatedVisibility(
+            visible = visible,
+            enter = slideInVertically {
+                with(density) { 60.dp.roundToPx() }
+            } + expandVertically(
+                expandFrom = Alignment.Top
+            ) + fadeIn(
+                initialAlpha = 0.2f
+            ),
+            exit = slideOutVertically() + shrinkVertically() + fadeOut()
+        ) {
+            FullInfoCardOfUser(
+                modifier = modifier,
+                profileDetailState = profileDetailState,
+                context = context
+            )
+        }
+
         TabUI(
             modifier = modifier,
             profileDetailState = profileDetailState,
             userPhotosState = userPhotosState,
             userCollectionState = userCollectionState,
-            onUserPhotoListClick = {id ->
+            onUserPhotoListClick = { id ->
                 onUserPhotoListClick.invoke(id)
             },
-            onCollectionItemClick = {id, title ->
-                onCollectionItemClick.invoke(id,title)
-            },scrollBehavior
+            onCollectionItemClick = { id, title ->
+                onCollectionItemClick.invoke(id, title)
+            }, scrollBehavior
         )
     }
 }
@@ -243,19 +266,18 @@ fun FullInfoCardOfUser(modifier: Modifier,profileDetailState: ProfileDetailState
     Column(
         modifier = modifier
             .wrapContentHeight()
-            .background(Color.Cyan)
     ) {
         InteractionCountOfUser(
-            modifier = modifier,
-            profileDetailState = profileDetailState
-        )
-        PersonalInfoOfUser(
-            modifier = modifier,
-            profileDetailState = profileDetailState,
-            context = context,
-        )
+                modifier = modifier,
+                profileDetailState = profileDetailState
+            )
+            PersonalInfoOfUser(
+                modifier = modifier,
+                profileDetailState = profileDetailState,
+                context = context,
+            )
+        }
     }
-}
 
 @Composable
 fun InteractionCountOfUser(modifier: Modifier,profileDetailState: ProfileDetailState?) {
