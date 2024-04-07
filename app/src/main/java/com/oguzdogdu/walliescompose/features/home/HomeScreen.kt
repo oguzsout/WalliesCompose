@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -196,46 +197,55 @@ fun HomeScreenContent(
     onPopularClick: (String) -> Unit,
     onLatestClick: (String) -> Unit
 ) {
-    LazyColumn(
-        modifier = modifier
-            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
-            .fillMaxHeight(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        when {
+            homeUiState.loading -> {
+                LoadingState(modifier = modifier)
+            }
 
-        item(key = 0) {
-            TopicLayoutContainer(
-                modifier = modifier,
-                homeScreenState = homeUiState,
-                onTopicDetailListClick =  {
-                                  onTopicDetailListClick.invoke(it)
-                },
-                onTopicSeeAllClick = {
-                    onTopicSeeAllClick.invoke()
-                })
-        }
-        item(key = 1) {
-            PopularLayoutContainer(modifier = modifier,
-                homeScreenState = homeUiState,
-                onPopularClick = { id ->
-                    onPopularClick.invoke(id)
-                },
-                onPopularSeeAllClick = {
-                    onPopularSeeAllClick.invoke()
-                })
-        }
+            homeUiState.topics.isNotEmpty() and homeUiState.popular.isNotEmpty() and homeUiState.latest.isNotEmpty() -> {
+                LazyColumn(
+                    modifier = modifier
+                        .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
 
-        item(key = 2) {
-            LatestLayoutContainer(modifier = modifier,
-                homeScreenState = homeUiState,
-                onLatestClick = { id -> onLatestClick.invoke(id) },
-                onLatestSeeAllClick = { onLatestSeeAllClick.invoke() })
+                    item {
+                        TopicLayoutContainer(
+                            modifier = modifier,
+                            homeScreenState = homeUiState,
+                            onTopicDetailListClick = {
+                                onTopicDetailListClick.invoke(it)
+                            },
+                            onTopicSeeAllClick = {
+                                onTopicSeeAllClick.invoke()
+                            })
+                    }
+                    item {
+                        PopularLayoutContainer(modifier = modifier,
+                            homeScreenState = homeUiState,
+                            onPopularClick = { id ->
+                                onPopularClick.invoke(id)
+                            },
+                            onPopularSeeAllClick = {
+                                onPopularSeeAllClick.invoke()
+                            })
+                    }
 
+                    item {
+                        LatestLayoutContainer(modifier = modifier,
+                            homeScreenState = homeUiState,
+                            onLatestClick = { id -> onLatestClick.invoke(id) },
+                            onLatestSeeAllClick = { onLatestSeeAllClick.invoke() })
+
+                    }
+                }
+            }
         }
     }
 }
-
 
 @Composable
 private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreenState,onTopicDetailListClick: (String?) -> Unit,onTopicSeeAllClick: () -> Unit) {
@@ -269,7 +279,7 @@ private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreen
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
-            modifier = modifier.heightIn(min = 92.dp, max = 280.dp),
+            modifier = modifier.requiredHeightIn(max = 280.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -318,7 +328,9 @@ private fun PopularLayoutContainer(
             )
         }
 
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
+        LazyRow(modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
             items(homeScreenState.popular, key = {
                 it.id.hashCode()
             }) { popularImage ->
@@ -366,7 +378,9 @@ private fun LatestLayoutContainer(
             )
         }
 
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
+        LazyRow(modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
             items(homeScreenState.latest, key = {
                 it.id.hashCode()
             }) { latestImage ->
@@ -429,7 +443,7 @@ private fun PopularImageView(id: String?, imageUrl: String?, onPopularClick: (St
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
-                .fillMaxWidth()
+                .width(160.dp)
                 .height(240.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
             loading = { ImageLoadingState() },
@@ -447,7 +461,7 @@ private fun LatestImageView(id: String?, imageUrl: String?, onLatestClick: (Stri
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
-                .fillMaxWidth()
+                .width(160.dp)
                 .height(240.dp)
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),
             loading = { ImageLoadingState() },
