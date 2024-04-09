@@ -32,10 +32,6 @@ jobs:
         run: |
           echo "RELEASE_API_KEY=${{ secrets.RELEASE_API_KEY }}" >> local.properties
 
-      - name: Create local.properties and add API Keys
-        run: |
-          echo "DEBUG_API_KEY=${{ secrets.DEBUG_API_KEY }}" >> local.properties
-
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 

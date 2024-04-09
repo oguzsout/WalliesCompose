@@ -44,7 +44,7 @@ object NetworkModule {
                 .addInterceptor { chain ->
                     val originalRequest = chain.request()
                     val newRequest = originalRequest.newBuilder()
-                        .addHeader("Authorization", "Client-ID ${BuildConfig.API_KEY}")
+                        .addHeader("Authorization", "Client-ID ${BuildConfig.RELEASE_API_KEY}")
                         .build()
                     chain.proceed(newRequest)
                 }

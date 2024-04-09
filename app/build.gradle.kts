@@ -9,7 +9,7 @@ plugins {
     id("com.google.gms.google-services")
     id ("kotlinx-serialization")
 }
-val debugApiKey: String = gradleLocalProperties(rootDir).getProperty("DEBUG_API_KEY")
+
 val releaseApiKey: String = gradleLocalProperties(rootDir).getProperty("RELEASE_API_KEY")
 android {
     namespace = "com.oguzdogdu.walliescompose"
@@ -31,7 +31,7 @@ android {
 
     buildTypes {
         release {
-            buildConfigField ("String", "API_KEY", releaseApiKey)
+            buildConfigField ("String", "RELEASE_API_KEY", releaseApiKey)
             isMinifyEnabled = true
             isDebuggable = false
             isShrinkResources = true
@@ -41,7 +41,7 @@ android {
             )
         }
         debug {
-            buildConfigField ("String", "API_KEY", debugApiKey)
+            buildConfigField ("String", "RELEASE_API_KEY", releaseApiKey)
             isMinifyEnabled = false
             isShrinkResources = false
             isDebuggable = true
