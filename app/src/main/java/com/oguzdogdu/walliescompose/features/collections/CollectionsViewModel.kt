@@ -10,7 +10,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,11 +17,8 @@ import javax.inject.Inject
 class CollectionsViewModel @Inject constructor(private val repository: WallpaperRepository) :
     ViewModel() {
 
-    private val _getCollections = MutableStateFlow(CollectionState())
-    val getCollections = _getCollections.asStateFlow()
-
-    private val _moviesState: MutableStateFlow<PagingData<WallpaperCollections>> = MutableStateFlow(value = PagingData.empty())
-    val moviesState: MutableStateFlow<PagingData<WallpaperCollections>> get() = _moviesState
+    private val _collectionPhotosState: MutableStateFlow<PagingData<WallpaperCollections>> = MutableStateFlow(value = PagingData.empty())
+    val collectionPhotosState: MutableStateFlow<PagingData<WallpaperCollections>> get() = _collectionPhotosState
 
     fun handleUIEvent(event: CollectionScreenEvent) {
         when (event) {
@@ -33,6 +29,7 @@ class CollectionsViewModel @Inject constructor(private val repository: Wallpaper
             is CollectionScreenEvent.SortByTitles -> sortListByTitle()
 
             is CollectionScreenEvent.SortByLikes -> sortListByLikes()
+            is CollectionScreenEvent.SortByUpdatedDate -> sortListByUpdatedDate()
         }
     }
 
@@ -41,8 +38,7 @@ class CollectionsViewModel @Inject constructor(private val repository: Wallpaper
             repository.getCollectionsList().cachedIn(viewModelScope)
                 .collectLatest { value: PagingData<WallpaperCollections> ->
                     value.let { list ->
-                        _getCollections.update { it.copy(collections = list) }
-                        _moviesState.value = list
+                        _collectionPhotosState.value = list
                     }
                 }
         }
@@ -53,7 +49,17 @@ class CollectionsViewModel @Inject constructor(private val repository: Wallpaper
         viewModelScope.launch {
             repository.getCollectionsListByTitleSort().cachedIn(viewModelScope).collectLatest { sortedPagingData ->
                 sortedPagingData.let { list ->
-                    _moviesState.value = list
+                    _collectionPhotosState.value = list
+                }
+            }
+        }
+    }
+
+    private fun sortListByUpdatedDate() {
+        viewModelScope.launch {
+            repository.getCollectionsListByUpdateDateSort().cachedIn(viewModelScope).collectLatest { sortedPagingData ->
+                sortedPagingData.let { list ->
+                    _collectionPhotosState.value = list
                 }
             }
         }
@@ -63,7 +69,7 @@ class CollectionsViewModel @Inject constructor(private val repository: Wallpaper
         viewModelScope.launch {
             repository.getCollectionsListByLikesSort().cachedIn(viewModelScope).collectLatest { sortedPagingData ->
                 sortedPagingData.let { list ->
-                    _moviesState.value = list
+                    _collectionPhotosState.value = list
                 }
             }
         }
