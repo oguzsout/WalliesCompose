@@ -73,11 +73,11 @@ fun CollectionsScreenRoute(
     onCollectionClick: (String,String) -> Unit
 ) {
     val collectionState: LazyPagingItems<WallpaperCollections> =
-        viewModel.moviesState.collectAsLazyPagingItems()
+        viewModel.collectionPhotosState.collectAsLazyPagingItems()
     LaunchedEffect(key1 = Unit) {
         viewModel.handleUIEvent(CollectionScreenEvent.FetchLatestData)
     }
-    val context = LocalContext.current
+
     Scaffold(modifier = modifier
         .fillMaxSize()
         .background(Color.Magenta), topBar = {
@@ -110,6 +110,9 @@ fun CollectionsScreenRoute(
                        1 -> {
                            viewModel.handleUIEvent(CollectionScreenEvent.SortByLikes)
                        }
+                       2 -> {
+                           viewModel.handleUIEvent(CollectionScreenEvent.SortByUpdatedDate)
+                       }
                    }
                })
             CollectionScreen(
@@ -129,7 +132,8 @@ fun DropdownMenuBox(
 ) {
     val sortTypeList = listOf(
         stringResource(id = R.string.text_alphabetic_sort),
-        stringResource(id = R.string.text_likes_sort)
+        stringResource(id = R.string.text_likes_sort),
+        stringResource(R.string.text_updated_date)
     )
     var isContextMenuVisible by rememberSaveable {
         mutableStateOf(false)

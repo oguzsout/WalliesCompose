@@ -130,5 +130,6 @@
     <string name="user_name_surname_update">Your information has been updated.</string>
     <string name="settings_general_header">General</string>
     <string name="settings_storage_header">Storage</string>
+    <string name="text_updated_date">By Updated Date</string>
 
 </resources>

@@ -1,6 +1,5 @@
 package com.oguzdogdu.walliescompose.util
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -11,34 +10,25 @@ import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.util.DisplayMetrics
 import android.view.WindowManager
-import androidx.core.view.ContentInfoCompat.Flags
 import com.oguzdogdu.walliescompose.data.common.Constants.AUTO
 import com.oguzdogdu.walliescompose.data.common.Constants.FIT
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
-@SuppressLint("SimpleDateFormat")
 fun String.formatDate(
-    outputFormat: String = DateFormats.OUTPUT_DOTTED_LAST_PAYMENT_DATE_FORMAT.value,
+    outputFormat: String = DateFormats.DEFAULT_DATE.value,
     inputFormat: String = DateFormats.INPUT_DATE_FORMAT.value
 ): String {
-    var d: Date? = null
-
-    val inputDateFormat = SimpleDateFormat(inputFormat, Locale.ENGLISH)
-    val outputDateFormat = SimpleDateFormat(outputFormat, Locale("en"))
-
-    try {
-        d = inputDateFormat.parse(this)
+    return try {
+        val inputDateFormat = SimpleDateFormat(inputFormat, Locale.ENGLISH)
+        val outputDateFormat = SimpleDateFormat(outputFormat, Locale.ENGLISH)
+        outputDateFormat.format(inputDateFormat.parse(this) ?: Date())
     } catch (e: Exception) {
         e.printStackTrace()
-    }
-
-    return if (d == null) {
         this
-    } else {
-        outputDateFormat.format(d)
     }
 }
 
@@ -66,7 +56,7 @@ enum class DateFormats(val value: String) {
     INPUT_DATE_FORMAT("yyyy-MM-dd'T'HH:mm:ss"),
     OUTPUT_BASIC_DATE_FORMAT("MMMM yyyy"),
     OUTPUT_LAST_PAYMENT_DATE_FORMAT("dd MMMM yyyy"),
-    OUTPUT_DOTTED_LAST_PAYMENT_DATE_FORMAT("dd.MM.yyyy")
+    DEFAULT_DATE("dd.MM.yyyy")
 }
 
 enum class ThemeKeys(val value: String) {

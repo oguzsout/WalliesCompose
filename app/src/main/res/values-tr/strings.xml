@@ -130,4 +130,5 @@
     <string name="user_name_surname_update">Bilgileriniz güncellendi.</string>
     <string name="settings_general_header">Genel</string>
     <string name="settings_storage_header">Depolama</string>
+    <string name="text_updated_date">Güncelleme Tarihine Göre</string>
 </resources>

@@ -4,4 +4,5 @@ sealed class CollectionScreenEvent {
     data object FetchLatestData : CollectionScreenEvent()
     data object SortByTitles : CollectionScreenEvent()
     data object SortByLikes : CollectionScreenEvent()
+    data object SortByUpdatedDate: CollectionScreenEvent()
 }

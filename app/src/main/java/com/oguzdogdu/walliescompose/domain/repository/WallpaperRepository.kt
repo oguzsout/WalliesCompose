@@ -20,6 +20,7 @@ interface WallpaperRepository {
     suspend fun getCollectionsList(): Flow<PagingData<WallpaperCollections>>
     suspend fun getCollectionsListByTitleSort(): Flow<PagingData<WallpaperCollections>>
     suspend fun getCollectionsListByLikesSort(): Flow<PagingData<WallpaperCollections>>
+    suspend fun getCollectionsListByUpdateDateSort(): Flow<PagingData<WallpaperCollections>>
     suspend fun insertImageToFavorites(favorite: FavoriteImages)
     suspend fun getFavorites(): Flow<Resource<List<FavoriteImages>?>>
     suspend fun deleteFavorites(favorite: FavoriteImages)

@@ -5,5 +5,6 @@ data class WallpaperCollections(
     val title: String?,
     val photo: String?,
     val desc: String?,
-    val likes: Int?
+    val likes: Int?,
+    val updatedAt: String?,
 )
