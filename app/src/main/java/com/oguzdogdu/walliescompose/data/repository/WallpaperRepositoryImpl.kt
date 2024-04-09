@@ -22,6 +22,7 @@ import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelPopular
 import com.oguzdogdu.walliescompose.data.model.topics.toDomainTopicList
 import com.oguzdogdu.walliescompose.data.model.topics.toDomainTopics
 import com.oguzdogdu.walliescompose.data.pagination.CollectionByLikesPagingSource
+import com.oguzdogdu.walliescompose.data.pagination.CollectionByUpdateDatePagingSource
 import com.oguzdogdu.walliescompose.data.pagination.CollectionsByTitlePagingSource
 import com.oguzdogdu.walliescompose.data.pagination.CollectionsPagingSource
 import com.oguzdogdu.walliescompose.data.pagination.LatestPagingSource
@@ -112,6 +113,19 @@ class WallpaperRepositoryImpl @Inject constructor(
             config = pagingConfig,
             initialKey = 1,
             pagingSourceFactory = { CollectionByLikesPagingSource(service = service) }
+        ).flow.mapNotNull {
+            it.map { collection ->
+                collection.toCollectionDomain()
+            }
+        }
+    }
+
+    override suspend fun getCollectionsListByUpdateDateSort(): Flow<PagingData<WallpaperCollections>> {
+        val pagingConfig = PagingConfig(pageSize = PAGE_ITEM_LIMIT)
+        return Pager(
+            config = pagingConfig,
+            initialKey = 1,
+            pagingSourceFactory = { CollectionByUpdateDatePagingSource(service = service) }
         ).flow.mapNotNull {
             it.map { collection ->
                 collection.toCollectionDomain()
