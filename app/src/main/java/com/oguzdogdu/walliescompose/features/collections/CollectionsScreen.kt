@@ -25,8 +25,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -46,7 +44,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -55,6 +52,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
@@ -74,6 +72,8 @@ fun CollectionsScreenRoute(
 ) {
     val collectionState: LazyPagingItems<WallpaperCollections> =
         viewModel.collectionPhotosState.collectAsLazyPagingItems()
+    val stateOfFilterBottomSheet by viewModel.filterBottomSheetOpenStat.collectAsStateWithLifecycle()
+    val stateOfChoisedFilter by viewModel.choisedFilter.collectAsStateWithLifecycle()
     LaunchedEffect(key1 = Unit) {
         viewModel.handleUIEvent(CollectionScreenEvent.FetchLatestData)
     }
@@ -102,7 +102,9 @@ fun CollectionsScreenRoute(
            DropdownMenuBox(modifier = modifier
                .align(Alignment.End)
                .padding(top = 8.dp, end = 8.dp, bottom = 8.dp),
+               sheetState = stateOfFilterBottomSheet,
               onItemClick = { id ->
+                  viewModel.handleUIEvent(CollectionScreenEvent.ChoisedFilterOption(id))
                    when(id) {
                        0 -> {
                            viewModel.handleUIEvent(CollectionScreenEvent.SortByTitles)
@@ -114,7 +116,9 @@ fun CollectionsScreenRoute(
                            viewModel.handleUIEvent(CollectionScreenEvent.SortByUpdatedDate)
                        }
                    }
-               })
+               }, dynamicSheetState = {
+                   viewModel.handleUIEvent(CollectionScreenEvent.OpenFilterBottomSheet(it))
+               }, choisedFilter = stateOfChoisedFilter)
             CollectionScreen(
                 modifier = modifier,
                 collectionLazyPagingItems = collectionState,
@@ -128,67 +132,63 @@ fun CollectionsScreenRoute(
 
 @Composable
 fun DropdownMenuBox(
-    modifier: Modifier, onItemClick: (Int) -> Unit
+    modifier: Modifier,
+    sheetState: Boolean,
+    onItemClick: (Int) -> Unit,
+    choisedFilter: Int,
+    dynamicSheetState: (Boolean) -> Unit
 ) {
     val sortTypeList = listOf(
         stringResource(id = R.string.text_alphabetic_sort),
         stringResource(id = R.string.text_likes_sort),
         stringResource(R.string.text_updated_date)
     )
-    var isContextMenuVisible by rememberSaveable {
-        mutableStateOf(false)
+    var isContextMenuVisible by remember {
+        mutableStateOf(sheetState)
     }
     var pressOffset by remember {
         mutableStateOf(DpOffset.Zero)
     }
-    var itemHeight by remember {
-        mutableStateOf(0.dp)
-    }
-    val interactionSource = remember {
-        MutableInteractionSource()
-    }
-    val density = LocalDensity.current
 
-    Card(modifier = modifier
-        .wrapContentSize()
-        .onSizeChanged {
-            itemHeight = with(density) { it.height.toDp() }
-        }) {
-        Box(modifier = modifier
+    LaunchedEffect(key1 = sheetState) {
+        isContextMenuVisible = sheetState
+    }
+
+    Card(
+        modifier = modifier
             .wrapContentSize()
-            .indication(interactionSource, LocalIndication.current)
-            .pointerInput(true) {
-                detectTapGestures(onPress = {
-                    isContextMenuVisible = true
-                    pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
-                })
-            }
-            .padding(8.dp)) {
-            Row {
-                Icon(painter = painterResource(id = R.drawable.ic_sort), contentDescription = "")
-                Spacer(modifier = modifier.size(4.dp))
-                Text(text = stringResource(id = R.string.text_sort), fontFamily = medium, color = Color.Unspecified)
-            }
+    ) {
 
-        }
-        DropdownMenu(
-            expanded = isContextMenuVisible, onDismissRequest = {
-                isContextMenuVisible = false
-            }, offset = pressOffset.copy(
-                y = pressOffset.y - itemHeight
+        Row(
+            modifier = modifier
+                .wrapContentSize()
+                .pointerInput(true) {
+                    detectTapGestures(onPress = {
+                        dynamicSheetState.invoke(true)
+                        pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
+                    })
+                }) {
+            Icon(painter = painterResource(id = R.drawable.ic_sort), contentDescription = "")
+            Spacer(modifier = modifier.size(4.dp))
+            Text(
+                text = stringResource(id = R.string.text_sort),
+                fontFamily = medium,
+                color = Color.Unspecified
             )
-        ) {
-            sortTypeList.forEach { title ->
-                DropdownMenuItem(onClick = {
-                    onItemClick(sortTypeList.indexOf(title))
-                    isContextMenuVisible = false
-                }, text = {
-                    Text(text = title)
-                })
-            }
         }
     }
+    FilterDialog(
+        modifier = modifier,
+        typeOfFilters = sortTypeList,
+        isOpen = isContextMenuVisible,
+        onItemClick = {
+            onItemClick.invoke(it)
+            dynamicSheetState.invoke(false)
+        }, onDismiss = {
+            dynamicSheetState.invoke(false)
+        }, choisedFilter = choisedFilter)
 }
+
 @Composable
 private fun CollectionScreen(modifier: Modifier,
     collectionLazyPagingItems: LazyPagingItems<WallpaperCollections>,

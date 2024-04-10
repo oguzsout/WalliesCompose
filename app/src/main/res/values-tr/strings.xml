@@ -131,4 +131,5 @@
     <string name="settings_general_header">Genel</string>
     <string name="settings_storage_header">Depolama</string>
     <string name="text_updated_date">Güncelleme Tarihine Göre</string>
+    <string name="text_apply">Uygula</string>
 </resources>
