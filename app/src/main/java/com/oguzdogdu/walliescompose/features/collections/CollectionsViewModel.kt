@@ -20,6 +20,12 @@ class CollectionsViewModel @Inject constructor(private val repository: Wallpaper
     private val _collectionPhotosState: MutableStateFlow<PagingData<WallpaperCollections>> = MutableStateFlow(value = PagingData.empty())
     val collectionPhotosState: MutableStateFlow<PagingData<WallpaperCollections>> get() = _collectionPhotosState
 
+    private val _filterBottomSheetOpenStat = MutableStateFlow(false)
+    val filterBottomSheetOpenStat = _filterBottomSheetOpenStat.asStateFlow()
+
+    private val _choisedFilter = MutableStateFlow(0)
+    val choisedFilter = _choisedFilter.asStateFlow()
+
     fun handleUIEvent(event: CollectionScreenEvent) {
         when (event) {
             is CollectionScreenEvent.FetchLatestData -> {
@@ -30,6 +36,13 @@ class CollectionsViewModel @Inject constructor(private val repository: Wallpaper
 
             is CollectionScreenEvent.SortByLikes -> sortListByLikes()
             is CollectionScreenEvent.SortByUpdatedDate -> sortListByUpdatedDate()
+            is CollectionScreenEvent.OpenFilterBottomSheet -> {
+                _filterBottomSheetOpenStat.value = event.isOpen
+            }
+
+            is CollectionScreenEvent.ChoisedFilterOption -> {
+                _choisedFilter.value = event.choised
+            }
         }
     }
 
