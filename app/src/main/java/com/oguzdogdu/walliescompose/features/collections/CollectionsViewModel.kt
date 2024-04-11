@@ -7,6 +7,8 @@ import androidx.paging.cachedIn
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
 import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -28,21 +30,13 @@ class CollectionsViewModel @Inject constructor(private val repository: Wallpaper
 
     fun handleUIEvent(event: CollectionScreenEvent) {
         when (event) {
-            is CollectionScreenEvent.FetchLatestData -> {
-                getCollectionsList()
-            }
-
+            is CollectionScreenEvent.FetchLatestData -> getCollectionsList()
             is CollectionScreenEvent.SortByTitles -> sortListByTitle()
-
             is CollectionScreenEvent.SortByLikes -> sortListByLikes()
             is CollectionScreenEvent.SortByUpdatedDate -> sortListByUpdatedDate()
-            is CollectionScreenEvent.OpenFilterBottomSheet -> {
-                _filterBottomSheetOpenStat.value = event.isOpen
-            }
-
-            is CollectionScreenEvent.ChoisedFilterOption -> {
-                _choisedFilter.value = event.choised
-            }
+            is CollectionScreenEvent.OpenFilterBottomSheet -> _filterBottomSheetOpenStat.value =
+                event.isOpen
+            is CollectionScreenEvent.ChoisedFilterOption -> _choisedFilter.value = event.choised
         }
     }
 
@@ -60,6 +54,8 @@ class CollectionsViewModel @Inject constructor(private val repository: Wallpaper
 
     private fun sortListByTitle() {
         viewModelScope.launch {
+            async { _collectionPhotosState.value = PagingData.empty() }.await()
+            delay(1000)
             repository.getCollectionsListByTitleSort().cachedIn(viewModelScope).collectLatest { sortedPagingData ->
                 sortedPagingData.let { list ->
                     _collectionPhotosState.value = list
@@ -70,6 +66,8 @@ class CollectionsViewModel @Inject constructor(private val repository: Wallpaper
 
     private fun sortListByUpdatedDate() {
         viewModelScope.launch {
+            async { _collectionPhotosState.value = PagingData.empty() }.await()
+            delay(1000)
             repository.getCollectionsListByUpdateDateSort().cachedIn(viewModelScope).collectLatest { sortedPagingData ->
                 sortedPagingData.let { list ->
                     _collectionPhotosState.value = list
@@ -80,6 +78,8 @@ class CollectionsViewModel @Inject constructor(private val repository: Wallpaper
 
     private fun sortListByLikes() {
         viewModelScope.launch {
+            async { _collectionPhotosState.value = PagingData.empty() }.await()
+            delay(1000)
             repository.getCollectionsListByLikesSort().cachedIn(viewModelScope).collectLatest { sortedPagingData ->
                 sortedPagingData.let { list ->
                     _collectionPhotosState.value = list

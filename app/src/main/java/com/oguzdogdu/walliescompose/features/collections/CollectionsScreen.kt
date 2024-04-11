@@ -1,12 +1,9 @@
 package com.oguzdogdu.walliescompose.features.collections
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,7 +31,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,8 +39,6 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -72,8 +66,11 @@ fun CollectionsScreenRoute(
 ) {
     val collectionState: LazyPagingItems<WallpaperCollections> =
         viewModel.collectionPhotosState.collectAsLazyPagingItems()
+
     val stateOfFilterBottomSheet by viewModel.filterBottomSheetOpenStat.collectAsStateWithLifecycle()
+
     val stateOfChoisedFilter by viewModel.choisedFilter.collectAsStateWithLifecycle()
+
     LaunchedEffect(key1 = Unit) {
         viewModel.handleUIEvent(CollectionScreenEvent.FetchLatestData)
     }
@@ -99,22 +96,20 @@ fun CollectionsScreenRoute(
                 .padding(it)
                 .fillMaxSize()
         ) {
-           DropdownMenuBox(modifier = modifier
+           ShowFilterOfCollections(modifier = modifier
                .align(Alignment.End)
                .padding(top = 8.dp, end = 8.dp, bottom = 8.dp),
                sheetState = stateOfFilterBottomSheet,
               onItemClick = { id ->
                   viewModel.handleUIEvent(CollectionScreenEvent.ChoisedFilterOption(id))
                    when(id) {
-                       0 -> {
-                           viewModel.handleUIEvent(CollectionScreenEvent.SortByTitles)
-                       }
-                       1 -> {
-                           viewModel.handleUIEvent(CollectionScreenEvent.SortByLikes)
-                       }
-                       2 -> {
-                           viewModel.handleUIEvent(CollectionScreenEvent.SortByUpdatedDate)
-                       }
+                       0 -> viewModel.handleUIEvent(CollectionScreenEvent.FetchLatestData)
+
+                       1 -> viewModel.handleUIEvent(CollectionScreenEvent.SortByTitles)
+
+                       2 -> viewModel.handleUIEvent(CollectionScreenEvent.SortByLikes)
+
+                       3 -> viewModel.handleUIEvent(CollectionScreenEvent.SortByUpdatedDate)
                    }
                }, dynamicSheetState = {
                    viewModel.handleUIEvent(CollectionScreenEvent.OpenFilterBottomSheet(it))
@@ -129,9 +124,8 @@ fun CollectionsScreenRoute(
     }
 }
 
-
 @Composable
-fun DropdownMenuBox(
+fun ShowFilterOfCollections(
     modifier: Modifier,
     sheetState: Boolean,
     onItemClick: (Int) -> Unit,
@@ -139,6 +133,7 @@ fun DropdownMenuBox(
     dynamicSheetState: (Boolean) -> Unit
 ) {
     val sortTypeList = listOf(
+        stringResource(R.string.text_recommended_ranking),
         stringResource(id = R.string.text_alphabetic_sort),
         stringResource(id = R.string.text_likes_sort),
         stringResource(R.string.text_updated_date)
@@ -160,16 +155,19 @@ fun DropdownMenuBox(
     ) {
 
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .wrapContentSize()
                 .pointerInput(true) {
                     detectTapGestures(onPress = {
                         dynamicSheetState.invoke(true)
                         pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
                     })
-                }) {
+                }
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Icon(painter = painterResource(id = R.drawable.ic_sort), contentDescription = "")
-            Spacer(modifier = modifier.size(4.dp))
+            Spacer(modifier = modifier.size(2.dp))
             Text(
                 text = stringResource(id = R.string.text_sort),
                 fontFamily = medium,
@@ -197,7 +195,7 @@ private fun CollectionScreen(modifier: Modifier,
     LazyVerticalGrid(columns = GridCells.Fixed(2),modifier = modifier
         .fillMaxSize()
         .padding(horizontal = 8.dp)
-    , state = rememberLazyGridState(), verticalArrangement = Arrangement.spacedBy(16.dp),
+    , state = rememberLazyGridState(0), verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         items(
             count = collectionLazyPagingItems.itemCount,
