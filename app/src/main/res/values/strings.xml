@@ -132,5 +132,6 @@
     <string name="settings_storage_header">Storage</string>
     <string name="text_updated_date">By Updated Date</string>
     <string name="text_apply">Apply</string>
+    <string name="text_recommended_ranking">Recommended Ranking</string>
 
 </resources>

@@ -1,7 +1,5 @@
 package com.oguzdogdu.walliescompose.features.collections
 
-import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,27 +62,26 @@ fun FilterDialog(
 
     if (openBottomSheet) {
         ModalBottomSheet(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier,
             sheetState = bottomSheetState,
             onDismissRequest = {
                 scope.launch {
                     onDismiss.invoke()
                     bottomSheetState.hide()
-                }
-                    .invokeOnCompletion { openBottomSheet = false }
+                }.invokeOnCompletion { openBottomSheet = false }
             },
         ) {
             Column(
                 modifier = modifier
                     .fillMaxWidth()
                     .wrapContentHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                BottomSheetContent(modifier = modifier, typeOfFilters = typeOfFilters, clickedItem = {
+                BottomSheetContent(typeOfFilters = typeOfFilters, clickedItem = {
                     scope.launch {
                         onItemClick.invoke(it)
                         bottomSheetState.hide()
-                    }
-                        .invokeOnCompletion { openBottomSheet = false }
+                    }.invokeOnCompletion { openBottomSheet = false }
                 }, onDismiss = {
                     onDismiss.invoke()
                 }, choisedFilter = choisedFilter)
@@ -93,10 +90,9 @@ fun FilterDialog(
     }
 }
 
-@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun BottomSheetContent(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     typeOfFilters: List<String>,
     clickedItem: (Int) -> Unit,
     onDismiss: () -> Unit,
@@ -127,7 +123,8 @@ fun BottomSheetContent(
             LazyColumn(
                 modifier = modifier
                     .fillMaxWidth()
-                    .wrapContentHeight(),
+                    .wrapContentHeight()
+                    .padding(vertical = 8.dp),
             ) {
                 itemsIndexed(typeOfFilters) { index, item ->
                     FilterRow(
@@ -192,7 +189,7 @@ fun FilterRow(modifier: Modifier, title: String, selected: Boolean, clickButton:
                     disabledUnselectedColor = Color.Transparent
                 )
             )
-            Text(selectedFilterTitle.value)
+            Text(selectedFilterTitle.value,style = MaterialTheme.typography.titleSmall)
         }
     }
 }
