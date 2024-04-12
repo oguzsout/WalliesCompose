@@ -13,6 +13,6 @@ object Constants {
     const val IMAGE = "image"
     const val FAVORITES = "favorites"
     const val FILE_NAME_SUFFIX = ".jpg"
-     const val FIT = "&fit=facearea"
-     const val AUTO = "&auto=enhance"
+    const val FIT = "&fit=facearea"
+    const val AUTO = "&auto=enhance"
 }

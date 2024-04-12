@@ -1,7 +1,5 @@
 package com.oguzdogdu.walliescompose.features.collections
 
-import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -14,14 +12,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -46,7 +47,10 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
@@ -57,7 +61,6 @@ import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
 import com.oguzdogdu.walliescompose.ui.theme.medium
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun CollectionsScreenRoute(
     modifier: Modifier = Modifier,
@@ -71,13 +74,14 @@ fun CollectionsScreenRoute(
 
     val stateOfChoisedFilter by viewModel.choisedFilter.collectAsStateWithLifecycle()
 
-    LaunchedEffect(key1 = Unit) {
-        viewModel.handleUIEvent(CollectionScreenEvent.FetchLatestData)
+    LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
+        if (collectionState.itemCount == 0) {
+            viewModel.handleUIEvent(CollectionScreenEvent.FetchLatestData)
+        }
     }
 
     Scaffold(modifier = modifier
-        .fillMaxSize()
-        .background(Color.Magenta), topBar = {
+        .fillMaxSize(), topBar = {
         Row(
             modifier = modifier
                 .wrapContentWidth()
@@ -153,7 +157,6 @@ fun ShowFilterOfCollections(
         modifier = modifier
             .wrapContentSize()
     ) {
-
         Row(
             modifier = Modifier
                 .wrapContentSize()
@@ -188,15 +191,19 @@ fun ShowFilterOfCollections(
 }
 
 @Composable
-private fun CollectionScreen(modifier: Modifier,
+private fun CollectionScreen(
+    modifier: Modifier,
     collectionLazyPagingItems: LazyPagingItems<WallpaperCollections>,
     onCollectionClick: (String, String) -> Unit
 ) {
-    LazyVerticalGrid(columns = GridCells.Fixed(2),modifier = modifier
-        .fillMaxSize()
-        .padding(horizontal = 8.dp)
-    , state = rememberLazyGridState(0), verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(4.dp),
+        state = rememberLazyGridState(),
+        verticalArrangement = Arrangement.Center
+    ) {
         items(
             count = collectionLazyPagingItems.itemCount,
             key = collectionLazyPagingItems.itemKey { item: WallpaperCollections -> item.id.hashCode()},
@@ -209,6 +216,42 @@ private fun CollectionScreen(modifier: Modifier,
                         onCollectionClick.invoke(id, title)
                     }
                 )
+            }
+        }
+        collectionLazyPagingItems.apply {
+            when {
+                loadState.source.refresh is LoadState.Loading -> {
+                    item(span = { GridItemSpan(2) }) {
+                        Box(
+                            modifier = modifier.fillMaxSize()
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = modifier.align(Alignment.Center)
+                            )
+                        }
+                    }
+                }
+
+                loadState.refresh is LoadState.Error || loadState.append is LoadState.Error -> {
+                    val errorMessage = (loadState.refresh as? LoadState.Error)?.error?.localizedMessage.orEmpty()
+                    item(span = { GridItemSpan(2) }) {
+                        Text(text = errorMessage)
+                    }
+                }
+
+                loadState.source.append is LoadState.Loading-> {
+                    item(span = { GridItemSpan(2) }) {
+                        Box(
+                            modifier = modifier
+                                .wrapContentHeight()
+                                .fillMaxWidth()
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = modifier.align(Alignment.BottomCenter)
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -224,6 +267,7 @@ fun CollectionItem(collections: WallpaperCollections, onCollectionItemClick: (St
                     collections.id.orEmpty(), collections.title.orEmpty()
                 )
             }
+            .padding(4.dp)
         , contentAlignment = Alignment.Center
     ) {
         SubcomposeAsyncImage(
