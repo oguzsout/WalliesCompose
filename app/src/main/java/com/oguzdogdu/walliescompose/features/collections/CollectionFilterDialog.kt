@@ -50,7 +50,7 @@ fun FilterDialog(
     choisedFilter:Int,
     onItemClick: (Int) -> Unit,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
 ) {
     var openBottomSheet by remember { mutableStateOf(isOpen) }
     val bottomSheetState = rememberModalBottomSheetState()

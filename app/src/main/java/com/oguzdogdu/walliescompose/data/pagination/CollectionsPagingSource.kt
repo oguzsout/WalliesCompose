@@ -5,6 +5,7 @@ import androidx.paging.PagingState
 import com.oguzdogdu.walliescompose.data.common.Constants
 import com.oguzdogdu.walliescompose.data.model.collection.CollectionResponse
 import com.oguzdogdu.walliescompose.data.service.WallpaperService
+import kotlinx.coroutines.delay
 
 class CollectionsPagingSource(private val service: WallpaperService) :
     PagingSource<Int, CollectionResponse>() {
@@ -18,6 +19,7 @@ class CollectionsPagingSource(private val service: WallpaperService) :
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, CollectionResponse> {
         return try {
             val page = params.key ?: 1
+            delay(1000)
             val response =
                 service.getCollections(page = page, perPage = Constants.PAGE_ITEM_LIMIT).body()
                     .orEmpty()
