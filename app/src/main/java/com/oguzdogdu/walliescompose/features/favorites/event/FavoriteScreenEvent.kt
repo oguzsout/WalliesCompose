@@ -2,5 +2,6 @@ package com.oguzdogdu.walliescompose.features.favorites.event
 
 sealed class FavoriteScreenEvent {
     data object GetFavorites : FavoriteScreenEvent()
-    data object DeleteList : FavoriteScreenEvent()
+    data class FlipToImage(val flip:Boolean): FavoriteScreenEvent()
+    data class DeleteFromFavorites(val favoriteId:String) : FavoriteScreenEvent()
 }

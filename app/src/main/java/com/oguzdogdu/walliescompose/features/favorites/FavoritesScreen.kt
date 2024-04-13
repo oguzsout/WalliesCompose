@@ -1,11 +1,27 @@
 package com.oguzdogdu.walliescompose.features.favorites
 
+import android.annotation.SuppressLint
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseInOutCirc
+import androidx.compose.animation.core.EaseOutBounce
+import androidx.compose.animation.core.EaseOutElastic
+import androidx.compose.animation.core.EaseOutQuad
+import androidx.compose.animation.core.EaseOutQuint
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,10 +37,17 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -33,17 +56,28 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
@@ -51,6 +85,7 @@ import com.oguzdogdu.walliescompose.features.favorites.event.FavoriteScreenEvent
 import com.oguzdogdu.walliescompose.features.favorites.state.FavoriteScreenState
 import com.oguzdogdu.walliescompose.features.home.LoadingState
 import com.oguzdogdu.walliescompose.ui.theme.regular
+import com.oguzdogdu.walliescompose.util.shareExternal
 
 
 @Composable
@@ -60,10 +95,14 @@ fun FavoritesScreenRoute(
     onFavoriteClick: (String?) -> Unit
 ) {
     val state by viewModel.favoritesState.collectAsStateWithLifecycle()
+    val cardFlippableState by viewModel.flipImageCard.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
+    var shareEnabled by remember { mutableStateOf(false) }
+    val launcherOfShare = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        shareEnabled = true
+    }
+    LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
         viewModel.handleUIEvent(FavoriteScreenEvent.GetFavorites)
-
     }
     Scaffold(modifier = modifier
         .fillMaxSize()
@@ -96,10 +135,19 @@ fun FavoritesScreenRoute(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(state.favorites.orEmpty()) {favorites ->
-                        FavoritesImageView(modifier,imageUrl = favorites.url, imageId = favorites.id, onFavoriteClick = {id ->
+                    itemsIndexed(state.favorites.orEmpty(),key = { _, item -> item.url.hashCode() }) {_, item ->
+                        FavoritesImageView(modifier,imageUrl = item.url, imageId = item.id, onFavoriteClick = {id ->
                             onFavoriteClick.invoke(id)
-                        })
+                        }, onFavoriteLongClick = {cardState ->
+                            viewModel.handleUIEvent(FavoriteScreenEvent.FlipToImage(cardState))
+                        }, onDeleteFavoriteClick = {id ->
+                            viewModel.handleUIEvent(FavoriteScreenEvent.DeleteFromFavorites(id))
+                        }, onShareFavoriteClick = { url ->
+                            launcherOfShare.launch(url.shareExternal())
+                        }, flipCard = cardFlippableState)
+                    }
+                    items(state.favorites.orEmpty()) {favorites ->
+
                     }
                 }
             }
@@ -140,27 +188,133 @@ fun EmptyView(modifier: Modifier, state: Boolean) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun FavoritesImageView(modifier: Modifier,imageUrl: String?,imageId:String?,onFavoriteClick:(String?) -> Unit) {
+private fun FavoritesImageView(
+    modifier: Modifier,
+    imageUrl: String?,
+    imageId: String?,
+    onFavoriteClick: (String?) -> Unit,
+    onFavoriteLongClick: (Boolean) -> Unit,
+    onDeleteFavoriteClick: (String) -> Unit,
+    onShareFavoriteClick: (String) -> Unit,
+    flipCard: Boolean
+) {
+    var flippableCard by remember {
+        mutableStateOf(flipCard)
+    }
     val favoriteId by remember {
         mutableStateOf(imageId)
     }
-    Box(
-        modifier = Modifier
-            .wrapContentSize()
-            .clickable {
-                onFavoriteClick.invoke(favoriteId)
+    val favoriteUrl by remember {
+        mutableStateOf(imageUrl)
+    }
+
+    val rotation by animateFloatAsState(
+        targetValue = if (flippableCard) 180f else 0f,
+        animationSpec = tween(2000, easing = EaseOutElastic), label = ""
+    )
+
+    val animateFront by animateFloatAsState(
+        targetValue = if (!flippableCard) 1f else 0f,
+        animationSpec = tween(1500), label = ""
+    )
+
+    val animateBack by animateFloatAsState(
+        targetValue = if (flippableCard) 1f else 0f,
+        animationSpec = tween(1500), label = ""
+    )
+
+    Card(shape = RoundedCornerShape(16.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(240.dp)
+            .graphicsLayer {
+                rotationY = rotation
+                cameraDistance = 8 * density
             }
+            .combinedClickable(onClick = {
+                if(!flippableCard) {
+                    onFavoriteClick.invoke(favoriteId)
+                }
+            }, onLongClick = {
+                flippableCard = !flipCard
+                onFavoriteLongClick.invoke(flippableCard)
+            })
     ) {
-        SubcomposeAsyncImage(
-            model = imageUrl,
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds,
-            modifier = modifier
-                .fillMaxWidth()
-                .height(240.dp)
-                .clip(CircleShape.copy(all = CornerSize(16.dp))),
-            loading = { ImageLoadingState() },
-        )
+        when (flippableCard) {
+            true -> {
+                Box(
+                    modifier = modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(modifier = modifier.wrapContentSize()) {
+                        IconButton(
+                            onClick = {
+                                onDeleteFavoriteClick.invoke(favoriteId.orEmpty())
+                            },
+                            modifier = modifier
+                                .wrapContentSize()
+                                .graphicsLayer {
+                                    alpha = animateBack
+                                }
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.delete),
+                                contentDescription = "",
+                                tint = Color.Red,
+                                modifier = modifier
+                                    .wrapContentSize()
+                                    .graphicsLayer {
+                                        alpha = animateBack
+                                    }
+                            )
+                        }
+                        IconButton(
+                            onClick = { onShareFavoriteClick.invoke(favoriteUrl.orEmpty()) },
+                            modifier = modifier
+                                .wrapContentSize()
+                                .graphicsLayer {
+                                    alpha = animateBack
+                                }
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.share),
+                                contentDescription = "",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = modifier
+                                    .wrapContentSize()
+                                    .graphicsLayer {
+                                        alpha = animateBack
+                                    }
+                            )
+                        }
+                    }
+                }
+            }
+
+            false -> {
+                Box(
+                    modifier = modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SubcomposeAsyncImage(
+                        model = imageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.FillBounds,
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .height(240.dp)
+                            .clip(CircleShape.copy(all = CornerSize(16.dp)))
+                            .graphicsLayer {
+                                alpha = animateFront
+                            },
+                        loading = { ImageLoadingState() },
+                    )
+                }
+            }
+        }
     }
 }

@@ -24,6 +24,7 @@ interface WallpaperRepository {
     suspend fun insertImageToFavorites(favorite: FavoriteImages)
     suspend fun getFavorites(): Flow<Resource<List<FavoriteImages>?>>
     suspend fun deleteFavorites(favorite: FavoriteImages)
+    suspend fun deleteSpecificIdFavorite(favoriteId: String)
     suspend fun getPhoto(id: String?): Flow<Resource<Photo?>>
     suspend fun searchPhoto(query: String?,language:String?): Flow<PagingData<SearchPhoto>>
     suspend fun getTopicsTitleWithPaging(): Flow<PagingData<Topics>>

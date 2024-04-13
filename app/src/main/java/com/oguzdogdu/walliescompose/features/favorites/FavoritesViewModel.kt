@@ -11,6 +11,7 @@ import com.oguzdogdu.walliescompose.features.favorites.event.FavoriteScreenEvent
 import com.oguzdogdu.walliescompose.features.favorites.state.FavoriteScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -24,15 +25,17 @@ class FavoritesViewModel @Inject constructor(private val repository: WallpaperRe
     )
     val favoritesState: MutableStateFlow<FavoriteScreenState> get() = _favoritesState
 
+    private val _flipImageCard: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val flipImageCard = _flipImageCard.asStateFlow()
+
     fun handleUIEvent(event: FavoriteScreenEvent) {
         when (event) {
             is FavoriteScreenEvent.GetFavorites -> fetchImagesToFavorites()
-            FavoriteScreenEvent.DeleteList -> delete()
+            is FavoriteScreenEvent.FlipToImage -> _flipImageCard.value = event.flip
+            is FavoriteScreenEvent.DeleteFromFavorites -> deleteWithIdFromToFavorites(event.favoriteId)
         }
     }
-    private fun delete() {
-        _favoritesState.update { it.copy(favorites = null) }
-    }
+
     private fun fetchImagesToFavorites() {
         viewModelScope.launch {
             repository.getFavorites().collectLatest { status ->
@@ -48,6 +51,12 @@ class FavoritesViewModel @Inject constructor(private val repository: WallpaperRe
                     _favoritesState.update { it.copy(error = error) }
                 }
             }
+        }
+    }
+
+    private fun deleteWithIdFromToFavorites(favoriteId:String) {
+        viewModelScope.launch {
+            repository.deleteSpecificIdFavorite(favoriteId)
         }
     }
 }
