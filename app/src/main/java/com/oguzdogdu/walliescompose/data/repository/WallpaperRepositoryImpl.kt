@@ -165,6 +165,11 @@ class WallpaperRepositoryImpl @Inject constructor(
             )
         )
     }
+
+    override suspend fun deleteSpecificIdFavorite(favoriteId: String) {
+        favoriteDao.deleteSpecificIdFavorite(favoriteId = favoriteId)
+    }
+
     override suspend fun getPhoto(id: String?): Flow<Resource<Photo?>> {
         return safeApiCall(ioDispatcher) {
             service.getPhoto(id = id).body()?.toDomainModelPhoto()
