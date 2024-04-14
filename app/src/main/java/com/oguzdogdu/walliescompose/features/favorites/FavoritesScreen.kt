@@ -56,6 +56,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -86,6 +87,7 @@ import com.oguzdogdu.walliescompose.features.favorites.state.FavoriteScreenState
 import com.oguzdogdu.walliescompose.features.home.LoadingState
 import com.oguzdogdu.walliescompose.ui.theme.regular
 import com.oguzdogdu.walliescompose.util.shareExternal
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -96,6 +98,7 @@ fun FavoritesScreenRoute(
 ) {
     val state by viewModel.favoritesState.collectAsStateWithLifecycle()
     val cardFlippableState by viewModel.flipImageCard.collectAsStateWithLifecycle()
+    val coroutineScope = rememberCoroutineScope()
 
     var shareEnabled by remember { mutableStateOf(false) }
     val launcherOfShare = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -138,6 +141,9 @@ fun FavoritesScreenRoute(
                     itemsIndexed(state.favorites.orEmpty(),key = { _, item -> item.url.hashCode() }) {_, item ->
                         FavoritesImageView(modifier,imageUrl = item.url, imageId = item.id, onFavoriteClick = {id ->
                             onFavoriteClick.invoke(id)
+                            coroutineScope.launch {
+                                viewModel.resetToFlipCardState(false)
+                            }
                         }, onFavoriteLongClick = {cardState ->
                             viewModel.handleUIEvent(FavoriteScreenEvent.FlipToImage(cardState))
                         }, onDeleteFavoriteClick = {id ->
@@ -234,7 +240,7 @@ private fun FavoritesImageView(
                 cameraDistance = 8 * density
             }
             .combinedClickable(onClick = {
-                if(!flippableCard) {
+                if (!flippableCard) {
                     onFavoriteClick.invoke(favoriteId)
                 }
             }, onLongClick = {

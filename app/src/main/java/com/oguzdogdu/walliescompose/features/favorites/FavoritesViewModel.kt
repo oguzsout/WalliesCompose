@@ -59,4 +59,8 @@ class FavoritesViewModel @Inject constructor(private val repository: WallpaperRe
             repository.deleteSpecificIdFavorite(favoriteId)
         }
     }
+
+     fun resetToFlipCardState(state:Boolean) {
+        _flipImageCard.value = state
+    }
 }
