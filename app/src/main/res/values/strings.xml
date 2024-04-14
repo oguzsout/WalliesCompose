@@ -116,8 +116,8 @@
     <string name="continue_without_registration">Continue Without Registration</string>
     <string name="users">Users</string>
     <string name="profile_image">Profile Image</string>
-    <string name="search">Search</string>
-    <string name="search_desc">Start searching now for the kind of photos you want!</string>
+    <string name="search">Search through images</string>
+    <string name="search_desc">Start searching now for the kind of images you want!</string>
     <string name="continue_with_email">Continue with e-mail</string>
     <string name="sign_in_to_wallies">Sign in to Wallies</string>
     <string name="sign_in_desc">You can use your account to use and save different wallpapers</string>
