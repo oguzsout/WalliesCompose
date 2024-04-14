@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun ErrorItem(modifier: Modifier, message: String) {
+fun ErrorItem(modifier: Modifier = Modifier, message: String?) {
     Card(
         modifier = modifier
             .padding(6.dp)
@@ -47,7 +47,7 @@ fun ErrorItem(modifier: Modifier, message: String) {
             )
             Text(
                 color = Color.White,
-                text = message,
+                text = message.orEmpty(),
                 fontSize = 16.sp,
                 modifier = modifier
                     .padding(start = 12.dp)
