@@ -128,7 +128,7 @@ private fun PopularDetailListScreen(
         ) {
             items(
                 count = popularLazyPagingItems.itemCount,
-                key = popularLazyPagingItems.itemKey { item: PopularImage -> item.id.hashCode() },
+                key = popularLazyPagingItems.itemKey { item: PopularImage -> item.url.hashCode() },
                 contentType = popularLazyPagingItems.itemContentType { "Popular" }) { index: Int ->
                 val popular: PopularImage? = popularLazyPagingItems[index]
                 if (popular != null) {
