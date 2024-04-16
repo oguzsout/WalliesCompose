@@ -129,7 +129,7 @@ private fun LatestDetailListScreen(
         ) {
             items(
                 count = latestLazyPagingItems.itemCount,
-                key = latestLazyPagingItems.itemKey { item: LatestImage -> item.id.hashCode() },
+                key = latestLazyPagingItems.itemKey { item: LatestImage -> item.url.hashCode() },
                 contentType = latestLazyPagingItems.itemContentType { "Latest" }) { index: Int ->
                 val latest: LatestImage? = latestLazyPagingItems[index]
                 if (latest != null) {
