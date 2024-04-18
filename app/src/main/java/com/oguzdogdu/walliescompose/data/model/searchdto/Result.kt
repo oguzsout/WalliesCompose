@@ -34,5 +34,6 @@ data class Result(
 
 fun Result.toDomainSearch() = SearchPhoto(
     id = id,
-    url = urls?.small
+    url = urls?.small,
+    imageDesc = alt_description
 )

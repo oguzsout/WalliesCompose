@@ -44,4 +44,4 @@ data class Photo(
 ):Parcelable
 
 fun Photo.toDomainCollectionDetailList() = CollectionList(id = id, url = urls?.regular,desc = description)
-fun Photo.toDomainUsersPhotos() = UsersPhotos(id = id, url = urls?.regular)
+fun Photo.toDomainUsersPhotos() = UsersPhotos(id = id, url = urls?.regular, imageDesc = alt_description)

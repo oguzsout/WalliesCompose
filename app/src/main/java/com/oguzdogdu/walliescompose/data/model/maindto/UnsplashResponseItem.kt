@@ -35,8 +35,8 @@ data class Tags(
     val title: String?,
 ):Parcelable
 fun UnsplashResponseItem.convertList() = tags.map { it?.title }
-fun UnsplashResponseItem.toDomainModelPopular() = PopularImage(id = id, url = urls?.regular)
-fun UnsplashResponseItem.toDomainModelLatest() = LatestImage(id = id, url = urls?.regular)
+fun UnsplashResponseItem.toDomainModelPopular() = PopularImage(id = id, url = urls?.regular, imageDesc = altDescription)
+fun UnsplashResponseItem.toDomainModelLatest() = LatestImage(id = id, url = urls?.regular, imageDesc = altDescription)
 fun UnsplashResponseItem.toDomainModelPhoto() = Photo(
     id = id,
     username = user?.username,

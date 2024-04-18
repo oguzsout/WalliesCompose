@@ -716,7 +716,7 @@ fun PhotoListItem(modifier: Modifier,userPhotosState: UsersPhotos, onUserPhotoLi
     ) {
         SubcomposeAsyncImage(
             model = userPhotosState.url,
-            contentDescription = null,
+            contentDescription = userPhotosState.imageDesc,
             contentScale = ContentScale.FillBounds,
             modifier = modifier
                 .fillMaxWidth()
@@ -747,7 +747,7 @@ fun CollectionListItem(
     ) {
         SubcomposeAsyncImage(
             model = userCollection?.photo,
-            contentDescription = null,
+            contentDescription = userCollection?.title,
             contentScale = ContentScale.FillBounds,
             modifier = modifier
                 .fillMaxWidth()

@@ -154,7 +154,7 @@ fun PopularListItem(popularImage: PopularImage, onPopularClick: (String) -> Unit
     ) {
         SubcomposeAsyncImage(
             model = popularImage.url,
-            contentDescription = null,
+            contentDescription = popularImage.imageDesc,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .fillMaxWidth()
