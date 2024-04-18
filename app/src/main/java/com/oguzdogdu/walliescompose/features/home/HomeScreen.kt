@@ -286,7 +286,7 @@ private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreen
             itemsIndexed(homeScreenState.topics, key = { index: Int, item: Topics ->
                 item.id.hashCode()
             }) { index, item ->
-                TopicTitleView(imageUrl = item.titleBackground, title = item.title, onTopicDetailListClick = {
+                TopicTitleView(imageUrl = item.titleBackground, title = item.title, imageName = item.title, onTopicDetailListClick = {
                     onTopicDetailListClick.invoke(it)
                 })
             }
@@ -336,6 +336,7 @@ private fun PopularLayoutContainer(
             }) { popularImage ->
                 PopularImageView(id = popularImage.id,
                     imageUrl = popularImage.url,
+                    imageName = popularImage.imageDesc,
                     onPopularClick = {
                         onPopularClick.invoke(it)
                     })
@@ -386,6 +387,7 @@ private fun LatestLayoutContainer(
             }) { latestImage ->
                 LatestImageView(id = latestImage.id,
                     imageUrl = latestImage.url,
+                    imageName = latestImage.imageDesc,
                     onLatestClick = {
                         onLatestClick.invoke(it)
                     })
@@ -396,7 +398,7 @@ private fun LatestLayoutContainer(
 }
 
 @Composable
-private fun TopicTitleView(imageUrl: String?, title: String?,onTopicDetailListClick: (String?) -> Unit) {
+private fun TopicTitleView(imageUrl: String?, title: String?, imageName:String?,onTopicDetailListClick: (String?) -> Unit) {
     Box(
         modifier = Modifier
             .wrapContentSize()
@@ -407,7 +409,7 @@ private fun TopicTitleView(imageUrl: String?, title: String?,onTopicDetailListCl
 
         SubcomposeAsyncImage(
             model = imageUrl,
-            contentDescription = null,
+            contentDescription = imageName,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .fillMaxWidth()
@@ -434,13 +436,13 @@ private fun TopicTitleView(imageUrl: String?, title: String?,onTopicDetailListCl
 }
 
 @Composable
-private fun PopularImageView(id: String?, imageUrl: String?, onPopularClick: (String) -> Unit) {
+private fun PopularImageView(id: String?, imageUrl: String?, imageName:String?, onPopularClick: (String) -> Unit) {
     Box(modifier = Modifier
         .wrapContentSize()
         .clickable { onPopularClick.invoke(id.orEmpty()) }) {
         SubcomposeAsyncImage(
             model = imageUrl,
-            contentDescription = null,
+            contentDescription = imageName,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .width(160.dp)
@@ -452,13 +454,13 @@ private fun PopularImageView(id: String?, imageUrl: String?, onPopularClick: (St
 }
 
 @Composable
-private fun LatestImageView(id: String?, imageUrl: String?, onLatestClick: (String) -> Unit) {
+private fun LatestImageView(id: String?, imageUrl: String?, imageName:String?, onLatestClick: (String) -> Unit) {
     Box(modifier = Modifier
         .wrapContentSize()
         .clickable { onLatestClick.invoke(id.orEmpty()) }) {
         SubcomposeAsyncImage(
             model = imageUrl,
-            contentDescription = null,
+            contentDescription = imageName,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .width(160.dp)

@@ -33,7 +33,7 @@ fun SearchItem(searchPhoto: SearchPhoto, onSearchPhotoClick: (String) -> Unit) {
     ) {
         SubcomposeAsyncImage(
             model = searchPhoto.url,
-            contentDescription = null,
+            contentDescription = searchPhoto.imageDesc,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .fillMaxWidth()

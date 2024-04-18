@@ -144,7 +144,7 @@ fun FavoritesScreenRoute(
                             coroutineScope.launch {
                                 viewModel.resetToFlipCardState(false)
                             }
-                        }, onFavoriteLongClick = {cardState ->
+                        }, imageName = item.name, onFavoriteLongClick = {cardState ->
                             viewModel.handleUIEvent(FavoriteScreenEvent.FlipToImage(cardState))
                         }, onDeleteFavoriteClick = {id ->
                             viewModel.handleUIEvent(FavoriteScreenEvent.DeleteFromFavorites(id))
@@ -200,6 +200,7 @@ private fun FavoritesImageView(
     modifier: Modifier,
     imageUrl: String?,
     imageId: String?,
+    imageName: String?,
     onFavoriteClick: (String?) -> Unit,
     onFavoriteLongClick: (Boolean) -> Unit,
     onDeleteFavoriteClick: (String) -> Unit,
@@ -308,7 +309,7 @@ private fun FavoritesImageView(
                 ) {
                     SubcomposeAsyncImage(
                         model = imageUrl,
-                        contentDescription = null,
+                        contentDescription = imageName,
                         contentScale = ContentScale.FillBounds,
                         modifier = modifier
                             .fillMaxWidth()

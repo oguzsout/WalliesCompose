@@ -279,7 +279,7 @@ fun DetailScreenRoute(
             ) {
                 SubcomposeAsyncImage(
                     model = state.detail?.highQuality,
-                    contentDescription = "",
+                    contentDescription = state.detail?.desc,
                     modifier = modifier
                         .fillMaxWidth()
                         .weight(1f),

@@ -155,7 +155,7 @@ fun LatestListItem(latestImage: LatestImage, onLatestClick: (String) -> Unit) {
     ) {
         SubcomposeAsyncImage(
             model = latestImage.url,
-            contentDescription = null,
+            contentDescription = latestImage.imageDesc,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .fillMaxWidth()

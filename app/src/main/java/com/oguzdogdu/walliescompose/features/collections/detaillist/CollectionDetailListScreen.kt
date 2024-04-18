@@ -46,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
+import com.oguzdogdu.walliescompose.domain.model.collections.CollectionList
 import com.oguzdogdu.walliescompose.features.home.LoadingState
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
@@ -129,8 +130,7 @@ fun CollectionDetailListScreen(modifier: Modifier,paddingValues: PaddingValues,s
                     items(state.collectionsLists) { collection ->
                         CollectionListImageView(
                             modifier,
-                            imageUrl = collection.url,
-                            imageId = collection.id.orEmpty(),
+                            collectionDetailListItems = collection,
                             onCollectionItemClick = {
                                 onCollectionClick.invoke(it)
                             }
@@ -176,17 +176,17 @@ fun EmptyView(modifier: Modifier, state: Boolean) {
 
 
 @Composable
-private fun CollectionListImageView(modifier: Modifier,imageUrl: String?,imageId:String,onCollectionItemClick:(String) -> Unit) {
+private fun CollectionListImageView(modifier: Modifier, collectionDetailListItems: CollectionList, onCollectionItemClick:(String) -> Unit) {
     Box(
         modifier = Modifier
             .wrapContentSize()
             .clickable {
-                onCollectionItemClick.invoke(imageId)
+                onCollectionItemClick.invoke(collectionDetailListItems.id.orEmpty())
             }
     ) {
         SubcomposeAsyncImage(
-            model = imageUrl,
-            contentDescription = null,
+            model = collectionDetailListItems.url,
+            contentDescription = collectionDetailListItems.desc,
             contentScale = ContentScale.FillBounds,
             modifier = modifier
                 .clip(CircleShape.copy(all = CornerSize(16.dp))),

@@ -258,7 +258,7 @@ private fun CollectionScreen(
 }
 
 @Composable
-fun CollectionItem(collections: WallpaperCollections, onCollectionItemClick: (String,String) -> Unit) {
+fun CollectionItem(collections: WallpaperCollections,onCollectionItemClick: (String,String) -> Unit) {
     Box(
         modifier = Modifier
             .wrapContentSize()
@@ -272,7 +272,7 @@ fun CollectionItem(collections: WallpaperCollections, onCollectionItemClick: (St
     ) {
         SubcomposeAsyncImage(
             model = collections.photo,
-            contentDescription = null,
+            contentDescription = collections.title,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .fillMaxWidth()
