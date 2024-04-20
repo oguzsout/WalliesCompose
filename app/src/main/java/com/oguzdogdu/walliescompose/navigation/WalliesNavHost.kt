@@ -47,6 +47,8 @@ import com.oguzdogdu.walliescompose.features.profiledetail.navigation.profileDet
 import com.oguzdogdu.walliescompose.features.search.navigateToSearchScreen
 import com.oguzdogdu.walliescompose.features.search.searchScreen
 import com.oguzdogdu.walliescompose.features.settings.settingsScreen
+import com.oguzdogdu.walliescompose.features.signup.navigateToSignUpScreen
+import com.oguzdogdu.walliescompose.features.signup.signUpScreen
 import com.oguzdogdu.walliescompose.features.splash.SplashScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.splash.splashScreen
 import com.oguzdogdu.walliescompose.features.topics.navigateToTopicsScreen
@@ -130,11 +132,15 @@ fun WalliesNavHost(
                 navController.popBackStack()
             }, navigateToForgotPassword = {
                 navController.navigateToForgotPasswordScreen()
-            }
+            },
+                navigateToSignUpScreen = {
+                    navController.navigateToSignUpScreen()
+                }
             )
             forgotPasswordScreen(navigateToHome = {}, navigateBack = {
                 navController.popBackStack()
             })
+            signUpScreen(navigateBack = { navController.popBackStack() })
         }
 
         navigation(startDestination = HomeScreenNavigationRoute, route = CONTENT) {

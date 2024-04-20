@@ -133,5 +133,6 @@
     <string name="text_updated_date">By Updated Date</string>
     <string name="text_apply">Apply</string>
     <string name="text_recommended_ranking">Recommended Ranking</string>
+    <string name="text_create_account">Create Account</string>
 
 </resources>
