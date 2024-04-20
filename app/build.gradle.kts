@@ -30,7 +30,7 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("release") {
             buildConfigField ("String", "RELEASE_API_KEY", releaseApiKey)
             isMinifyEnabled = true
             isDebuggable = false
@@ -40,7 +40,7 @@ android {
                 "proguard-rules.pro"
             )
         }
-        debug {
+        getByName("debug") {
             buildConfigField ("String", "RELEASE_API_KEY", releaseApiKey)
             isMinifyEnabled = false
             isShrinkResources = false

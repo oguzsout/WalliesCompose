@@ -11,6 +11,7 @@ interface UserAuthenticationRepository {
     suspend fun isUserAuthenticatedInFirebase(): Flow<Boolean>
     suspend fun isUserAuthenticatedWithGoogle(): Flow<Boolean>
     suspend fun signIn(userEmail: String?, password: String?):Flow<Resource<AuthResult>>
+    suspend fun signUp(user: User?, password: String?) : Flow<Resource<User?>>
     suspend fun signInWithGoogle(idToken: String?):Flow<Resource<AuthResult>>
     suspend fun fetchUserInfos():Flow<Resource<User?>>
     suspend fun forgotMyPassword(email: String): Task<Void>

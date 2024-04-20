@@ -46,6 +46,33 @@ class UserAuthenticationRepositoryImpl @Inject constructor(
         }.toResource()
     }
 
+    override suspend fun signUp(
+        user: com.oguzdogdu.walliescompose.domain.model.auth.User?,
+        password: String?
+    ): Flow<Resource<com.oguzdogdu.walliescompose.domain.model.auth.User?>> {
+        user?.email?.let { auth.createUserWithEmailAndPassword(it, password.orEmpty()).await() }
+        val userModel = hashMapOf(
+            ID to auth.currentUser?.uid,
+            EMAIL to user?.email,
+            NAME to user?.name,
+            SURNAME to user?.surname,
+            IMAGE to user?.image,
+            FAVORITES to user?.favorites
+        )
+        auth.currentUser?.uid?.let {
+            firebaseFirestore.collection(COLLECTION_PATH).document(it)
+                .set(userModel)
+        }?.await()
+        val result = User(
+            name = userModel.get(key = NAME).toString(),
+            surname = userModel.get(key = SURNAME).toString(),
+            email = userModel.get(key = EMAIL).toString(),
+            image = userModel.get(key = IMAGE).toString(),
+            favorites = userModel.get(key = FAVORITES) as? List<HashMap<String, String>>
+        )
+        return flowOf(result.toUserDomain()).toResource()
+    }
+
     override suspend fun signInWithGoogle(idToken: String?): Flow<Resource<AuthResult>> {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         return flowOf(auth.signInWithCredential(credential).addOnCompleteListener { task ->
