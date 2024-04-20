@@ -56,7 +56,7 @@ fun SignInWithEmailScreenRoute(
     modifier: Modifier = Modifier,
     viewModel: SignInWithEmailViewModel = hiltViewModel(),
     navigateToHome: () -> Unit,
-    onCreateNewAccountClick: () -> Unit,
+    navigateToSignUpScreen: () -> Unit,
     navigateToForgotPassword: () -> Unit,
     navigateBack:() -> Unit
 ) {
@@ -95,6 +95,9 @@ fun SignInWithEmailScreenRoute(
                 },
                 navigateToForgotPassword = {
                     navigateToForgotPassword.invoke()
+                },
+                navigateToSignUpScreen = {
+                    navigateToSignUpScreen.invoke()
                 }
             )
         }
@@ -110,7 +113,8 @@ fun SignInWithEmailScreenContent(
     onLoginButtonClick: (String, String) -> Unit,
     navigateToHome: () -> Unit,
     navigateToBack: () -> Unit,
-    navigateToForgotPassword: () -> Unit
+    navigateToForgotPassword: () -> Unit,
+    navigateToSignUpScreen: () -> Unit
 ) {
     var buttonEnabled by remember { mutableStateOf(false) }
     var email by remember {
@@ -264,7 +268,9 @@ fun SignInWithEmailScreenContent(
                 fontFamily = regular,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 modifier = modifier
-                    .padding(8.dp)
+                    .padding(8.dp).clickable {
+                        navigateToSignUpScreen.invoke()
+                    }
             )
         }
     }
