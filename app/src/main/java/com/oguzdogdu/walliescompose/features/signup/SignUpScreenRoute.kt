@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,7 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -31,15 +32,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,15 +48,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.features.login.components.EmailTextField
+import com.oguzdogdu.walliescompose.features.signup.component.EmailTextFieldWithoutSubText
 import com.oguzdogdu.walliescompose.features.signup.component.PasswordRuleSetBox
-import com.oguzdogdu.walliescompose.features.signup.component.TextFieldWithoutSubText
+import com.oguzdogdu.walliescompose.features.signup.component.PasswordTextFieldWithoutSubText
 import com.oguzdogdu.walliescompose.ui.theme.medium
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,9 +61,6 @@ fun SignUpScreenRoute(modifier: Modifier = Modifier,onBackClick: () -> Unit,view
 
     val signUpState by viewModel.signUpUiState.collectAsStateWithLifecycle()
 
-    LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
-        viewModel.handleUiEvents(SignUpScreenEvent.ExecuteValidation)
-    }
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -122,9 +113,8 @@ fun SignUpScreenRoute(modifier: Modifier = Modifier,onBackClick: () -> Unit,view
         ) {
             SignUpScreenContent(
                 state = signUpState,
-                modifier = modifier,
-                passwordCheck = {
-                    viewModel.executePasswordRuleset(it)
+                passwordCheck = { password ->
+                    viewModel.handleUiEvents(SignUpScreenEvent.CheckPasswordRule(password))
                 },
                 continueButtonClick = { email, password ->
                     viewModel.handleUiEvents(SignUpScreenEvent.ResumeToSignUp(email, password))
@@ -136,11 +126,13 @@ fun SignUpScreenRoute(modifier: Modifier = Modifier,onBackClick: () -> Unit,view
 
 @Composable
 fun SignUpScreenContent(
-    state: SignUpScreenState,
-    modifier: Modifier,
+    state: SignUpUIState,
+    modifier: Modifier = Modifier,
     passwordCheck: (String) -> Unit,
     continueButtonClick: (String, String) -> Unit,
 ) {
+    val context = LocalContext.current
+
     var email by remember {
         mutableStateOf("")
     }
@@ -150,69 +142,45 @@ fun SignUpScreenContent(
     var ruleSetVisible by remember {
         mutableStateOf(false)
     }
-    var loading by remember {
-        mutableStateOf(false)
-    }
 
-    val context = LocalContext.current
-
-    LaunchedEffect(state) {
-        when (state) {
-            is SignUpScreenState.Start -> {}
-
-            is SignUpScreenState.UserSignUp -> {
-                Toast.makeText(context, context.getString(R.string.success_sign), Toast.LENGTH_LONG)
-                    .show()
-            }
-
-            is SignUpScreenState.ErrorSignUp -> {
-                Toast.makeText(context, state.errorMessage, Toast.LENGTH_LONG).show()
-            }
-
-            is SignUpScreenState.Loading -> {
-                loading = state.loading
-            }
-
+    Box(modifier = modifier.fillMaxSize()) {
+        when(state.isSignUp) {
+            true -> Toast.makeText(context,context.getString(R.string.success_sign),Toast.LENGTH_LONG).show()
             else -> {}
         }
-    }
 
-    Box(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            EmailTextField(modifier = modifier, onChangeEmail = {
-                email = it
-            })
-
-            TextFieldWithoutSubText(modifier = modifier, onChangePassword = {
-                ruleSetVisible = it != ""
-                password = it
-                passwordCheck.invoke(it)
-            })
-
+            EmailAndPasswordFieldContainer(
+                ruleSetVisibility = { ruleSetVisible = it },
+                sendEmail = {
+                    email = it
+                },
+                sendPassword = {
+                    password = it
+                    passwordCheck.invoke(it)
+                }
+            )
+            Spacer(modifier = modifier.size(8.dp))
             PasswordRuleSet(state = state, ruleSetVisible = ruleSetVisible, modifier = modifier)
         }
         Button(
             onClick = {
                 continueButtonClick.invoke(email, password)
             },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
+            modifier = modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
+                .align(Alignment.BottomCenter),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer
             ),
             shape = RoundedCornerShape(16.dp),
             contentPadding = PaddingValues(16.dp)
         ) {
-            when (loading) {
+            when (state.loading) {
                 true -> {
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.primary,
@@ -234,24 +202,40 @@ fun SignUpScreenContent(
     }
 }
 
+
+@Composable
+fun EmailAndPasswordFieldContainer(
+    ruleSetVisibility: (Boolean) -> Unit,
+    sendEmail: (String) -> Unit,
+    sendPassword: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .wrapContentHeight()
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        EmailTextFieldWithoutSubText(onChangeEmail = {
+            sendEmail.invoke(it)
+        })
+
+        PasswordTextFieldWithoutSubText(modifier = modifier, onChangePassword = {
+            ruleSetVisibility.invoke(it != "")
+            sendPassword.invoke(it)
+        })
+    }
+}
+
 @Composable
 fun PasswordRuleSet(
-    state: SignUpScreenState,
+    state: SignUpUIState,
     ruleSetVisible: Boolean,
     modifier: Modifier = Modifier
 ) {
     val ruleSetVisibility = rememberUpdatedState(newValue = ruleSetVisible)
-    val stateOfRuleSet = remember { mutableStateOf(listOf(Pair("",false))) }
-
-    LaunchedEffect(state) {
-        when (state) {
-            is SignUpScreenState.PasswordRuleSet -> {
-               stateOfRuleSet.value = state.ruleSet
-            }
-
-            else -> {}
-        }
-    }
 
     if (ruleSetVisibility.value) {
         Card(
@@ -261,19 +245,22 @@ fun PasswordRuleSet(
                 Color.Transparent, Color.Transparent, Color.Transparent
             ),
             modifier = modifier
+                .padding(horizontal = 24.dp)
                 .wrapContentHeight()
-                .padding(horizontal = 16.dp)
                 .border(1.dp, Color.LightGray, shape = RoundedCornerShape(16.dp)),
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .padding(16.dp),
-                state = rememberLazyListState()
-            ) {
-                items(items = stateOfRuleSet.value) {
-                    PasswordRuleSetBox(title = it.first, validate = it.second)
-
+            if (ruleSetVisibility.value) {
+                LazyColumn(state = rememberLazyListState(),
+                    modifier = modifier
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                ) {
+                    itemsIndexed(
+                        state.ruleSet,
+                        key = { index: Int, item: PasswordRuleSetContainer -> item.title.hashCode() }) { index, item ->
+                        PasswordRuleSetBox(passwordRuleSetContainer = item)
+                    }
                 }
             }
         }
