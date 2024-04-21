@@ -1,6 +1,7 @@
 package com.oguzdogdu.walliescompose.util
 
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.features.signup.PasswordRuleSetContainer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.util.regex.Pattern
@@ -45,14 +46,14 @@ object FieldValidators {
         emit(isValid)
     }
 
-    fun isValidPasswordCheckRuleSetFlow(input: String): Flow<List<Pair<String, Boolean>>> = flow {
+    fun isValidPasswordCheckRuleSetFlow(input: String): Flow<List<PasswordRuleSetContainer>> = flow {
         if (input.isBlank()) {
             val defaultValidations = listOf(
-                "Min 6 characters" to false,
-                "Contains number" to false,
-                "Contains lower and upper case" to false,
-                "Contains special character" to false
-            )
+                PasswordRuleSetContainer(R.string.password_length,false),
+                PasswordRuleSetContainer(R.string.required_at_least_1_digit,false),
+                PasswordRuleSetContainer(R.string.password_must_contain_upper_and_lower_case_letters,false),
+                PasswordRuleSetContainer(R.string.one_special_character_required,false))
+
             emit(defaultValidations)
         } else {
             val lengthValid = input.length >= 6
@@ -61,11 +62,10 @@ object FieldValidators {
             val containsSpecialCharacter = isStringContainSpecialCharacter(input)
 
             val passwordValidations = listOf(
-                "Min 6 characters" to lengthValid,
-                "Contains number" to containsNumber,
-                "Contains lower and upper case" to containsLowerAndUpperCase,
-                "Contains special character" to containsSpecialCharacter
-            )
+                PasswordRuleSetContainer(R.string.password_length,lengthValid),
+                PasswordRuleSetContainer(R.string.required_at_least_1_digit,containsNumber),
+                PasswordRuleSetContainer(R.string.password_must_contain_upper_and_lower_case_letters,containsLowerAndUpperCase),
+                PasswordRuleSetContainer(R.string.one_special_character_required,containsSpecialCharacter))
 
             emit(passwordValidations)
         }
