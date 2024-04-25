@@ -64,10 +64,10 @@
     <string name="change_email_info">In order to change your e-mail address and ensure its security, you must enter your password.</string>
     <string name="required_field">This field cannot be left blank !</string>
     <string name="invalid_email">Invalid email !</string>
-    <string name="password_length">Password can\'t be less than 6 !</string>
-    <string name="required_at_least_1_digit">Required at least 1 digit !</string>
-    <string name="password_must_contain_upper_and_lower_case_letters">Password must contain upper and lower case letters !</string>
-    <string name="one_special_character_required">One special character required !</string>
+    <string name="password_length">Password can\'t be less than 6</string>
+    <string name="required_at_least_1_digit">Required at least 1 digit</string>
+    <string name="password_must_contain_upper_and_lower_case_letters">Password must contain upper and lower case letters</string>
+    <string name="one_special_character_required">One special character required</string>
     <string name="forgot_password">I forgot my password</string>
     <string name="forgot_password_title">Forgot your password?</string>
     <string name="password_change">Your Password Has Been Changed</string>
@@ -134,5 +134,7 @@
     <string name="text_apply">Apply</string>
     <string name="text_recommended_ranking">Recommended Ranking</string>
     <string name="text_create_account">Create Account</string>
+    <string name="successfull_registration_message_text">Welcome! Your account has been successfully created. You are now part of our app. Let\'s start our journey!</string>
+    <string name="go_to_login">Go to Login</string>
 
 </resources>

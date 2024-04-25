@@ -65,10 +65,10 @@
     <string name="change_email_info">E-posta adresini değiştirebilmek ve güvenliğini sağlamak amacıyla şifreni girmen gerekmektedir.</string>
     <string name="required_field">Bu alan boş bırakılamaz !</string>
     <string name="invalid_email">Geçersiz email !</string>
-    <string name="password_length">Şifren 6 karakterden az olamaz !</string>
-    <string name="required_at_least_1_digit">En az 1 sayı girmelisin !</string>
-    <string name="password_must_contain_upper_and_lower_case_letters">Şifren büyük ve küçük harf içermeli !</string>
-    <string name="one_special_character_required">Şifren 1 özel karakter içermeli !</string>
+    <string name="password_length">Şifren 6 karakterden az olamaz</string>
+    <string name="required_at_least_1_digit">En az 1 sayı girmelisin</string>
+    <string name="password_must_contain_upper_and_lower_case_letters">Şifren büyük ve küçük harf içermeli</string>
+    <string name="one_special_character_required">Şifren 1 özel karakter içermeli</string>
     <string name="forgot_password">Şifremi unuttum</string>
     <string name="forgot_password_title">Şifrenizi mi unuttunuz?</string>
     <string name="password_change">Şifren Değiştirildi</string>
@@ -134,4 +134,6 @@
     <string name="text_apply">Uygula</string>
     <string name="text_recommended_ranking">Önerilen Sıralama</string>
     <string name="text_create_account">Hesap Oluştur</string>
+    <string name="successfull_registration_message_text">Hoş geldiniz! Hesabınız başarıyla oluşturuldu. Artık uygulamamızın bir parçasısınız. Yolculuğumuza başlayalım!</string>
+    <string name="go_to_login">Giriş Yap</string>
 </resources>
