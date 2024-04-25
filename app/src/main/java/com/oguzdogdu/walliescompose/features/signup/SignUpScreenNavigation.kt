@@ -4,7 +4,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
 
 const val SignUpScreenNavigationRoute = "sign_up_screen_route"
 
@@ -15,13 +14,16 @@ fun NavController.navigateToSignUpScreen(
 }
 
 fun NavGraphBuilder.signUpScreen(
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    goToLoginScreen: () -> Unit
 ) {
     composable(
         SignUpScreenNavigationRoute
     ) {
         SignUpScreenRoute(onBackClick = {
             navigateBack.invoke()
+        }, goToLoginScreen = {
+            goToLoginScreen.invoke()
         })
     }
 }

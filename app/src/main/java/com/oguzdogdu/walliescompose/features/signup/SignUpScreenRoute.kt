@@ -1,7 +1,23 @@
 package com.oguzdogdu.walliescompose.features.signup
 
-import android.widget.Toast
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,15 +48,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -49,162 +68,392 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.features.signup.component.BasicInputTextField
 import com.oguzdogdu.walliescompose.features.signup.component.EmailTextFieldWithoutSubText
 import com.oguzdogdu.walliescompose.features.signup.component.PasswordRuleSetBox
 import com.oguzdogdu.walliescompose.features.signup.component.PasswordTextFieldWithoutSubText
+import com.oguzdogdu.walliescompose.features.signup.state.SignUpSteps
+import com.oguzdogdu.walliescompose.features.signup.state.SignUpStepsData
+import com.oguzdogdu.walliescompose.features.signup.state.SignUpUIState
 import com.oguzdogdu.walliescompose.ui.theme.medium
+import com.oguzdogdu.walliescompose.ui.theme.regular
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreenRoute(modifier: Modifier = Modifier,onBackClick: () -> Unit,viewModel: SignUpScreenViewModel = hiltViewModel()) {
+fun SignUpScreenRoute(
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit,
+    goToLoginScreen: () -> Unit,
+    viewModel: SignUpScreenViewModel = hiltViewModel()
+) {
 
     val signUpState by viewModel.signUpUiState.collectAsStateWithLifecycle()
+    val signUpStepsState by viewModel.signUpStepsState.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                colors = TopAppBarColors(containerColor = MaterialTheme.colorScheme.background,
-                    Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent),
-                title = {},
-                actions = {
-                    Row(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        IconButton(
-                            onClick = { onBackClick.invoke() },
+            if(signUpStepsState.signUpSteps != SignUpSteps.SIGN_UP_STATUS) {
+                TopAppBar(
+                    colors = TopAppBarColors(containerColor = MaterialTheme.colorScheme.background,
+                        Color.Transparent, Color.Transparent, Color.Transparent, Color.Transparent),
+                    title = {},
+                    actions = {
+                        Row(
                             modifier = modifier
-                                .wrapContentSize()
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
                         ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.back),
-                                contentDescription = "",
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            IconButton(
+                                onClick = {
+                                    if (signUpStepsState.stepIndex == 0) {
+                                        onBackClick.invoke()
+                                    } else {
+                                        viewModel.onPreviousPressed()
+                                    }
+                                },
                                 modifier = modifier
                                     .wrapContentSize()
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.back),
+                                    contentDescription = "",
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = modifier
+                                        .wrapContentSize()
+                                )
+                            }
+
+                            Text(
+                                modifier = modifier,
+                                text = stringResource(R.string.text_create_account),
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                fontSize = 16.sp,
+                                fontFamily = medium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.Center
                             )
                         }
-
-                        Text(
-                            modifier = modifier,
-                            text = stringResource(R.string.text_create_account),
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            fontSize = 16.sp,
-                            fontFamily = medium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            textAlign = TextAlign.Center
-                        )
                     }
-                }
-            )
+                )
+            }
         }
     ) {
         Column(
             modifier = modifier
-                .padding(it)
                 .fillMaxSize()
+                .padding(it)
+
         ) {
-            SignUpScreenContent(
-                state = signUpState,
-                passwordCheck = { password ->
-                    viewModel.handleUiEvents(SignUpScreenEvent.CheckPasswordRule(password))
-                },
-                continueButtonClick = { email, password ->
-                    viewModel.handleUiEvents(SignUpScreenEvent.ResumeToSignUp(email, password))
-                },
-            )
+                SignUpScreenContent(
+                    signUpUIState = signUpState,
+                    signUpStepsData = signUpStepsState,
+                    passwordCheck = { password ->
+                        viewModel.handleUiEvents(SignUpScreenEvent.CheckPasswordRule(password))
+                    },
+                    continueButtonClick = {email, password ->
+                        when (signUpStepsState.shouldShowDoneButton) {
+                            true -> {
+                                goToLoginScreen.invoke()
+                            }
+                            false -> {
+                                viewModel.handleUiEvents(SignUpScreenEvent.ResumeToSignUp(email, password))
+                                viewModel.handleUiEvents(SignUpScreenEvent.ExecuteFlowOfSignUp)
+                                viewModel.onNextPressed()
+                            }
+
+                            null -> {}
+                        }
+                    },
+                    sendEmail = {email ->
+                        viewModel.handleUiEvents(SignUpScreenEvent.SendEmail(email))
+                    },
+                    sendPassword = {password ->
+                        viewModel.handleUiEvents(SignUpScreenEvent.SendPassword(password))
+                    },
+                    sendName = { name ->
+                        viewModel.handleUiEvents(SignUpScreenEvent.SendName(name))
+                    },
+                    sendSurname = { surname ->
+                        viewModel.handleUiEvents(SignUpScreenEvent.SendSurname(surname))
+                    },
+                    sendUri = { uri ->
+                        viewModel.handleUiEvents(SignUpScreenEvent.SendUri(uri))
+                    },
+                    goToLoginScreen = {
+                        goToLoginScreen.invoke()
+                    }
+                )
+            }
         }
     }
-}
 
 @Composable
 fun SignUpScreenContent(
-    state: SignUpUIState,
+    signUpUIState: SignUpUIState,
+    signUpStepsData: SignUpStepsData,
     modifier: Modifier = Modifier,
     passwordCheck: (String) -> Unit,
     continueButtonClick: (String, String) -> Unit,
+    sendEmail: (String) -> Unit,
+    sendPassword: (String) -> Unit,
+    sendName: (String) -> Unit,
+    sendSurname: (String) -> Unit,
+    sendUri: (Uri) -> Unit,
+    goToLoginScreen: () -> Unit,
 ) {
-    val context = LocalContext.current
 
-    var email by remember {
+    var emailField by remember {
         mutableStateOf("")
     }
-    var password by remember {
+    var passwordField by remember {
         mutableStateOf("")
     }
+
     var ruleSetVisible by remember {
         mutableStateOf(false)
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
-        when(state.isSignUp) {
-            true -> Toast.makeText(context,context.getString(R.string.success_sign),Toast.LENGTH_LONG).show()
-            else -> {}
-        }
+    AnimatedContent(
+        targetState = signUpStepsData.signUpSteps,
+        transitionSpec = {
+            slideInHorizontally(
+                animationSpec = tween(400),
+                initialOffsetX = { fullWidth -> fullWidth }
+            ) togetherWith
+                    slideOutHorizontally(
+                        animationSpec = tween(400),
+                        targetOffsetX = { fullWidth -> -fullWidth }
+                    )
+        }, label = ""
+    ) { targetState ->
+        Box(modifier = modifier.fillMaxSize()) {
+            when (targetState) {
+                SignUpSteps.EMAIL_PASSWORD -> {
+                    SignUpStepEmailAndPasswordBox(
+                        signUpUIState = signUpUIState,
+                        passwordCheck = { password ->
+                            passwordCheck.invoke(password)
+                        },
+                        sendEmail = { email ->
+                            sendEmail.invoke(email)
+                            emailField = email
+                        },
+                        sendPassword = { password ->
+                            sendPassword.invoke(password)
+                            passwordField = password
+                        },
+                    )
+                }
 
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            EmailAndPasswordFieldContainer(
-                ruleSetVisibility = { ruleSetVisible = it },
-                sendEmail = {
-                    email = it
+                SignUpSteps.PHOTO_NAME_SURNAME -> {
+                    SignUpStepPhotoNameAndSurnameBox(
+                        sendName = {
+                            sendName.invoke(it)
+                        },
+                        sendSurname = {
+                            sendSurname.invoke(it)
+                        },
+                        sendUri = {
+                            sendUri.invoke(it)
+                        }
+                    )
+                    ruleSetVisible = false
+                }
+
+                SignUpSteps.SIGN_UP_STATUS -> {
+                    ResultScreen(successSignUpText = stringResource(R.string.successfull_registration_message_text))
+                }
+
+                null -> {
+
+                }
+            }
+            Button(
+                onClick = {
+                    if (signUpStepsData.shouldShowDoneButton == true) {
+                        goToLoginScreen.invoke()
+                    } else {
+                        continueButtonClick.invoke(emailField, passwordField)
+                    }
                 },
-                sendPassword = {
-                    password = it
-                    passwordCheck.invoke(it)
-                }
-            )
-            Spacer(modifier = modifier.size(8.dp))
-            PasswordRuleSet(state = state, ruleSetVisible = ruleSetVisible, modifier = modifier)
-        }
-        Button(
-            onClick = {
-                continueButtonClick.invoke(email, password)
-            },
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .align(Alignment.BottomCenter),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
-            ),
-            shape = RoundedCornerShape(16.dp),
-            contentPadding = PaddingValues(16.dp)
-        ) {
-            when (state.loading) {
-                true -> {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = modifier.size(16.dp),
-                        strokeWidth = 2.dp
-                    )
-                }
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .align(Alignment.BottomCenter),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                ),
+                shape = RoundedCornerShape(16.dp),
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                when (signUpUIState.loading) {
+                    true -> {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = modifier.size(16.dp),
+                            strokeWidth = 2.dp
+                        )
+                    }
 
-                false -> {
-                    Text(
-                        text = stringResource(R.string.text_continue),
-                        fontSize = 14.sp,
-                        fontFamily = medium,
-                        color = Color.White
-                    )
+                    false -> {
+                        Text(
+                            text = when (signUpStepsData.stepIndex) {
+                                0 -> stringResource(R.string.text_continue)
+                                1 -> stringResource(id = R.string.text_create_account)
+                                2 -> stringResource(R.string.go_to_login)
+                                else -> ""
+                            },
+                            fontSize = 14.sp,
+                            fontFamily = medium,
+                            color = Color.White
+                        )
+                    }
                 }
             }
         }
     }
 }
 
+@Composable
+fun SignUpStepEmailAndPasswordBox(
+    signUpUIState: SignUpUIState,
+    passwordCheck: (String) -> Unit,
+    sendEmail: (String) -> Unit,
+    sendPassword: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var ruleSetVisible by remember {
+        mutableStateOf(false)
+    }
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        EmailAndPasswordFieldContainer(
+            email = signUpUIState.email.orEmpty(),
+            password = signUpUIState.password.orEmpty(),
+            ruleSetVisibility = { ruleSetVisible = it },
+            sendEmail = {
+                sendEmail.invoke(it)
+            },
+            sendPassword = {
+                sendPassword.invoke(it)
+                passwordCheck.invoke(it)
+            }
+        )
+        Spacer(modifier = modifier.size(8.dp))
+        PasswordRuleSet(
+            state = signUpUIState,
+            ruleSetVisible = ruleSetVisible,
+            modifier = modifier
+        )
+    }
+}
+
+@Composable
+fun SignUpStepPhotoNameAndSurnameBox(
+    sendName: (String) -> Unit,
+    sendSurname: (String) -> Unit,
+    sendUri: (Uri) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val coroutineScope = rememberCoroutineScope()
+    var profileImage: Any by remember {
+        mutableStateOf(0)
+    }
+    var imageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            uri?.let {
+                imageUri = it
+            }
+        }
+    )
+    LaunchedEffect(imageUri) {
+        when {
+            imageUri == null -> {
+                profileImage = R.drawable.ic_large_default_avatar
+            }
+            imageUri != null -> {
+                sendUri.invoke(imageUri!!)
+                profileImage = imageUri as Uri
+            }
+        }
+    }
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = modifier.padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = modifier
+                    .wrapContentSize()
+            ) {
+                AsyncImage(
+                    model = profileImage,
+                    contentScale = ContentScale.FillBounds,
+                    contentDescription = "Profile Image",
+                    modifier = modifier
+                        .size(96.dp)
+                        .clip(RoundedCornerShape(96.dp))
+                        .border(1.dp, Color.LightGray, shape = RoundedCornerShape(96.dp)),
+                )
+                Image(
+                    painter = if (imageUri == null) painterResource(id = R.drawable.ic_edit_photo) else painterResource(
+                        id = R.drawable.ic_clear_image
+                    ),
+                    contentDescription = "Profile Image Edit",
+                    modifier = modifier
+                        .size(24.dp)
+                        .align(Alignment.TopEnd)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(Color.White)
+                        .clickable {
+                            coroutineScope.launch {
+                                if (imageUri == null) {
+                                    galleryLauncher.launch(
+                                        PickVisualMediaRequest(
+                                            mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+                                        )
+                                    )
+                                } else {
+                                    imageUri = null
+                                }
+                            }
+                        },
+                )
+            }
+            Spacer(modifier = modifier.size(16.dp))
+            BasicInputTextField(typeOfField = R.string.name, onTextChanged = {
+                sendName.invoke(it)
+            })
+            Spacer(modifier = modifier.size(8.dp))
+            BasicInputTextField(typeOfField = R.string.surname, onTextChanged = {
+                sendSurname.invoke(it)
+            })
+        }
+    }
+}
 
 @Composable
 fun EmailAndPasswordFieldContainer(
+    email:String,
+    password:String,
     ruleSetVisibility: (Boolean) -> Unit,
     sendEmail: (String) -> Unit,
     sendPassword: (String) -> Unit,
@@ -218,11 +467,11 @@ fun EmailAndPasswordFieldContainer(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        EmailTextFieldWithoutSubText(onChangeEmail = {
+        EmailTextFieldWithoutSubText(email = email, onChangeEmail = {
             sendEmail.invoke(it)
         })
-
-        PasswordTextFieldWithoutSubText(modifier = modifier, onChangePassword = {
+        Spacer(modifier = modifier.size(8.dp))
+        PasswordTextFieldWithoutSubText(password = password, onChangePassword = {
             ruleSetVisibility.invoke(it != "")
             sendPassword.invoke(it)
         })
@@ -237,7 +486,15 @@ fun PasswordRuleSet(
 ) {
     val ruleSetVisibility = rememberUpdatedState(newValue = ruleSetVisible)
 
-    if (ruleSetVisibility.value) {
+    AnimatedVisibility(
+        visible = ruleSetVisibility.value,
+        enter = slideInHorizontally(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) + fadeIn(
+            animationSpec = tween(durationMillis = 300)
+        ),
+        exit = slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) + fadeOut(
+            animationSpec = tween(durationMillis = 300)
+        )
+    ) {
         Card(
             shape = RoundedCornerShape(16.dp),
             colors = CardColors(
@@ -249,20 +506,68 @@ fun PasswordRuleSet(
                 .wrapContentHeight()
                 .border(1.dp, Color.LightGray, shape = RoundedCornerShape(16.dp)),
         ) {
-            if (ruleSetVisibility.value) {
-                LazyColumn(state = rememberLazyListState(),
-                    modifier = modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                ) {
-                    itemsIndexed(
-                        state.ruleSet,
-                        key = { index: Int, item: PasswordRuleSetContainer -> item.title.hashCode() }) { index, item ->
-                        PasswordRuleSetBox(passwordRuleSetContainer = item)
-                    }
+            LazyColumn(
+                state = rememberLazyListState(),
+                modifier = modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+            ) {
+                itemsIndexed(
+                    state.ruleSet,
+                    key = { index: Int, item: PasswordRuleSetContainer -> item.title.hashCode() }) { index, item ->
+                    PasswordRuleSetBox(passwordRuleSetContainer = item)
                 }
             }
         }
     }
+}
+
+@Composable
+fun ResultScreen(successSignUpText: String?, modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+
+            SuccessResultAnimation(modifier = modifier.size(width = 180.dp, height = 180.dp))
+            Spacer(modifier = modifier.size(8.dp))
+            Text(
+                text = successSignUpText.orEmpty(),
+                fontSize = 16.sp,
+                fontFamily = regular,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+fun SuccessResultAnimation(modifier: Modifier) {
+    val preloaderLottieComposition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(
+            R.raw.success_animation
+        )
+    )
+
+    val preloaderProgress by animateLottieCompositionAsState(
+        preloaderLottieComposition,
+        iterations = 1,
+        isPlaying = true
+    )
+
+
+    LottieAnimation(
+        composition = preloaderLottieComposition,
+        progress = preloaderProgress,
+        modifier = modifier
+    )
+}
+enum class TypeOfResult {
+    SUCCESS,
+    ERROR
 }
