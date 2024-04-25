@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.navigation
 import com.oguzdogdu.walliescompose.features.appstate.MainAppState
-import com.oguzdogdu.walliescompose.features.authenticateduser.AuthenticatedUserScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.authenticateduser.authenticatedUserScreen
 import com.oguzdogdu.walliescompose.features.authenticateduser.changeemail.changeEmailScreen
 import com.oguzdogdu.walliescompose.features.authenticateduser.changeemail.navigateToChangeEmailScreen
@@ -33,7 +32,6 @@ import com.oguzdogdu.walliescompose.features.home.navigateToHomeScreen
 import com.oguzdogdu.walliescompose.features.latest.latestScreen
 import com.oguzdogdu.walliescompose.features.latest.navigateToLatestScreen
 import com.oguzdogdu.walliescompose.features.login.LoginScreenNavigationRoute
-import com.oguzdogdu.walliescompose.features.login.forgotpassword.ForgotPasswordScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.login.forgotpassword.forgotPasswordScreen
 import com.oguzdogdu.walliescompose.features.login.forgotpassword.navigateToForgotPasswordScreen
 import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
@@ -140,7 +138,13 @@ fun WalliesNavHost(
             forgotPasswordScreen(navigateToHome = {}, navigateBack = {
                 navController.popBackStack()
             })
-            signUpScreen(navigateBack = { navController.popBackStack() })
+            signUpScreen(navigateBack = { navController.popBackStack() }, goToLoginScreen = {
+                navController.navigate(LoginScreenNavigationRoute) {
+                    popUpTo(LoginScreenNavigationRoute){
+                        inclusive = true
+                    }
+                }
+            })
         }
 
         navigation(startDestination = HomeScreenNavigationRoute, route = CONTENT) {

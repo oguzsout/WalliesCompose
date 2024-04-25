@@ -21,12 +21,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.ui.theme.medium
 
 @Composable
-fun PasswordTextFieldWithoutSubText(onChangePassword: (String) -> Unit, modifier: Modifier = Modifier) {
-
-    var password by remember { mutableStateOf("") }
+fun PasswordTextFieldWithoutSubText(password:String, onChangePassword: (String) -> Unit, modifier: Modifier = Modifier) {
 
     var passwordVisibility by remember { mutableStateOf(false) }
 
@@ -38,11 +38,11 @@ fun PasswordTextFieldWithoutSubText(onChangePassword: (String) -> Unit, modifier
     OutlinedTextField(
         value = password,
         onValueChange = { value ->
-                password = value
                 onChangePassword.invoke(value)
         },
         placeholder = { Text(text = stringResource(id = R.string.password)) },
-        label = { Text(stringResource(id = R.string.password)) },
+        label = { Text(stringResource(id = R.string.password),fontSize = 14.sp,
+            fontFamily = medium,) },
         trailingIcon = {
             IconButton(onClick = {
                 passwordVisibility = !passwordVisibility

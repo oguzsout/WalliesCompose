@@ -7,28 +7,23 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.ui.theme.medium
 
 @Composable
-fun EmailTextFieldWithoutSubText(onChangeEmail: (String) -> Unit, modifier: Modifier = Modifier) {
-
-    var email by remember { mutableStateOf("") }
-
+fun EmailTextFieldWithoutSubText(email:String, onChangeEmail: (String) -> Unit, modifier: Modifier = Modifier) {
     OutlinedTextField(
         value = email,
         onValueChange = {
-            email = it
             onChangeEmail.invoke(it)
         },
-        label = { Text(stringResource(id = R.string.email)) },
+        label = { Text(stringResource(id = R.string.email),fontSize = 14.sp,
+            fontFamily = medium,) },
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
