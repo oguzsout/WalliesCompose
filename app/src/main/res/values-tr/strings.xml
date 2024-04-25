@@ -136,4 +136,6 @@
     <string name="text_create_account">Hesap Oluştur</string>
     <string name="successfull_registration_message_text">Hoş geldiniz! Hesabınız başarıyla oluşturuldu. Artık uygulamamızın bir parçasısınız. Yolculuğumuza başlayalım!</string>
     <string name="go_to_login">Giriş Yap</string>
+    <string name="email_password_sub_title_text">Hesap Oluşturmak için E-postanızı ve Şifrenizi Kullanın</string>
+    <string name="image_name_surname_sub_title_text">Profilinizi resim, ad ve soyad bilgilerinizle özelleştirin</string>
 </resources>

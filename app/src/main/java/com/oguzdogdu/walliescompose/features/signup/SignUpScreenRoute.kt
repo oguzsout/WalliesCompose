@@ -81,6 +81,7 @@ import com.oguzdogdu.walliescompose.features.signup.component.PasswordTextFieldW
 import com.oguzdogdu.walliescompose.features.signup.state.SignUpSteps
 import com.oguzdogdu.walliescompose.features.signup.state.SignUpStepsData
 import com.oguzdogdu.walliescompose.features.signup.state.SignUpUIState
+import com.oguzdogdu.walliescompose.ui.theme.bold
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
 import kotlinx.coroutines.launch
@@ -400,6 +401,15 @@ fun SignUpStepPhotoNameAndSurnameBox(
             modifier = modifier.padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text(
+                text = stringResource(R.string.image_name_surname_sub_title_text),
+                fontSize = 20.sp,
+                fontFamily = bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Start,
+                modifier = modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(modifier = modifier.size(16.dp))
             Box(
                 modifier = modifier
                     .wrapContentSize()
@@ -467,6 +477,15 @@ fun EmailAndPasswordFieldContainer(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(
+            text = stringResource(R.string.email_password_sub_title_text),
+            fontSize = 20.sp,
+            fontFamily = medium,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Start,
+            modifier = modifier.padding(horizontal = 16.dp)
+        )
+        Spacer(modifier = modifier.size(8.dp))
         EmailTextFieldWithoutSubText(email = email, onChangeEmail = {
             sendEmail.invoke(it)
         })
