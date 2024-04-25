@@ -1,7 +1,6 @@
 package com.oguzdogdu.walliescompose.features.signup.state
 
 import androidx.compose.runtime.Stable
-import com.oguzdogdu.walliescompose.features.signup.SignUpSteps
 
 @Stable
 data class SignUpStepsData(

@@ -136,5 +136,7 @@
     <string name="text_create_account">Create Account</string>
     <string name="successfull_registration_message_text">Welcome! Your account has been successfully created. You are now part of our app. Let\'s start our journey!</string>
     <string name="go_to_login">Go to Login</string>
+    <string name="email_password_sub_title_text">Use Your Email and Password to Create an Account</string>
+    <string name="image_name_surname_sub_title_text">Customize your profile with your picture, name and surname information</string>
 
 </resources>
