@@ -7,6 +7,8 @@
 
 In this application consisting of multiple screens, you can review popular and recently added photos and set the wallpaper for your phone's background on the detail screen. In the detail screen, you can view the high resolution image by swiping or zooming the relevant photo, you can download it to your phone if you want, and you can share the photo with your friends. On the Collections screen, you can review the photos in the collections created by users on the unsplash site and save the photo you like. If you don't want to be content with these, search and review the photo you want on the search screen. This repo is a version of the project in the [WalliesHD](https://github.com/oguzsout/Wallies) repo, rewritten with Jetpack Compose.
 
+You can switch to the `develop` branch to get the latest changes build.
+
 # 🏭 Tech Stacks
 This project uses many of the popular libraries, plugins and tools of the android ecosystem.
 - [Clean Architecture](https://developer.android.com/topic/architecture) - Clean architecture is a method of software development in which you should be able to identify what a program performs merely by looking at its source code.
