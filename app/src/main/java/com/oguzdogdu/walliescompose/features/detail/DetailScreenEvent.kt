@@ -6,8 +6,8 @@ import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 sealed class DetailScreenEvent {
     data object GetPhotoDetails : DetailScreenEvent()
     data object GetFavoriteCheckStat : DetailScreenEvent()
-    data class PhotoQualityType(val type:String?) : DetailScreenEvent()
-    data class SetWallpaperPlace(val place:String?) : DetailScreenEvent()
+    data class PhotoQualityType(val type:TypeOfPhotoQuality) : DetailScreenEvent()
+    data class SetWallpaperPlace(val type: TypeOfSetWallpaper) : DetailScreenEvent()
     data class OpenDownloadBottomSheet(val isOpen: Boolean) : DetailScreenEvent()
     data class OpenSetWallpaperBottomSheet(val isOpen: Boolean) : DetailScreenEvent()
     data class AddFavorites(val favorites: FavoriteImages) : DetailScreenEvent()

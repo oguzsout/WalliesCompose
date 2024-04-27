@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import java.io.File
@@ -71,7 +72,7 @@ class DetailViewModel@Inject constructor(
             }
 
             is DetailScreenEvent.PhotoQualityType ->  {
-                _photoQualityType.value = event.type.toString()
+                _photoQualityType.value = event.type.name
             }
 
             is DetailScreenEvent.OpenSetWallpaperBottomSheet -> {
@@ -79,7 +80,7 @@ class DetailViewModel@Inject constructor(
             }
 
             is DetailScreenEvent.SetWallpaperPlace -> {
-                _setWallpaperPlace.value = event.place.toString()
+                _setWallpaperPlace.value = event.type.name
             }
         }
     }
@@ -101,6 +102,12 @@ class DetailViewModel@Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    fun setNullValueOfImageUrl() {
+        viewModelScope.launch {
+            _photoQualityType.value = ""
         }
     }
 
@@ -128,4 +135,15 @@ class DetailViewModel@Inject constructor(
             }
         }
     }
+}
+enum class TypeOfPhotoQuality {
+    LOW,
+    MEDIUM,
+    HIGH,
+    RAW
+}
+enum class TypeOfSetWallpaper {
+    LOCK,
+    HOME,
+    HOME_AND_LOCK
 }
