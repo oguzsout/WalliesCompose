@@ -47,7 +47,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SetWallpaperImageScreenRoute(
+fun SetWallpaperImageBottomSheet(
     modifier: Modifier,
     isOpen: Boolean,
     onDismiss: () -> Unit,

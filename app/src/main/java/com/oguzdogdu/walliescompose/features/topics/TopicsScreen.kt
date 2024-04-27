@@ -35,7 +35,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
@@ -50,11 +51,8 @@ import com.oguzdogdu.walliescompose.ui.theme.medium
 fun TopicsScreenRoute(modifier: Modifier = Modifier,viewModel: TopicsViewModel = hiltViewModel(),onBackClick:() -> Unit,onTopicClick: (String) -> Unit) {
     val topicsState: LazyPagingItems<Topics> =
         viewModel.topicsState.collectAsLazyPagingItems()
-    LifecycleStartEffect {
+    LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
         viewModel.handleUIEvent(TopicsScreenEvent.FetchTopicsData)
-        onStopOrDispose { 
-            
-        }
     }
     val context = LocalContext.current
     Scaffold(modifier = modifier
@@ -109,7 +107,9 @@ private fun TopicsScreen(
     topicsLazyPagingItems: LazyPagingItems<Topics>,
     onTopicClick: (String) -> Unit
 ) {
-    Column(modifier = modifier.fillMaxSize().padding(bottom = 8.dp, start = 8.dp, end = 8.dp)) {
+    Column(modifier = modifier
+        .fillMaxSize()
+        .padding(bottom = 8.dp, start = 8.dp, end = 8.dp)) {
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = modifier
