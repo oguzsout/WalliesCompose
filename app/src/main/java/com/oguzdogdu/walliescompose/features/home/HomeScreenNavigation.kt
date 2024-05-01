@@ -1,5 +1,7 @@
 package com.oguzdogdu.walliescompose.features.home
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
@@ -13,7 +15,9 @@ fun NavController.navigateToHomeScreen(
     this.navigate(HomeScreenNavigationRoute, navOptions)
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.homeScreen(
+    transitionScope: SharedTransitionScope,
     onTopicSeeAllClick: () -> Unit,
     onPopularSeeAllClick: () -> Unit,
     onLatestSeeAllClick: () -> Unit,
@@ -27,7 +31,9 @@ fun NavGraphBuilder.homeScreen(
     composable(
         HomeScreenNavigationRoute
     ) {
-        HomeScreenRoute(onTopicSeeAllClick = {
+        transitionScope.HomeScreenRoute(
+            animatedVisibilityScope = this,
+            onTopicSeeAllClick = {
             onTopicSeeAllClick.invoke()
         },
             onTopicDetailListClick = {

@@ -4,6 +4,9 @@ import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -74,8 +77,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun AuthenticatedUserScreenRoute(
+fun SharedTransitionScope.AuthenticatedUserScreenRoute(
+    animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier,
     viewModel: AuthenticatedUserViewModel = hiltViewModel(),
     navigateBack:() -> Unit,
@@ -148,6 +153,7 @@ fun AuthenticatedUserScreenRoute(
                 .fillMaxSize()
         ) {
             AuthenticatedUserScreenContent(
+                animatedVisibilityScope = animatedVisibilityScope,
                 userScreenState = userState,
                 modifier = modifier,
                 profilePhotoUri = imageUri,
@@ -179,10 +185,12 @@ fun AuthenticatedUserScreenRoute(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun AuthenticatedUserScreenContent(
+fun SharedTransitionScope.AuthenticatedUserScreenContent(
+    animatedVisibilityScope: AnimatedVisibilityScope,
     userScreenState: AuthenticatedUserScreenState?,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     profilePhotoUri: Uri?,
     onSignOutClick: () -> Unit,
     onChangeProfilePhotoClick: (Boolean) -> Unit,
@@ -222,7 +230,7 @@ fun AuthenticatedUserScreenContent(
                                 .padding(8.dp)
                         ) {
                             AuthenticatedUserWelcomeCard(
-                                modifier = modifier,
+                                animatedVisibilityScope = animatedVisibilityScope,
                                 userInfos = userScreenState,
                                 isGoogleSignIn = isGoogleSign,
                                 onChangeProfilePhotoClick = {
@@ -297,9 +305,11 @@ fun UserNotAuthenticatedInfo(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun AuthenticatedUserWelcomeCard(
-    modifier: Modifier,
+fun SharedTransitionScope.AuthenticatedUserWelcomeCard(
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    modifier: Modifier = Modifier,
     userInfos: AuthenticatedUserScreenState.UserInfos,
     isGoogleSignIn: Boolean,
     onChangeProfilePhotoClick: (Boolean) -> Unit
@@ -356,7 +366,7 @@ fun AuthenticatedUserWelcomeCard(
 
                 Box(
                     modifier = modifier
-                        .size(56.dp),
+                        .wrapContentSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(
@@ -364,25 +374,17 @@ fun AuthenticatedUserWelcomeCard(
                         contentScale = ContentScale.FillBounds,
                         contentDescription = "Profile Image",
                         modifier = modifier
-                            .height(48.dp)
-                            .width(48.dp)
-                            .clip(RoundedCornerShape(64.dp)),
+                            .sharedBounds(
+                                sharedContentState = rememberSharedContentState(key = "profileImage"),
+                                animatedVisibilityScope = animatedVisibilityScope
+                            )
+                            .height(64.dp)
+                            .width(64.dp)
+                            .clip(RoundedCornerShape(64.dp))
+                            .clickable {
+                                onChangeProfilePhotoClick.invoke(!openBottomSheetOfProfilePhotoChange)
+                            },
                     )
-                    if (!isGoogleSignIn){
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_edit_photo),
-                            contentDescription = "Profile Image Edit",
-                            modifier = modifier
-                                .height(20.dp)
-                                .width(20.dp)
-                                .align(Alignment.TopEnd)
-                                .clip(RoundedCornerShape(32.dp))
-                                .background(Color.White)
-                                .clickable {
-                                    onChangeProfilePhotoClick.invoke(!openBottomSheetOfProfilePhotoChange)
-                                },
-                        )
-                    }
                 }
 
                 Text(

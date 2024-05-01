@@ -1,6 +1,9 @@
 package com.oguzdogdu.walliescompose.features.home
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -66,9 +70,11 @@ import com.oguzdogdu.walliescompose.navigation.utils.WalliesIcons
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun HomeScreenRoute(
+fun SharedTransitionScope.HomeScreenRoute(
     modifier: Modifier = Modifier,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     viewModel: HomeViewModel = hiltViewModel(),
     onTopicSeeAllClick: () -> Unit,
     onPopularSeeAllClick: () -> Unit,
@@ -88,23 +94,9 @@ fun HomeScreenRoute(
         viewModel.handleScreenEvents(HomeScreenEvent.FetchMainScreenUserData)
         viewModel.handleScreenEvents(HomeScreenEvent.FetchHomeScreenLists)
     }
-    var profileImageAuthUser: Any by remember {
-        mutableStateOf(0)
-    }
 
     BackHandler(enabled = true) {
         navigateBack.invoke()
-    }
-
-    LaunchedEffect(authUserProfileImage) {
-        when {
-            authUserProfileImage.isNullOrEmpty() -> {
-                profileImageAuthUser = WalliesIcons.DefaultAvatar
-            }
-            authUserProfileImage?.isNotEmpty() == true -> {
-                profileImageAuthUser = authUserProfileImage as String
-            }
-        }
     }
 
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
@@ -123,14 +115,17 @@ fun HomeScreenRoute(
                     .weight(1f)
             ) {
                 AsyncImage(
-                    model = profileImageAuthUser,
+                    model = if (authUserProfileImage?.isNotEmpty() == true) authUserProfileImage else WalliesIcons.DefaultAvatar,
                     contentScale = ContentScale.FillBounds,
                     contentDescription = "Profile Image",
                     modifier = modifier
-                        .height(28.dp)
-                        .width(28.dp)
+                        .sharedBounds(
+                            sharedContentState = rememberSharedContentState(key = "profileImage"),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        )
+                        .size(32.dp)
                         .clip(RoundedCornerShape(64.dp))
-                        .border(2.dp, Color.DarkGray, shape = RoundedCornerShape(64.dp))
+                        .border(1.dp, Color.DarkGray, shape = RoundedCornerShape(64.dp))
                 )
             }
 
