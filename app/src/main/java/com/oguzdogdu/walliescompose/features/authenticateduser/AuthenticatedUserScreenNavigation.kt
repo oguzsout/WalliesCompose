@@ -1,5 +1,7 @@
 package com.oguzdogdu.walliescompose.features.authenticateduser
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
@@ -13,7 +15,9 @@ fun NavController.navigateToAuthenticatedUserScreen(
     this.navigate(AuthenticatedUserScreenNavigationRoute, navOptions)
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.authenticatedUserScreen(
+    transitionScope: SharedTransitionScope,
     navigateBack: () -> Unit,
     navigateToLogin: () -> Unit,
     navigateToChangeNameAndSurname: () -> Unit,
@@ -24,7 +28,8 @@ fun NavGraphBuilder.authenticatedUserScreen(
     composable(
         AuthenticatedUserScreenNavigationRoute
     ) {
-        AuthenticatedUserScreenRoute(
+        transitionScope.AuthenticatedUserScreenRoute(
+            animatedVisibilityScope = this,
            navigateBack = {
                navigateBack.invoke()
            },

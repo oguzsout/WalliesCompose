@@ -1,5 +1,7 @@
 package com.oguzdogdu.walliescompose.features.collections
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
@@ -13,11 +15,14 @@ fun NavController.navigateToCollectionScreen(
     this.navigate(CollectionScreenNavigationRoute, navOptions)
 }
 
-fun NavGraphBuilder.collectionScreen(onCollectionClick: (String,String) -> Unit) {
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun NavGraphBuilder.collectionScreen(transitionScope: SharedTransitionScope, onCollectionClick: (String, String) -> Unit) {
     composable(
         CollectionScreenNavigationRoute
     ) {
-        CollectionsScreenRoute(onCollectionClick = {id,title ->
+        transitionScope.CollectionsScreenRoute(
+            animatedVisibilityScope = this,
+            onCollectionClick = {id,title ->
             onCollectionClick.invoke(id,title)
         })
     }
