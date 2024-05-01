@@ -1,5 +1,8 @@
 package com.oguzdogdu.walliescompose.features.collections
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +24,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -61,8 +65,10 @@ import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
 import com.oguzdogdu.walliescompose.ui.theme.medium
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun CollectionsScreenRoute(
+fun SharedTransitionScope.CollectionsScreenRoute(
+    animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier,
     viewModel: CollectionsViewModel = hiltViewModel(),
     onCollectionClick: (String,String) -> Unit
@@ -119,7 +125,7 @@ fun CollectionsScreenRoute(
                    viewModel.handleUIEvent(CollectionScreenEvent.OpenFilterBottomSheet(it))
                }, choisedFilter = stateOfChoisedFilter)
             CollectionScreen(
-                modifier = modifier,
+                animatedVisibilityScope = animatedVisibilityScope,
                 collectionLazyPagingItems = collectionState,
                 onCollectionClick = { id, title ->
                     onCollectionClick.invoke(id,title)
@@ -190,9 +196,11 @@ fun ShowFilterOfCollections(
         }, choisedFilter = choisedFilter)
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun CollectionScreen(
-    modifier: Modifier,
+private fun SharedTransitionScope.CollectionScreen(
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    modifier: Modifier = Modifier,
     collectionLazyPagingItems: LazyPagingItems<WallpaperCollections>,
     onCollectionClick: (String, String) -> Unit
 ) {
@@ -211,6 +219,7 @@ private fun CollectionScreen(
             val collections: WallpaperCollections? = collectionLazyPagingItems[index]
             if (collections != null) {
                 CollectionItem(
+                    animatedVisibilityScope = animatedVisibilityScope,
                     collections = collections,
                     onCollectionItemClick = { id, title ->
                         onCollectionClick.invoke(id, title)
@@ -257,10 +266,16 @@ private fun CollectionScreen(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun CollectionItem(collections: WallpaperCollections,onCollectionItemClick: (String,String) -> Unit) {
+fun SharedTransitionScope.CollectionItem(
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    modifier: Modifier = Modifier,
+    collections: WallpaperCollections,
+    onCollectionItemClick: (String, String) -> Unit
+) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .wrapContentSize()
             .clickable {
                 onCollectionItemClick.invoke(
@@ -274,10 +289,10 @@ fun CollectionItem(collections: WallpaperCollections,onCollectionItemClick: (Str
             model = collections.photo,
             contentDescription = collections.title,
             contentScale = ContentScale.FillBounds,
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .height(240.dp)
-                .clip(CircleShape.copy(all = CornerSize(16.dp)))
+                .clip(RoundedCornerShape(16.dp))
                 .drawWithContent {
                     drawContent()
                     drawRect(
@@ -294,7 +309,13 @@ fun CollectionItem(collections: WallpaperCollections,onCollectionItemClick: (Str
                 textAlign = TextAlign.Center,
                 fontFamily = medium,
                 fontSize = 16.sp,
-                color = Color.White
+                color = Color.White,
+                modifier = modifier.sharedBounds(
+                    sharedContentState = rememberSharedContentState(key = "collectionTitle-${collections.title}"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    enter = scaleInSharedContentToBounds(),
+                    exit = scaleOutSharedContentToBounds()
+                )
             )
         }
     }

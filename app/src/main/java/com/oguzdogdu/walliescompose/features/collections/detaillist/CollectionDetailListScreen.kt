@@ -1,6 +1,9 @@
 package com.oguzdogdu.walliescompose.features.collections.detaillist
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.shrinkHorizontally
@@ -51,8 +54,10 @@ import com.oguzdogdu.walliescompose.features.home.LoadingState
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun CollectionDetailListScreenRoute(
+fun SharedTransitionScope.CollectionDetailListScreenRoute(
+    animatedVisibilityScope: AnimatedVisibilityScope,
     collectionDetailId: String?,
     collectionDetailTitle: String?,
     modifier: Modifier = Modifier,
@@ -89,7 +94,12 @@ fun CollectionDetailListScreenRoute(
                 }
 
                 Text(
-                    modifier = modifier,
+                    modifier = modifier.sharedBounds(
+                        sharedContentState = rememberSharedContentState(key = "collectionTitle-${collectionDetailTitle}"),
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        enter = scaleInSharedContentToBounds(),
+                        exit = scaleOutSharedContentToBounds()
+                    ),
                     text = collectionDetailTitle.orEmpty(),
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontSize = 16.sp,
