@@ -44,8 +44,7 @@ fun PhotoDetailedInformationCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ), shape = RoundedCornerShape(
-            topStart = 16.dp,
-            topEnd = 16.dp,
+           16.dp
         ), modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 120.dp, max = 360.dp)
@@ -115,10 +114,10 @@ fun PhotoDetailedInformationCard(
             thickness = 0.8.dp,
             color = Color(0xFF30363D)
         )
-        DetailTagsRow(modifier = modifier, detail = state.detail, onTagClick = {
+        DetailTagsRow(detail = state.detail, onTagClick = {
             onTagClick.invoke(it)
         })
-        DetailTripleActionButtons(modifier = modifier, setWallpaperButtonClick = {isOpen ->
+        DetailTripleActionButtons(setWallpaperButtonClick = {isOpen ->
             onSetWallpaperClick.invoke(isOpen)
         }, shareButtonClick = {
             onShareClick.invoke(state.detail?.urls.orEmpty())
