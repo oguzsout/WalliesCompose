@@ -1,5 +1,8 @@
 package com.oguzdogdu.walliescompose.features.popular
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +19,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,13 +51,16 @@ import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
 import com.oguzdogdu.walliescompose.ui.theme.medium
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun PopularScreenRoute(
+fun SharedTransitionScope.PopularScreenRoute(
+    animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier,
     viewModel: PopularViewModel = hiltViewModel(),
     onPopularClick: (String?) -> Unit,
     onBackClick: () -> Unit
 ) {
+
     val popularListState: LazyPagingItems<PopularImage> =
         viewModel.getPopular.collectAsLazyPagingItems()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -102,16 +109,21 @@ fun PopularScreenRoute(
                 .padding(it)
                 .fillMaxSize()
         ) {
-            PopularDetailListScreen(modifier = modifier, popularLazyPagingItems = popularListState, onTopicClick = { id ->
-                onPopularClick.invoke(id)
-            })
+            PopularDetailListScreen(
+                animatedVisibilityScope = animatedVisibilityScope,
+                popularLazyPagingItems = popularListState,
+                onTopicClick = { id ->
+                    onPopularClick.invoke(id)
+                })
         }
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun PopularDetailListScreen(
-    modifier: Modifier,
+private fun SharedTransitionScope.PopularDetailListScreen(
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    modifier: Modifier = Modifier,
     popularLazyPagingItems: LazyPagingItems<PopularImage>,
     onTopicClick: (String) -> Unit
 ) {
@@ -132,37 +144,44 @@ private fun PopularDetailListScreen(
                 contentType = popularLazyPagingItems.itemContentType { "Popular" }) { index: Int ->
                 val popular: PopularImage? = popularLazyPagingItems[index]
                 if (popular != null) {
-                    PopularListItem(popularImage = popular, onPopularClick = { onTopicClick.invoke(it) })
+                    PopularListItem(animatedVisibilityScope = animatedVisibilityScope, popularImage = popular, onPopularClick = { onTopicClick.invoke(it) })
                 }
             }
         }
     }
 }
+
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun PopularListItem(popularImage: PopularImage, onPopularClick: (String) -> Unit) {
-    Box(
-        modifier = Modifier
-            .wrapContentSize()
+fun SharedTransitionScope.PopularListItem(
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    modifier: Modifier = Modifier,
+    popularImage: PopularImage,
+    onPopularClick: (String) -> Unit
+) {
+    SubcomposeAsyncImage(
+        modifier = modifier
+            .sharedBounds(
+                sharedContentState = rememberSharedContentState(key = "popularImage-${popularImage.id}"),
+                animatedVisibilityScope = animatedVisibilityScope,
+                enter = scaleInSharedContentToBounds(),
+                exit = scaleOutSharedContentToBounds()
+            )
+            .fillMaxWidth()
+            .height(240.dp)
+            .clip(RoundedCornerShape(16.dp))
             .clickable {
                 popularImage.id?.let {
                     onPopularClick.invoke(
                         it
                     )
                 }
-            }
-        , contentAlignment = Alignment.Center
-    ) {
-        SubcomposeAsyncImage(
-            model = popularImage.url,
-            contentDescription = popularImage.imageDesc,
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(240.dp)
-                .clip(CircleShape.copy(all = CornerSize(16.dp)))
-            , loading = {
-                ImageLoadingState()
-            }
-        )
-    }
+            },
+        model = popularImage.url,
+        contentDescription = popularImage.imageDesc,
+        loading = {
+            ImageLoadingState()
+        },
+        contentScale = ContentScale.FillBounds
+    )
 }

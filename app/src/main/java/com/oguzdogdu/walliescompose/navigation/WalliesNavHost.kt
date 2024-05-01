@@ -2,6 +2,8 @@ package com.oguzdogdu.walliescompose.navigation
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -56,6 +58,7 @@ import com.oguzdogdu.walliescompose.features.topics.topicsScreen
 import com.oguzdogdu.walliescompose.navigation.utils.NavigationConstants.AUTH
 import com.oguzdogdu.walliescompose.navigation.utils.NavigationConstants.CONTENT
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun WalliesNavHost(
     appState: MainAppState,
@@ -72,20 +75,12 @@ fun WalliesNavHost(
     LaunchedEffect(key1 = isAuthenticated) {
         authState = isAuthenticated
     }
+    SharedTransitionLayout {
         NavHost(
-        navController = navController,
-        startDestination,
-        modifier = modifier,
-            enterTransition = {
-                EnterTransition.None
-            }, exitTransition = {
-                ExitTransition.None
-            }, popEnterTransition = {
-                EnterTransition.None
-            }, popExitTransition = {
-                ExitTransition.None
-            }
-    ) {
+            navController = navController,
+            startDestination = startDestination,
+            modifier = modifier
+        ) {
             splashScreen(goToLoginFlow = {
                 navController.navigate(LoginScreenNavigationRoute) {
                     popUpTo(SplashScreenNavigationRoute) {
@@ -100,15 +95,27 @@ fun WalliesNavHost(
                 }
             })
 
-        navigation(startDestination = LoginScreenNavigationRoute, route = AUTH) {
-            loginScreen(googleAuthUiClient = googleAuthUiClient,navigateToHome = {
-                navController.navigate(HomeScreenNavigationRoute) {
-                    popUpTo(LoginScreenNavigationRoute){
-                        inclusive = true
+            navigation(startDestination = LoginScreenNavigationRoute, route = AUTH) {
+                loginScreen(googleAuthUiClient = googleAuthUiClient,navigateToHome = {
+                    navController.navigate(HomeScreenNavigationRoute) {
+                        popUpTo(LoginScreenNavigationRoute){
+                            inclusive = true
+                        }
                     }
-                }
-            },
-                onContinueWithoutLoginClick = {
+                },
+                    onContinueWithoutLoginClick = {
+                        navController.navigate(HomeScreenNavigationRoute) {
+                            popUpTo(LoginScreenNavigationRoute){
+                                inclusive = true
+                            }
+                        }
+                    }, navigateBack = {
+                        navController.popBackStack()
+                    }, navigateToSignInEmail = {
+                        navController.navigate(SignInWithEmailScreenNavigationRoute)
+                    })
+
+                signInWithEmailScreen(navigateToHome = {
                     navController.navigate(HomeScreenNavigationRoute) {
                         popUpTo(LoginScreenNavigationRoute){
                             inclusive = true
@@ -116,155 +123,153 @@ fun WalliesNavHost(
                     }
                 }, navigateBack = {
                     navController.popBackStack()
-                }, navigateToSignInEmail = {
-                    navController.navigate(SignInWithEmailScreenNavigationRoute)
+                }, navigateToForgotPassword = {
+                    navController.navigateToForgotPasswordScreen()
+                },
+                    navigateToSignUpScreen = {
+                        navController.navigateToSignUpScreen()
+                    }
+                )
+                forgotPasswordScreen(navigateToHome = {}, navigateBack = {
+                    navController.popBackStack()
                 })
-
-            signInWithEmailScreen(navigateToHome = {
-                navController.navigate(HomeScreenNavigationRoute) {
-                    popUpTo(LoginScreenNavigationRoute){
-                        inclusive = true
+                signUpScreen(navigateBack = { navController.popBackStack() }, goToLoginScreen = {
+                    navController.navigate(LoginScreenNavigationRoute) {
+                        popUpTo(LoginScreenNavigationRoute){
+                            inclusive = true
+                        }
                     }
-                }
-            }, navigateBack = {
-                navController.popBackStack()
-            }, navigateToForgotPassword = {
-                navController.navigateToForgotPasswordScreen()
-            },
-                navigateToSignUpScreen = {
-                    navController.navigateToSignUpScreen()
-                }
-            )
-            forgotPasswordScreen(navigateToHome = {}, navigateBack = {
-                navController.popBackStack()
-            })
-            signUpScreen(navigateBack = { navController.popBackStack() }, goToLoginScreen = {
-                navController.navigate(LoginScreenNavigationRoute) {
-                    popUpTo(LoginScreenNavigationRoute){
-                        inclusive = true
-                    }
-                }
-            })
-        }
+                })
+            }
 
-        navigation(startDestination = HomeScreenNavigationRoute, route = CONTENT) {
-            homeScreen(
-                onTopicDetailListClick = {
+            navigation(startDestination = HomeScreenNavigationRoute, route = CONTENT) {
+                homeScreen(
+                    transitionScope = this@SharedTransitionLayout,
+                    onTopicDetailListClick = {
+                        navController.navigateToTopicDetailListScreen(topicId = it)
+                    },
+                    onLatestClick = {
+                        navController.navigateToDetailScreen(photoId = it)
+                    },
+                    onPopularClick = {
+                        navController.navigateToDetailScreen(photoId = it)
+                    },
+                    onTopicSeeAllClick = {
+                        navController.navigateToTopicsScreen()
+                    },
+                    onSearchClick = {
+                        navController.navigateToSearchScreen()
+                    },
+                    onPopularSeeAllClick = {
+                        navController.navigateToPopularScreen()
+                    },
+                    onLatestSeeAllClick = {
+                        navController.navigateToLatestScreen()
+                    },
+                    navigateBack = {
+                        appState.onBackPress()
+                    },
+                    onUserPhotoClick = {
+                        navController.navigateToAuthenticatedUserScreen()
+                    }
+                )
+                collectionScreen(
+                    transitionScope = this@SharedTransitionLayout,
+                    onCollectionClick = {id,title ->
+                    navController.navigateToCollectionDetailListScreen(
+                        collectionDetailListId = id,
+                        collectionDetailListTitle = title
+                    )
+                })
+                favoritesScreen(onFavoriteClick = {
+                    navController.navigateToDetailScreen(photoId = it)
+                })
+                settingsScreen()
+                searchScreen(onBackClick = {
+                    navController.popBackStack()
+                }, searchPhotoClick = {
+                    navController.navigateToDetailScreen(photoId = it)
+                })
+                detailScreen(
+                    transitionScope = this@SharedTransitionLayout,
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onTagClick = {
+                        navController.navigateToSearchScreen(queryFromDetail = it)
+                    },
+                    onProfileDetailClick = {
+                        navController.navigateToProfileDetailScreen(username = it)
+                    }
+                )
+                topicsScreen(onBackClick = {
+                    navController.navigateToHomeScreen()
+                }, onTopicClick = {
                     navController.navigateToTopicDetailListScreen(topicId = it)
-                },
-                onLatestClick = {
+                })
+                topicDetailListScreen(onTopicClick = {
                     navController.navigateToDetailScreen(photoId = it)
-                },
-                onPopularClick = {
-                    navController.navigateToDetailScreen(photoId = it)
-                },
-                onTopicSeeAllClick = {
-                    navController.navigateToTopicsScreen()
-                },
-                onSearchClick = {
-                    navController.navigateToSearchScreen()
-                },
-                onPopularSeeAllClick = {
-                    navController.navigateToPopularScreen()
-                },
-                onLatestSeeAllClick = {
-                    navController.navigateToLatestScreen()
-                },
-                navigateBack = {
-                    appState.onBackPress()
-                },
-                onUserPhotoClick = {
-                    navController.navigateToAuthenticatedUserScreen()
-                }
-            )
-            collectionScreen(onCollectionClick = {id,title ->
-                navController.navigateToCollectionDetailListScreen(
-                    collectionDetailListId = id,
-                    collectionDetailListTitle = title
-                )
-            })
-            favoritesScreen(onFavoriteClick = {
-                navController.navigateToDetailScreen(photoId = it)
-            })
-            settingsScreen()
-            searchScreen(onBackClick = {
-                navController.popBackStack()
-            }, searchPhotoClick = {
-                navController.navigateToDetailScreen(photoId = it)
-            })
-            detailScreen(
-                onBackClick = {
-                    navController.popBackStack()
-                },
-                onTagClick = {
-                    navController.navigateToSearchScreen(queryFromDetail = it)
-                },
-                onProfileDetailClick = {
-                    navController.navigateToProfileDetailScreen(username = it)
-                }
-            )
-            topicsScreen(onBackClick = {
-                navController.navigateToHomeScreen()
-            }, onTopicClick = {
-                navController.navigateToTopicDetailListScreen(topicId = it)
-            })
-            topicDetailListScreen(onTopicClick = {
-                navController.navigateToDetailScreen(photoId = it)
-            }, onBackClick = {
-                navController.popBackStack()
-            })
-            collectionDetailListScreen(onCollectionClick = {
-                navController.navigateToDetailScreen(photoId = it)
-            }, onBackClick = {
-                navController.popBackStack()
-            })
-            popularScreen(onPopularClick = {
-                navController.navigateToDetailScreen(photoId = it)
-            },
-                onBackClick = {
+                }, onBackClick = {
                     navController.popBackStack()
                 })
-            latestScreen(onLatestClick = {
-                navController.navigateToDetailScreen(photoId = it)
-            },
-                onBackClick = {
+                collectionDetailListScreen(
+                    transitionScope = this@SharedTransitionLayout,
+                    onCollectionClick = {
+                    navController.navigateToDetailScreen(photoId = it)
+                }, onBackClick = {
                     navController.popBackStack()
                 })
-            profileDetailScreen(onUserPhotoListClick = { id ->
-                navController.navigateToDetailScreen(photoId = id)
+                popularScreen(
+                    transitionScope = this@SharedTransitionLayout, onPopularClick = {
+                        navController.navigateToDetailScreen(photoId = it)
+                    },
+                    onBackClick = {
+                        navController.navigateToHomeScreen()
+                    })
+                latestScreen(onLatestClick = {
+                    navController.navigateToDetailScreen(photoId = it)
+                },
+                    onBackClick = {
+                        navController.navigateToHomeScreen()
+                    })
+                profileDetailScreen(onUserPhotoListClick = { id ->
+                    navController.navigateToDetailScreen(photoId = id)
 
-            }, onCollectionItemClick = { id, title ->
-                navController.navigateToCollectionDetailListScreen(
-                    collectionDetailListId = id,
-                    collectionDetailListTitle = title
-                )
-            }, onBackClick = {
-                navController.popBackStack()
-            })
-            authenticatedUserScreen(navigateBack = {
-                navController.popBackStack()
-            }, navigateToLogin = {
-                navController.navigate(AUTH) {
-                    popUpTo(CONTENT){
-                        inclusive = true
+                }, onCollectionItemClick = { id, title ->
+                    navController.navigateToCollectionDetailListScreen(
+                        collectionDetailListId = id,
+                        collectionDetailListTitle = title
+                    )
+                }, onBackClick = {
+                    navController.popBackStack()
+                })
+                authenticatedUserScreen(
+                    transitionScope = this@SharedTransitionLayout,
+                    navigateBack = {
+                        navController.popBackStack()
+                }, navigateToLogin = {
+                    navController.navigate(AUTH) {
+                        popUpTo(CONTENT){
+                            inclusive = true
+                        }
                     }
-                }
-            }, navigateToChangeNameAndSurname = {
-                navController.navigateToChangeNameAndASurnameScreen()
-            }, navigateToChangePassword = {
-                navController.navigateToChangePasswordScreen()
-            }, navigateToChangeEmail = {
-                navController.navigateToChangeEmailScreen()
-            })
-            changeNameAndSurnameScreen(navigateBack = {
-                navController.popBackStack()
-            })
-            changePasswordScreen(navigateBack = {
-                navController.popBackStack()
-            })
-            changeEmailScreen(navigateBack = {
-                navController.popBackStack()
-            })
+                }, navigateToChangeNameAndSurname = {
+                    navController.navigateToChangeNameAndASurnameScreen()
+                }, navigateToChangePassword = {
+                    navController.navigateToChangePasswordScreen()
+                }, navigateToChangeEmail = {
+                    navController.navigateToChangeEmailScreen()
+                })
+                changeNameAndSurnameScreen(navigateBack = {
+                    navController.popBackStack()
+                })
+                changePasswordScreen(navigateBack = {
+                    navController.popBackStack()
+                })
+                changeEmailScreen(navigateBack = {
+                    navController.popBackStack()
+                })
+            }
         }
     }
 }
