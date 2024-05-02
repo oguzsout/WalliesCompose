@@ -103,26 +103,33 @@ fun PhotoDetailedInformationCard(
                 })
             }
         }
-        HorizontalDivider(
-            modifier = modifier.padding(start = 8.dp, end = 8.dp, top = 16.dp, bottom = 16.dp),
-            thickness = 0.8.dp,
-            color = Color(0xFF30363D)
-        )
-        DetailPhotoAttributesRow(modifier = modifier, detail = state.detail)
-        HorizontalDivider(
-            modifier = modifier.padding(start = 8.dp, end = 8.dp, top = 16.dp),
-            thickness = 0.8.dp,
-            color = Color(0xFF30363D)
-        )
-        DetailTagsRow(detail = state.detail, onTagClick = {
-            onTagClick.invoke(it)
-        })
-        DetailTripleActionButtons(setWallpaperButtonClick = {isOpen ->
-            onSetWallpaperClick.invoke(isOpen)
-        }, shareButtonClick = {
-            onShareClick.invoke(state.detail?.urls.orEmpty())
-        }, downloadButtonClick = {
-            onDownloadClick.invoke(it)
-        })
+        Column(
+            modifier = modifier
+                .fillMaxWidth().padding(horizontal = 4.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            HorizontalDivider(
+                modifier = modifier.padding(start = 8.dp, end = 8.dp, top = 16.dp, bottom = 16.dp),
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            DetailPhotoAttributesRow(modifier = modifier, detail = state.detail)
+            HorizontalDivider(
+                modifier = modifier.padding(start = 8.dp, end = 8.dp, top = 16.dp),
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            DetailTagsRow(detail = state.detail, onTagClick = {
+                onTagClick.invoke(it)
+            })
+            DetailTripleActionButtons(setWallpaperButtonClick = {isOpen ->
+                onSetWallpaperClick.invoke(isOpen)
+            }, shareButtonClick = {
+                onShareClick.invoke(state.detail?.urls.orEmpty())
+            }, downloadButtonClick = {
+                onDownloadClick.invoke(it)
+            })
+        }
     }
 }

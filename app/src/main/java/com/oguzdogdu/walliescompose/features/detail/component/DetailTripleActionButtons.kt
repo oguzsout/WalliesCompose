@@ -41,14 +41,14 @@ fun DetailTripleActionButtons(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 8.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Button(
             modifier = modifier.border(
                 width = 1.dp,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 shape = RoundedCornerShape(16.dp)
             ),
             colors = ButtonDefaults.buttonColors(
