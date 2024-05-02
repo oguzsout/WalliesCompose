@@ -169,14 +169,14 @@ fun SharedTransitionScope.PopularListItem(
             )
             .fillMaxWidth()
             .height(240.dp)
-            .clip(RoundedCornerShape(16.dp))
             .clickable {
                 popularImage.id?.let {
                     onPopularClick.invoke(
                         it
                     )
                 }
-            },
+            }
+            .clip(RoundedCornerShape(16.dp)),
         model = popularImage.url,
         contentDescription = popularImage.imageDesc,
         loading = {

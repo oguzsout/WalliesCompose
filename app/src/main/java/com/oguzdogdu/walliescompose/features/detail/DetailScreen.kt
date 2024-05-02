@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,7 +40,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,7 +48,6 @@ import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.features.detail.component.PhotoDetailedInformationCard
 import com.oguzdogdu.walliescompose.features.downloadimage.DownloadImageBottomSheet
-import com.oguzdogdu.walliescompose.features.home.LoadingState
 import com.oguzdogdu.walliescompose.features.setwallpaper.SetWallpaperImageBottomSheet
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.util.adjustUrlForScreenConstraints
@@ -63,7 +59,7 @@ import com.oguzdogdu.walliescompose.util.shareExternal
 @Composable
 fun SharedTransitionScope.DetailScreenRoute(
     animatedVisibilityScope: AnimatedVisibilityScope,
-    detailViewModel: DetailViewModel = hiltViewModel(),
+    detailViewModel: DetailViewModel,
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
     onProfileDetailClick: (String) -> Unit,
@@ -301,18 +297,16 @@ fun SharedTransitionScope.DetailScreenContent(
             modifier = modifier
                 .sharedBounds(
                     sharedContentState = rememberSharedContentState(key = "popularImage-${state.detail?.id}"),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    enter = scaleInSharedContentToBounds(),
-                    exit = scaleOutSharedContentToBounds()
+                    animatedVisibilityScope = animatedVisibilityScope
                 )
-                .fillMaxWidth()
                 .weight(1f)
+                .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp)),
-            model = state.detail?.highQuality,
+            model = state.detail?.mediumQuality,
             contentDescription = state.detail?.desc,
             contentScale = ContentScale.FillBounds,
         )
-        Spacer(modifier = modifier.size(4.dp))
+        Spacer(modifier = modifier.size(8.dp))
         PhotoDetailedInformationCard(
             modifier = modifier.align(Alignment.End),
             state = state,
