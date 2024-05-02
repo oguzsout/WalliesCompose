@@ -28,7 +28,7 @@ import com.oguzdogdu.walliescompose.ui.theme.regular
 @Composable
 fun DetailTagsRow(modifier: Modifier = Modifier, detail: Photo?,onTagClick:(String) -> Unit) {
     LazyRow(
-        modifier = modifier.padding(horizontal = 8.dp),
+        modifier = modifier,
         state = rememberLazyListState(),
         contentPadding = PaddingValues(8.dp),
     ) {
@@ -45,7 +45,7 @@ fun DetailTagsRow(modifier: Modifier = Modifier, detail: Photo?,onTagClick:(Stri
                     .padding(4.dp)
                     .border(
                         width = 1.dp,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                         shape = RoundedCornerShape(16.dp)
                     )
                     .clickable {
@@ -54,10 +54,10 @@ fun DetailTagsRow(modifier: Modifier = Modifier, detail: Photo?,onTagClick:(Stri
             ) {
                 Text(
                     text = item.orEmpty(),
-                    color = Color.White,
                     textAlign = TextAlign.Center,
                     modifier = modifier.padding(8.dp),
                     fontFamily = regular,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontSize = 12.sp
                 )
             }
