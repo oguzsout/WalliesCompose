@@ -5,19 +5,25 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -65,7 +71,6 @@ fun SharedTransitionScope.DetailScreenRoute(
     onProfileDetailClick: (String) -> Unit,
     onTagClick: (String) -> Unit
 ) {
-
     val state by detailViewModel.photo.collectAsStateWithLifecycle()
     val stateOfDownloadBottomSheet by detailViewModel.downloadBottomSheetOpenStat.collectAsStateWithLifecycle()
     val stateOfSetWallpaperBottomSheet by detailViewModel.setWallpaperBottomSheetOpenStat.collectAsStateWithLifecycle()
@@ -73,14 +78,20 @@ fun SharedTransitionScope.DetailScreenRoute(
     val wallpaperPlace by detailViewModel.setWallpaperPlace.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    var shareEnabled by remember { mutableStateOf(false) }
+    val launcherOfShare = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        shareEnabled = true
+    }
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
         detailViewModel.handleScreenEvents(DetailScreenEvent.GetPhotoDetails)
         detailViewModel.handleScreenEvents(DetailScreenEvent.GetFavoriteCheckStat)
     }
+
     LaunchedEffect(key1 = state.favorites) {
         detailViewModel.handleScreenEvents(DetailScreenEvent.GetFavoriteCheckStat)
     }
+
     LaunchedEffect(key1 = photoQuality) {
         val imageUrl = when (photoQuality) {
             TypeOfPhotoQuality.RAW.name -> state.detail?.rawQuality.orEmpty()
@@ -120,14 +131,6 @@ fun SharedTransitionScope.DetailScreenRoute(
         }
     }
 
-
-    var shareEnabled by remember { mutableStateOf(false) }
-    val launcherOfShare = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        shareEnabled = true
-    }
-
-
-
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         Row(
             modifier = modifier
@@ -151,7 +154,6 @@ fun SharedTransitionScope.DetailScreenRoute(
                         .wrapContentSize()
                 )
             }
-
             Text(
                 modifier = modifier.weight(6f),
                 text = state.detail?.desc.orEmpty(),
@@ -162,7 +164,6 @@ fun SharedTransitionScope.DetailScreenRoute(
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
             )
-
             IconButton(
                 onClick = { onProfileDetailClick.invoke(state.detail?.username.orEmpty()) },
                 modifier = modifier
@@ -259,7 +260,7 @@ fun SharedTransitionScope.DetailScreenRoute(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun SharedTransitionScope.DetailScreenContent(
     animatedVisibilityScope: AnimatedVisibilityScope,
@@ -284,31 +285,37 @@ fun SharedTransitionScope.DetailScreenContent(
     onTagButtonClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var isExpand by remember {
+        mutableStateOf(false)
+    }
 
     Box(modifier = modifier
         .fillMaxSize()
         .padding(paddingValues = paddingValues)) {
     Column(
-        modifier = modifier.padding(8.dp),
+        modifier = modifier
+            .padding(8.dp)
+            .fillMaxSize()
+            .verticalScroll(state = rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         SubcomposeAsyncImage(
-            modifier = modifier
+            modifier = Modifier
                 .sharedBounds(
                     sharedContentState = rememberSharedContentState(key = "popularImage-${state.detail?.id}"),
                     animatedVisibilityScope = animatedVisibilityScope
                 )
-                .weight(1f)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp)),
+                .aspectRatio(if (isExpand) 0.75f else 0.85f)
+                .clip(RoundedCornerShape(16.dp))
+                .combinedClickable(onClick = {}, onLongClick = { isExpand = !isExpand }),
             model = state.detail?.mediumQuality,
             contentDescription = state.detail?.desc,
             contentScale = ContentScale.FillBounds,
         )
         Spacer(modifier = modifier.size(8.dp))
         PhotoDetailedInformationCard(
-            modifier = modifier.align(Alignment.End),
+            modifier = Modifier.align(Alignment.End),
             state = state,
             onSetWallpaperClick = { isOpen -> onSetWallpaperButtonClick.invoke(isOpen) },
             onShareClick = { url -> onShareButtonClick.invoke(url) },
