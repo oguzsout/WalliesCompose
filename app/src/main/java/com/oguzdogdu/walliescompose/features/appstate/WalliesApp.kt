@@ -1,14 +1,16 @@
 package com.oguzdogdu.walliescompose.features.appstate
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -20,7 +22,6 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,15 +29,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Unspecified
 import androidx.compose.ui.graphics.Color.Companion.Yellow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,10 +43,10 @@ import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClie
 import com.oguzdogdu.walliescompose.navigation.TopLevelDestination
 import com.oguzdogdu.walliescompose.navigation.WalliesNavHost
 import com.oguzdogdu.walliescompose.ui.theme.medium
-import com.oguzdogdu.walliescompose.ui.theme.regular
 import com.oguzdogdu.walliescompose.util.NetworkMonitor
 import kotlinx.coroutines.CoroutineScope
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun WalliesApp(
     modifier: Modifier = Modifier,
@@ -75,15 +71,21 @@ fun WalliesApp(
             )
         }
     }
-    Scaffold(modifier = modifier, bottomBar = {
-        if (appState.shouldShowBottomBar) {
-            AppNavBar(
-                destinations = appState.topLevelDestinations,
-                onNavigateToDestination = appState::navigateToTopLevelDestination,
-                currentDestination = appState.currentDestination
-            )
+    Scaffold(modifier = modifier.fillMaxSize(), bottomBar = {
+        SharedTransitionLayout {
+            AnimatedVisibility(
+                visible = appState.shouldShowBottomBar
+            ) {
+                AppNavBar(
+                    destinations = appState.topLevelDestinations,
+                    onNavigateToDestination = appState::navigateToTopLevelDestination,
+                    currentDestination = appState.currentDestination,
+                    modifier = modifier
+                )
+            }
         }
-    },snackbarHost = {SnackbarHost(snackbarHostState) {
+
+    },snackbarHost = { SnackbarHost(snackbarHostState) {
         Snackbar(
             modifier = modifier
                 .padding(8.dp)
@@ -118,8 +120,9 @@ internal fun AppNavBar(
     destinations: List<TopLevelDestination>,
     onNavigateToDestination: (TopLevelDestination) -> Unit,
     currentDestination: NavDestination?,
+    modifier: Modifier
 ) {
-    NavigationBar {
+    NavigationBar(modifier = modifier) {
         destinations.forEach { destination ->
             val selected = currentDestination.isTopLevelDestinationInHierarchy(destination)
             NavigationBarItem(
