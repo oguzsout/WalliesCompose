@@ -291,7 +291,8 @@ fun SharedTransitionScope.DetailScreenContent(
 
     Box(modifier = modifier
         .fillMaxSize()
-        .padding(paddingValues = paddingValues)) {
+        .padding(paddingValues = paddingValues)
+    ) {
     Column(
         modifier = modifier
             .padding(8.dp)
@@ -306,7 +307,7 @@ fun SharedTransitionScope.DetailScreenContent(
                     sharedContentState = rememberSharedContentState(key = "popularImage-${state.detail?.id}"),
                     animatedVisibilityScope = animatedVisibilityScope
                 )
-                .aspectRatio(if (isExpand) 0.75f else 0.85f)
+                .weight(1f)
                 .clip(RoundedCornerShape(16.dp))
                 .combinedClickable(onClick = {}, onLongClick = { isExpand = !isExpand }),
             model = state.detail?.mediumQuality,

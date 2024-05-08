@@ -1,5 +1,7 @@
 package com.oguzdogdu.walliescompose.features.latest
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
@@ -13,14 +15,21 @@ fun NavController.navigateToLatestScreen(
     this.navigate(LatestScreenNavigationRoute, navOptions)
 }
 
-fun NavGraphBuilder.latestScreen(onLatestClick: (String?) -> Unit, onBackClick: () -> Unit) {
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun NavGraphBuilder.latestScreen(
+    transitionScope: SharedTransitionScope,
+    onLatestClick: (String?) -> Unit,
+    onBackClick: () -> Unit
+) {
     composable(
         LatestScreenNavigationRoute
     ) {
-        LatestScreenRoute(onLatestClick = { id ->
-            onLatestClick.invoke(id)
-        }, onBackClick = {
-            onBackClick.invoke()
-        })
+        transitionScope.LatestScreenRoute(
+            animatedVisibilityScope = this,
+            onLatestClick = { id ->
+                onLatestClick.invoke(id)
+            }, onBackClick = {
+                onBackClick.invoke()
+            })
     }
 }

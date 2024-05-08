@@ -1,16 +1,9 @@
 package com.oguzdogdu.walliescompose.features.appstate
 
-import android.app.Activity
-import android.content.Context
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -21,7 +14,6 @@ import androidx.navigation.navOptions
 import com.oguzdogdu.walliescompose.features.collections.navigateToCollectionScreen
 import com.oguzdogdu.walliescompose.features.favorites.navigateToFavoritesScreen
 import com.oguzdogdu.walliescompose.features.home.navigateToHomeScreen
-import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
 import com.oguzdogdu.walliescompose.features.settings.navigateToSettingsScreen
 import com.oguzdogdu.walliescompose.navigation.TopLevelDestination
 import com.oguzdogdu.walliescompose.util.NetworkMonitor
@@ -72,10 +64,10 @@ class MainAppState(
     fun navigateToTopLevelDestination(topLevelDestination: TopLevelDestination) {
         val topLevelNavOptions = navOptions {
             popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
+                saveState = false
             }
             launchSingleTop = true
-            restoreState = true
+            restoreState = false
         }
 
         when (topLevelDestination) {

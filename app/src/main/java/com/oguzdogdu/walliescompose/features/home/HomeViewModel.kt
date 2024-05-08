@@ -54,10 +54,6 @@ class HomeViewModel @Inject constructor(
                 repository.getHomeImagesByLatest()
             ) { topicsResult, popularsResult, latestResult ->
 
-                _homeListState.update { it.copy(loading = true) }
-
-                delay(250)
-
                 topicsResult.onSuccess { topics ->
                     _homeListState.update { it.copy(loading = false, topics = topics.orEmpty()) }
                 }
@@ -98,18 +94,13 @@ class HomeViewModel @Inject constructor(
     private fun getUserProfileImage() {
         viewModelScope.launch {
             authenticationRepository.fetchUserInfos().collectLatest { value ->
-                value.onLoading {
-
-                }
-
+                value.onLoading {}
                 value.onSuccess { user ->
                     user?.let {
                         _userProfileImage.value = user.image.orEmpty()
                     }
                 }
-
-                value.onFailure {
-                }
+                value.onFailure {}
             }
         }
     }
