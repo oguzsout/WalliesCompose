@@ -2,6 +2,9 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
+      <entry key="NavigationUiTest">
+        <State />
+      </entry>
       <entry key="WalliesAppStateTest">
         <State />
       </entry>

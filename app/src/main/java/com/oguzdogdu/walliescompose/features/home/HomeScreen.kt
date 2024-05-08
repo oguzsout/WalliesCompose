@@ -1,20 +1,18 @@
 package com.oguzdogdu.walliescompose.features.home
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
@@ -27,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,23 +35,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -68,7 +60,6 @@ import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
 import com.oguzdogdu.walliescompose.features.home.state.HomeScreenState
 import com.oguzdogdu.walliescompose.navigation.utils.WalliesIcons
 import com.oguzdogdu.walliescompose.ui.theme.medium
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -86,17 +77,13 @@ fun SharedTransitionScope.HomeScreenRoute(
     onUserPhotoClick: () -> Unit,
     navigateBack:() -> Unit
 ) {
-    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val homeUiState by viewModel.homeListState.collectAsStateWithLifecycle()
     val authUserProfileImage by viewModel.userProfileImage.collectAsStateWithLifecycle()
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE, lifecycleOwner = lifecycleOwner){
         viewModel.handleScreenEvents(HomeScreenEvent.FetchMainScreenUserData)
         viewModel.handleScreenEvents(HomeScreenEvent.FetchHomeScreenLists)
-    }
-
-    BackHandler(enabled = true) {
-        navigateBack.invoke()
     }
 
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
@@ -148,41 +135,44 @@ fun SharedTransitionScope.HomeScreenRoute(
                 Icon(
                     painter = painterResource(id = R.drawable.search),
                     contentDescription = "",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = MaterialTheme.colorScheme.inverseSurface,
                     modifier = modifier.wrapContentSize()
                 )
             }
         }
-    }) {
-        Column(modifier = modifier
-            .fillMaxSize()
-            .padding(it)) {
-            HomeScreenContent(
-                homeUiState = homeUiState,
-                modifier = modifier,
-                onTopicSeeAllClick = {
-                    onTopicSeeAllClick.invoke()
-                },
-                onTopicDetailListClick = { id ->
-                    onTopicDetailListClick.invoke(id)
-                },
-                onPopularClick = { id ->
-                    onPopularClick.invoke(id)
-                },
-                onLatestClick = { id -> onLatestClick.invoke(id) },
-                onPopularSeeAllClick = {
-                    onPopularSeeAllClick.invoke()
-                },
-                onLatestSeeAllClick = {
-                    onLatestSeeAllClick.invoke()
-                }
-            )
+    }) {paddingValues ->
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)) {
+                HomeScreenContent(
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    homeUiState = homeUiState,
+                    modifier = modifier,
+                    onTopicSeeAllClick = {
+                        onTopicSeeAllClick.invoke()
+                    },
+                    onTopicDetailListClick = { id ->
+                        onTopicDetailListClick.invoke(id)
+                    },
+                    onPopularClick = { id ->
+                        onPopularClick.invoke(id)
+                    },
+                    onLatestClick = { id -> onLatestClick.invoke(id) },
+                    onPopularSeeAllClick = {
+                        onPopularSeeAllClick.invoke()
+                    },
+                    onLatestSeeAllClick = {
+                        onLatestSeeAllClick.invoke()
+                    }
+                )
         }
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun HomeScreenContent(
+fun SharedTransitionScope.HomeScreenContent(
+    animatedVisibilityScope: AnimatedVisibilityScope,
     homeUiState: HomeScreenState,
     modifier: Modifier,
     onTopicSeeAllClick: () -> Unit,
@@ -192,52 +182,45 @@ fun HomeScreenContent(
     onPopularClick: (String) -> Unit,
     onLatestClick: (String) -> Unit
 ) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        when {
-            homeUiState.loading -> {
-                LoadingState(modifier = modifier)
-            }
 
-            homeUiState.topics.isNotEmpty() and homeUiState.popular.isNotEmpty() and homeUiState.latest.isNotEmpty() -> {
-                LazyColumn(
-                    modifier = modifier
-                        .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
+    LazyColumn(
+        state = rememberLazyListState(),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
 
-                    item {
-                        TopicLayoutContainer(
-                            modifier = modifier,
-                            homeScreenState = homeUiState,
-                            onTopicDetailListClick = {
-                                onTopicDetailListClick.invoke(it)
-                            },
-                            onTopicSeeAllClick = {
-                                onTopicSeeAllClick.invoke()
-                            })
-                    }
-                    item {
-                        PopularLayoutContainer(modifier = modifier,
-                            homeScreenState = homeUiState,
-                            onPopularClick = { id ->
-                                onPopularClick.invoke(id)
-                            },
-                            onPopularSeeAllClick = {
-                                onPopularSeeAllClick.invoke()
-                            })
-                    }
+        item {
+            TopicLayoutContainer(
+                modifier = modifier,
+                homeScreenState = homeUiState,
+                onTopicDetailListClick = {
+                    onTopicDetailListClick.invoke(it)
+                },
+                onTopicSeeAllClick = {
+                    onTopicSeeAllClick.invoke()
+                })
+        }
 
-                    item {
-                        LatestLayoutContainer(modifier = modifier,
-                            homeScreenState = homeUiState,
-                            onLatestClick = { id -> onLatestClick.invoke(id) },
-                            onLatestSeeAllClick = { onLatestSeeAllClick.invoke() })
+        item {
+            PopularLayoutContainer(animatedVisibilityScope = animatedVisibilityScope,
+                homeScreenState = homeUiState,
+                onPopularClick = { id ->
+                    onPopularClick.invoke(id)
+                },
+                onPopularSeeAllClick = {
+                    onPopularSeeAllClick.invoke()
+                })
+        }
 
-                    }
-                }
-            }
+        item {
+            LatestLayoutContainer(animatedVisibilityScope = animatedVisibilityScope,
+                homeScreenState = homeUiState,
+                onLatestClick = { id -> onLatestClick.invoke(id) },
+                onLatestSeeAllClick = { onLatestSeeAllClick.invoke() })
+
         }
     }
 }
@@ -290,9 +273,14 @@ private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreen
 
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun PopularLayoutContainer(
-    modifier: Modifier, homeScreenState: HomeScreenState, onPopularClick: (String) -> Unit,onPopularSeeAllClick: () -> Unit
+private fun SharedTransitionScope.PopularLayoutContainer(
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    modifier: Modifier = Modifier,
+    homeScreenState: HomeScreenState,
+    onPopularClick: (String) -> Unit,
+    onPopularSeeAllClick: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -329,7 +317,9 @@ private fun PopularLayoutContainer(
             items(homeScreenState.popular, key = {
                 it.id.hashCode()
             }) { popularImage ->
-                PopularImageView(id = popularImage.id,
+                PopularImageView(
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    id = popularImage.id,
                     imageUrl = popularImage.url,
                     imageName = popularImage.imageDesc,
                     onPopularClick = {
@@ -341,9 +331,14 @@ private fun PopularLayoutContainer(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun LatestLayoutContainer(
-    modifier: Modifier, homeScreenState: HomeScreenState, onLatestClick: (String) -> Unit,onLatestSeeAllClick:() -> Unit
+private fun SharedTransitionScope.LatestLayoutContainer(
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    modifier: Modifier = Modifier,
+    homeScreenState: HomeScreenState,
+    onLatestClick: (String) -> Unit,
+    onLatestSeeAllClick: () -> Unit
 ) {
     Column(
         modifier = modifier
@@ -380,7 +375,9 @@ private fun LatestLayoutContainer(
             items(homeScreenState.latest, key = {
                 it.id.hashCode()
             }) { latestImage ->
-                LatestImageView(id = latestImage.id,
+                LatestImageView(
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    id = latestImage.id,
                     imageUrl = latestImage.url,
                     imageName = latestImage.imageDesc,
                     onLatestClick = {
@@ -430,38 +427,59 @@ private fun TopicTitleView(imageUrl: String?, title: String?, imageName:String?,
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun PopularImageView(id: String?, imageUrl: String?, imageName:String?, onPopularClick: (String) -> Unit) {
-    Box(modifier = Modifier
-        .wrapContentSize()
-        .clickable { onPopularClick.invoke(id.orEmpty()) }) {
-        SubcomposeAsyncImage(
+private fun SharedTransitionScope.PopularImageView(
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    id: String?,
+    imageUrl: String?,
+    imageName: String?,
+    onPopularClick: (String) -> Unit
+) {
+    SubcomposeAsyncImage(
             model = imageUrl,
             contentDescription = imageName,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
+                .sharedBounds(
+                    sharedContentState = rememberSharedContentState(key = "popularImage-${id}"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    enter = scaleInSharedContentToBounds(),
+                    exit = scaleOutSharedContentToBounds(),
+                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+                )
                 .width(160.dp)
                 .height(240.dp)
-                .clip(CircleShape.copy(all = CornerSize(16.dp))),
+                .clip(CircleShape.copy(all = CornerSize(16.dp)))
+                .clickable { onPopularClick.invoke(id.orEmpty()) },
             loading = { ImageLoadingState() },
         )
-    }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun LatestImageView(id: String?, imageUrl: String?, imageName:String?, onLatestClick: (String) -> Unit) {
-    Box(modifier = Modifier
-        .wrapContentSize()
-        .clickable { onLatestClick.invoke(id.orEmpty()) }) {
-        SubcomposeAsyncImage(
-            model = imageUrl,
-            contentDescription = imageName,
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier
-                .width(160.dp)
-                .height(240.dp)
-                .clip(CircleShape.copy(all = CornerSize(16.dp))),
-            loading = { ImageLoadingState() },
-        )
-    }
+private fun SharedTransitionScope.LatestImageView(
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    id: String?,
+    imageUrl: String?,
+    imageName: String?,
+    onLatestClick: (String) -> Unit
+) {
+    SubcomposeAsyncImage(
+        model = imageUrl,
+        contentDescription = imageName,
+        contentScale = ContentScale.FillBounds,
+        modifier = Modifier
+            .sharedBounds(
+                sharedContentState = rememberSharedContentState(key = "popularImage-${id}"),
+                animatedVisibilityScope = animatedVisibilityScope,
+                enter = scaleInSharedContentToBounds(),
+                exit = scaleOutSharedContentToBounds(),
+            )
+            .width(160.dp)
+            .height(240.dp)
+            .clip(CircleShape.copy(all = CornerSize(16.dp)))
+            .clickable { onLatestClick.invoke(id.orEmpty()) },
+        loading = { ImageLoadingState() },
+    )
 }

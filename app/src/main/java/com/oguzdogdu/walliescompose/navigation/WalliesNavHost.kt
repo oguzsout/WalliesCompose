@@ -226,9 +226,11 @@ fun WalliesNavHost(
                     onBackClick = {
                         navController.navigateToHomeScreen()
                     })
-                latestScreen(onLatestClick = {
-                    navController.navigateToDetailScreen(photoId = it)
-                },
+                latestScreen(
+                    transitionScope = this@SharedTransitionLayout,
+                    onLatestClick = {
+                        navController.navigateToDetailScreen(photoId = it)
+                    },
                     onBackClick = {
                         navController.navigateToHomeScreen()
                     })

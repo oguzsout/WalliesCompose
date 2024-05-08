@@ -3,6 +3,10 @@ package com.oguzdogdu.walliescompose.features.appstate
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -81,6 +85,14 @@ fun WalliesApp(
                     onNavigateToDestination = appState::navigateToTopLevelDestination,
                     currentDestination = appState.currentDestination,
                     modifier = modifier
+                        .animateEnterExit(
+                            enter = fadeIn() + slideInVertically {
+                                it
+                            },
+                            exit = fadeOut() + slideOutVertically {
+                                it
+                            }
+                        )
                 )
             }
         }
@@ -105,7 +117,8 @@ fun WalliesApp(
                 )
             }
         }
-    } }) {
+    }
+    }) {
         WalliesNavHost(
             appState = appState,
             modifier = modifier.padding(it),
