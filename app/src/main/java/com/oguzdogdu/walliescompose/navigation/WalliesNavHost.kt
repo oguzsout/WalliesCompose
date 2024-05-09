@@ -1,9 +1,10 @@
 package com.oguzdogdu.walliescompose.navigation
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,7 +31,6 @@ import com.oguzdogdu.walliescompose.features.detail.navigateToDetailScreen
 import com.oguzdogdu.walliescompose.features.favorites.favoritesScreen
 import com.oguzdogdu.walliescompose.features.home.HomeScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.home.homeScreen
-import com.oguzdogdu.walliescompose.features.home.navigateToHomeScreen
 import com.oguzdogdu.walliescompose.features.latest.latestScreen
 import com.oguzdogdu.walliescompose.features.latest.navigateToLatestScreen
 import com.oguzdogdu.walliescompose.features.login.LoginScreenNavigationRoute
@@ -203,7 +203,7 @@ fun WalliesNavHost(
                     }
                 )
                 topicsScreen(onBackClick = {
-                    navController.navigateToHomeScreen()
+                    navController.popBackStack()
                 }, onTopicClick = {
                     navController.navigateToTopicDetailListScreen(topicId = it)
                 })
@@ -224,7 +224,7 @@ fun WalliesNavHost(
                         navController.navigateToDetailScreen(photoId = it)
                     },
                     onBackClick = {
-                        navController.navigateToHomeScreen()
+                        navController.popBackStack()
                     })
                 latestScreen(
                     transitionScope = this@SharedTransitionLayout,
@@ -232,7 +232,7 @@ fun WalliesNavHost(
                         navController.navigateToDetailScreen(photoId = it)
                     },
                     onBackClick = {
-                        navController.navigateToHomeScreen()
+                        navController.popBackStack()
                     })
                 profileDetailScreen(onUserPhotoListClick = { id ->
                     navController.navigateToDetailScreen(photoId = id)

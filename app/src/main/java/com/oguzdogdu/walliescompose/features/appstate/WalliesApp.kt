@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -61,7 +62,7 @@ fun WalliesApp(
         coroutineScope = coroutineScope,
         networkMonitor = networkMonitor
     ),
-    isAuthenticated:Boolean,
+    isAuthenticated: Boolean,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val isOffline by appState.isOffline.collectAsStateWithLifecycle()
@@ -85,6 +86,7 @@ fun WalliesApp(
                     onNavigateToDestination = appState::navigateToTopLevelDestination,
                     currentDestination = appState.currentDestination,
                     modifier = modifier
+                        .renderInSharedTransitionScopeOverlay()
                         .animateEnterExit(
                             enter = fadeIn() + slideInVertically {
                                 it
@@ -96,28 +98,33 @@ fun WalliesApp(
                 )
             }
         }
-
-    },snackbarHost = { SnackbarHost(snackbarHostState) {
-        Snackbar(
-            modifier = modifier
-                .padding(8.dp)
-                .wrapContentSize(),
-            containerColor = MaterialTheme.colorScheme.background
-        ) {
-            Row(
-                modifier = modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+    }, snackbarHost = {
+        SnackbarHost(snackbarHostState) {
+            Snackbar(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .wrapContentSize(),
+                containerColor = MaterialTheme.colorScheme.background
             ) {
-                Icon(Icons.Filled.Warning, "", modifier.padding(horizontal = 8.dp), tint = Yellow)
-                Text(
-                    it.visuals.message,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontFamily = medium, fontSize = 12.sp, maxLines = 2,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        Icons.Filled.Warning,
+                        "",
+                        Modifier.padding(horizontal = 8.dp),
+                        tint = Yellow
+                    )
+                    Text(
+                        it.visuals.message,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontFamily = medium, fontSize = 12.sp, maxLines = 2,
+                    )
+                }
             }
         }
-    }
     }) {
         WalliesNavHost(
             appState = appState,
@@ -133,7 +140,7 @@ internal fun AppNavBar(
     destinations: List<TopLevelDestination>,
     onNavigateToDestination: (TopLevelDestination) -> Unit,
     currentDestination: NavDestination?,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
     NavigationBar(modifier = modifier) {
         destinations.forEach { destination ->

@@ -141,9 +141,9 @@ fun SharedTransitionScope.HomeScreenRoute(
             }
         }
     }) {paddingValues ->
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)) {
+            Column(modifier = modifier
+                .padding(paddingValues = paddingValues)
+                .fillMaxSize()) {
                 HomeScreenContent(
                     animatedVisibilityScope = animatedVisibilityScope,
                     homeUiState = homeUiState,
@@ -174,13 +174,13 @@ fun SharedTransitionScope.HomeScreenRoute(
 fun SharedTransitionScope.HomeScreenContent(
     animatedVisibilityScope: AnimatedVisibilityScope,
     homeUiState: HomeScreenState,
-    modifier: Modifier,
     onTopicSeeAllClick: () -> Unit,
     onPopularSeeAllClick: () -> Unit,
     onLatestSeeAllClick: () -> Unit,
     onTopicDetailListClick: (String?) -> Unit,
     onPopularClick: (String) -> Unit,
-    onLatestClick: (String) -> Unit
+    onLatestClick: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
 
     LazyColumn(
@@ -444,8 +444,6 @@ private fun SharedTransitionScope.PopularImageView(
                 .sharedBounds(
                     sharedContentState = rememberSharedContentState(key = "popularImage-${id}"),
                     animatedVisibilityScope = animatedVisibilityScope,
-                    enter = scaleInSharedContentToBounds(),
-                    exit = scaleOutSharedContentToBounds(),
                     placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
                 )
                 .width(160.dp)
@@ -473,8 +471,6 @@ private fun SharedTransitionScope.LatestImageView(
             .sharedBounds(
                 sharedContentState = rememberSharedContentState(key = "popularImage-${id}"),
                 animatedVisibilityScope = animatedVisibilityScope,
-                enter = scaleInSharedContentToBounds(),
-                exit = scaleOutSharedContentToBounds(),
             )
             .width(160.dp)
             .height(240.dp)
