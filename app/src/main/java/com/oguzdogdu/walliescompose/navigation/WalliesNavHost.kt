@@ -2,9 +2,6 @@ package com.oguzdogdu.walliescompose.navigation
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -57,6 +54,7 @@ import com.oguzdogdu.walliescompose.features.topics.topicdetaillist.topicDetailL
 import com.oguzdogdu.walliescompose.features.topics.topicsScreen
 import com.oguzdogdu.walliescompose.navigation.utils.NavigationConstants.AUTH
 import com.oguzdogdu.walliescompose.navigation.utils.NavigationConstants.CONTENT
+
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -167,7 +165,7 @@ fun WalliesNavHost(
                         navController.navigateToLatestScreen()
                     },
                     navigateBack = {
-                        appState.onBackPress()
+                        navController.popBackStack()
                     },
                     onUserPhotoClick = {
                         navController.navigateToAuthenticatedUserScreen()
@@ -176,11 +174,11 @@ fun WalliesNavHost(
                 collectionScreen(
                     transitionScope = this@SharedTransitionLayout,
                     onCollectionClick = {id,title ->
-                    navController.navigateToCollectionDetailListScreen(
-                        collectionDetailListId = id,
-                        collectionDetailListTitle = title
-                    )
-                })
+                        navController.navigateToCollectionDetailListScreen(
+                            collectionDetailListId = id,
+                            collectionDetailListTitle = title
+                        )
+                    })
                 favoritesScreen(onFavoriteClick = {
                     navController.navigateToDetailScreen(photoId = it)
                 })
@@ -215,10 +213,10 @@ fun WalliesNavHost(
                 collectionDetailListScreen(
                     transitionScope = this@SharedTransitionLayout,
                     onCollectionClick = {
-                    navController.navigateToDetailScreen(photoId = it)
-                }, onBackClick = {
-                    navController.popBackStack()
-                })
+                        navController.navigateToDetailScreen(photoId = it)
+                    }, onBackClick = {
+                        navController.popBackStack()
+                    })
                 popularScreen(
                     transitionScope = this@SharedTransitionLayout, onPopularClick = {
                         navController.navigateToDetailScreen(photoId = it)
@@ -249,19 +247,19 @@ fun WalliesNavHost(
                     transitionScope = this@SharedTransitionLayout,
                     navigateBack = {
                         navController.popBackStack()
-                }, navigateToLogin = {
-                    navController.navigate(AUTH) {
-                        popUpTo(CONTENT){
-                            inclusive = true
+                    }, navigateToLogin = {
+                        navController.navigate(AUTH) {
+                            popUpTo(CONTENT){
+                                inclusive = true
+                            }
                         }
-                    }
-                }, navigateToChangeNameAndSurname = {
-                    navController.navigateToChangeNameAndASurnameScreen()
-                }, navigateToChangePassword = {
-                    navController.navigateToChangePasswordScreen()
-                }, navigateToChangeEmail = {
-                    navController.navigateToChangeEmailScreen()
-                })
+                    }, navigateToChangeNameAndSurname = {
+                        navController.navigateToChangeNameAndASurnameScreen()
+                    }, navigateToChangePassword = {
+                        navController.navigateToChangePasswordScreen()
+                    }, navigateToChangeEmail = {
+                        navController.navigateToChangeEmailScreen()
+                    })
                 changeNameAndSurnameScreen(navigateBack = {
                     navController.popBackStack()
                 })

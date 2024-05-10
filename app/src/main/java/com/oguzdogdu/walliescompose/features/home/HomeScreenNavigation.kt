@@ -2,6 +2,7 @@ package com.oguzdogdu.walliescompose.features.home
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
@@ -31,11 +32,13 @@ fun NavGraphBuilder.homeScreen(
     composable(
         HomeScreenNavigationRoute
     ) {
+        val viewModel : HomeViewModel = hiltViewModel()
         transitionScope.HomeScreenRoute(
             animatedVisibilityScope = this,
             onTopicSeeAllClick = {
             onTopicSeeAllClick.invoke()
         },
+            viewModel = viewModel,
             onTopicDetailListClick = {
                 onTopicDetailListClick.invoke(it)
             }, onPopularClick = {

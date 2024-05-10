@@ -3,7 +3,6 @@ package com.oguzdogdu.walliescompose.features.home
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,17 +47,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
+import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
+import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
 import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
-import com.oguzdogdu.walliescompose.features.home.state.HomeScreenState
+import com.oguzdogdu.walliescompose.features.home.state.HomeUIState
 import com.oguzdogdu.walliescompose.navigation.utils.WalliesIcons
 import com.oguzdogdu.walliescompose.ui.theme.medium
 
@@ -66,7 +70,7 @@ import com.oguzdogdu.walliescompose.ui.theme.medium
 fun SharedTransitionScope.HomeScreenRoute(
     modifier: Modifier = Modifier,
     animatedVisibilityScope: AnimatedVisibilityScope,
-    viewModel: HomeViewModel = hiltViewModel(),
+    viewModel: HomeViewModel,
     onTopicSeeAllClick: () -> Unit,
     onPopularSeeAllClick: () -> Unit,
     onLatestSeeAllClick: () -> Unit,
@@ -77,7 +81,7 @@ fun SharedTransitionScope.HomeScreenRoute(
     onUserPhotoClick: () -> Unit,
     navigateBack:() -> Unit
 ) {
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val homeUiState by viewModel.homeListState.collectAsStateWithLifecycle()
     val authUserProfileImage by viewModel.userProfileImage.collectAsStateWithLifecycle()
 
@@ -173,60 +177,73 @@ fun SharedTransitionScope.HomeScreenRoute(
 @Composable
 fun SharedTransitionScope.HomeScreenContent(
     animatedVisibilityScope: AnimatedVisibilityScope,
-    homeUiState: HomeScreenState,
+    homeUiState: HomeUIState,
+    modifier: Modifier = Modifier,
     onTopicSeeAllClick: () -> Unit,
     onPopularSeeAllClick: () -> Unit,
     onLatestSeeAllClick: () -> Unit,
     onTopicDetailListClick: (String?) -> Unit,
     onPopularClick: (String) -> Unit,
-    onLatestClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    onLatestClick: (String) -> Unit
 ) {
+    Box(modifier = modifier.fillMaxSize()) {
+        when (homeUiState) {
+            is HomeUIState.Loading -> {}
 
-    LazyColumn(
-        state = rememberLazyListState(),
-        modifier = modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+            is HomeUIState.Error -> {}
 
-        item {
-            TopicLayoutContainer(
-                modifier = modifier,
-                homeScreenState = homeUiState,
-                onTopicDetailListClick = {
-                    onTopicDetailListClick.invoke(it)
-                },
-                onTopicSeeAllClick = {
-                    onTopicSeeAllClick.invoke()
-                })
-        }
+            is HomeUIState.Success -> {
+                LazyColumn(
+                    state = rememberLazyListState(),
+                    modifier = modifier
+                        .padding(8.dp)
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
 
-        item {
-            PopularLayoutContainer(animatedVisibilityScope = animatedVisibilityScope,
-                homeScreenState = homeUiState,
-                onPopularClick = { id ->
-                    onPopularClick.invoke(id)
-                },
-                onPopularSeeAllClick = {
-                    onPopularSeeAllClick.invoke()
-                })
-        }
+                    item(key = "topicContainer") {
+                        TopicLayoutContainer(
+                            modifier = modifier,
+                            topicsList = homeUiState.topics,
+                            onTopicDetailListClick = {
+                                onTopicDetailListClick.invoke(it)
+                            },
+                            onTopicSeeAllClick = {
+                                onTopicSeeAllClick.invoke()
+                            })
+                    }
+                    item(key = "popularContainer") {
+                        PopularLayoutContainer(animatedVisibilityScope = animatedVisibilityScope,
+                            popularList = homeUiState.popular,
+                            onPopularClick = { id ->
+                                onPopularClick.invoke(id)
+                            },
+                            onPopularSeeAllClick = {
+                                onPopularSeeAllClick.invoke()
+                            })
+                    }
 
-        item {
-            LatestLayoutContainer(animatedVisibilityScope = animatedVisibilityScope,
-                homeScreenState = homeUiState,
-                onLatestClick = { id -> onLatestClick.invoke(id) },
-                onLatestSeeAllClick = { onLatestSeeAllClick.invoke() })
+                    item(key = "latestContainer") {
+                        LatestLayoutContainer(animatedVisibilityScope = animatedVisibilityScope,
+                            latestList = homeUiState.latest,
+                            onLatestClick = { id -> onLatestClick.invoke(id) },
+                            onLatestSeeAllClick = { onLatestSeeAllClick.invoke() })
 
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreenState,onTopicDetailListClick: (String?) -> Unit,onTopicSeeAllClick: () -> Unit) {
+private fun TopicLayoutContainer(
+    modifier: Modifier,
+    topicsList: List<Topics>,
+    onTopicDetailListClick: (String?) -> Unit,
+    onTopicSeeAllClick: () -> Unit
+) {
     Column(
         modifier = modifier
             .wrapContentSize()
@@ -261,7 +278,7 @@ private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreen
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            itemsIndexed(homeScreenState.topics, key = { index: Int, item: Topics ->
+            itemsIndexed(topicsList, key = { index: Int, item: Topics ->
                 item.id.hashCode()
             }) { index, item ->
                 TopicTitleView(imageUrl = item.titleBackground, title = item.title, imageName = item.title, onTopicDetailListClick = {
@@ -278,7 +295,7 @@ private fun TopicLayoutContainer(modifier: Modifier, homeScreenState: HomeScreen
 private fun SharedTransitionScope.PopularLayoutContainer(
     animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier,
-    homeScreenState: HomeScreenState,
+    popularList: List<PopularImage>,
     onPopularClick: (String) -> Unit,
     onPopularSeeAllClick: () -> Unit
 ) {
@@ -314,7 +331,7 @@ private fun SharedTransitionScope.PopularLayoutContainer(
         LazyRow(modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight(),horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
-            items(homeScreenState.popular, key = {
+            items(popularList, key = {
                 it.id.hashCode()
             }) { popularImage ->
                 PopularImageView(
@@ -336,7 +353,7 @@ private fun SharedTransitionScope.PopularLayoutContainer(
 private fun SharedTransitionScope.LatestLayoutContainer(
     animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier,
-    homeScreenState: HomeScreenState,
+    latestList: List<LatestImage>,
     onLatestClick: (String) -> Unit,
     onLatestSeeAllClick: () -> Unit
 ) {
@@ -372,7 +389,7 @@ private fun SharedTransitionScope.LatestLayoutContainer(
         LazyRow(modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight(),horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
-            items(homeScreenState.latest, key = {
+            items(latestList, key = {
                 it.id.hashCode()
             }) { latestImage ->
                 LatestImageView(
@@ -478,4 +495,20 @@ private fun SharedTransitionScope.LatestImageView(
             .clickable { onLatestClick.invoke(id.orEmpty()) },
         loading = { ImageLoadingState() },
     )
+}
+
+@Composable
+fun ComposableLifecycle(
+    lifeCycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    onEvent: (LifecycleOwner, Lifecycle.Event) -> Unit
+) {
+    DisposableEffect(lifeCycleOwner) {
+        val observer = LifecycleEventObserver { source, event ->
+            onEvent(source, event)
+        }
+        lifeCycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifeCycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 }
