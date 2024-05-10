@@ -77,6 +77,7 @@ fun SharedTransitionScope.LatestScreenRoute(
         viewModel.handleUIEvent(LatestScreenEvent.FetchLatestData)
 
     }
+
     Scaffold(modifier = modifier
         .fillMaxSize()
         .background(Color.Magenta), topBar = {

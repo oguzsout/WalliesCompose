@@ -3,7 +3,9 @@ package com.oguzdogdu.walliescompose.features.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oguzdogdu.walliescompose.WalliesApplication
+import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
+import com.oguzdogdu.walliescompose.domain.model.topics.Topics
 import com.oguzdogdu.walliescompose.domain.repository.UserAuthenticationRepository
 import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.onFailure
@@ -11,6 +13,7 @@ import com.oguzdogdu.walliescompose.domain.wrapper.onLoading
 import com.oguzdogdu.walliescompose.domain.wrapper.onSuccess
 import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
 import com.oguzdogdu.walliescompose.features.home.state.HomeScreenState
+import com.oguzdogdu.walliescompose.features.home.state.HomeUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -29,7 +32,11 @@ class HomeViewModel @Inject constructor(
     private val authenticationRepository: UserAuthenticationRepository,
     private val application: WalliesApplication
 ) : ViewModel() {
-    private val _homeListState = MutableStateFlow(HomeScreenState())
+
+    private var topicsList: List<Topics> = emptyList()
+    private var popularList: List<PopularImage> = emptyList()
+    private var latestList: List<LatestImage> = emptyList()
+    private val _homeListState = MutableStateFlow<HomeUIState>(HomeUIState.Loading())
     val homeListState = _homeListState.asStateFlow()
 
     private val _userProfileImage = MutableStateFlow<String?>("")
@@ -48,37 +55,43 @@ class HomeViewModel @Inject constructor(
     }
     private fun fetchHomeScreenData() {
         viewModelScope.launch {
-            combine(
+            val results = combine(
                 repository.getHomeTopicsImages(),
                 repository.getHomeImagesByPopulars(),
                 repository.getHomeImagesByLatest()
-            ) { topicsResult, popularsResult, latestResult ->
+            ) { topics, populars, latest ->
 
-                topicsResult.onSuccess { topics ->
-                    _homeListState.update { it.copy(loading = false, topics = topics.orEmpty()) }
+                topics.onSuccess {
+                    topicsList = it.orEmpty()
                 }
-                popularsResult.onSuccess { populars ->
-                    _homeListState.update { it.copy(loading = false, popular = populars.orEmpty()) }
+                populars.onSuccess {
+                    popularList = it.orEmpty()
                 }
-                latestResult.onSuccess { latest ->
-                    _homeListState.update { it.copy(loading = false, latest = latest.orEmpty()) }
+                latest.onSuccess {
+                    latestList = it.orEmpty()
+                }
+                Triple(topicsList, popularList, latestList)
+            }
+
+            results.collect { (topics, populars, latest) ->
+                val combinedData = HomeUIState.Success(
+                    topics = topics,
+                    popular = populars,
+                    latest = latest
+                )
+                populars.take(10).map {
+                    application.imagesList.add(it.url)
                 }
 
-                topicsResult.onFailure { error ->
-                    _homeListState.update { it.copy(loading = false, error = error) }
+                if (combinedData.isEmpty()) {
+                    _homeListState.update { HomeUIState.Error("No data found") }
+                } else {
+                    _homeListState.update { combinedData }
                 }
-                popularsResult.onFailure { error ->
-                    _homeListState.update { it.copy(loading = false, error = error) }
-                }
-                latestResult.onFailure { error ->
-                    _homeListState.update { it.copy(loading = false, error = error) }
-                }
-            }.collect()
-            _homeListState.value.popular.take(10).map {
-                application.imagesList.add(it.url)
             }
         }
     }
+
     private fun checkUserAuthState() {
         viewModelScope.launch {
             combine(
