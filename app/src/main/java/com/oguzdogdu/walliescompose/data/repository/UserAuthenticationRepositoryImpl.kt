@@ -49,28 +49,36 @@ class UserAuthenticationRepositoryImpl @Inject constructor(
     override suspend fun signUp(
         user: com.oguzdogdu.walliescompose.domain.model.auth.User?,
         password: String?
-    ): Flow<Resource<com.oguzdogdu.walliescompose.domain.model.auth.User?>> {
-        user?.email?.let { auth.createUserWithEmailAndPassword(it, password.orEmpty()).await() }
-        val userModel = hashMapOf(
-            ID to auth.currentUser?.uid,
-            EMAIL to user?.email,
-            NAME to user?.name,
-            SURNAME to user?.surname,
-            IMAGE to user?.image,
-            FAVORITES to user?.favorites
-        )
-        auth.currentUser?.uid?.let {
-            firebaseFirestore.collection(COLLECTION_PATH).document(it)
-                .set(userModel)
-        }?.await()
-        val result = User(
-            name = userModel.get(key = NAME).toString(),
-            surname = userModel.get(key = SURNAME).toString(),
-            email = userModel.get(key = EMAIL).toString(),
-            image = userModel.get(key = IMAGE).toString(),
-            favorites = userModel.get(key = FAVORITES) as? List<HashMap<String, String>>
-        )
-        return flowOf(result.toUserDomain()).toResource()
+    ): Flow<Resource<com.oguzdogdu.walliescompose.domain.model.auth.User?>> = flow {
+        val result = runCatching {
+            val authResult = auth.createUserWithEmailAndPassword(user?.email.orEmpty(), password.orEmpty()).await()
+            if (authResult.user != null) {
+                val userModel = hashMapOf(
+                    ID to authResult.user?.uid,
+                    EMAIL to user?.email,
+                    NAME to user?.name,
+                    SURNAME to user?.surname,
+                    IMAGE to user?.image,
+                    FAVORITES to user?.favorites
+                )
+
+                firebaseFirestore.collection(COLLECTION_PATH).document(authResult.user?.uid ?: "")
+                    .set(userModel).await()
+
+                val result = User(
+                    name = userModel.get(key = NAME).toString(),
+                    surname = userModel.get(key = SURNAME).toString(),
+                    email = userModel.get(key = EMAIL).toString(),
+                    image = userModel.get(key = IMAGE).toString(),
+                    favorites = userModel.get(key = FAVORITES) as? List<HashMap<String, String>>
+                )
+                Resource.Success(result.toUserDomain())
+            } else {
+                Resource.Error("User creation failed")
+            }
+        }
+        result.onSuccess { emit(it) }
+        result.onFailure { emit(Resource.Error(it.message.toString())) }
     }
 
     override suspend fun signInWithGoogle(idToken: String?): Flow<Resource<AuthResult>> {
@@ -89,7 +97,7 @@ class UserAuthenticationRepositoryImpl @Inject constructor(
                         .set(userModel)
                 }
             }
-        }.await()) .toResource()
+        }.await()).toResource()
     }
 
     override suspend fun fetchUserInfos(): Flow<Resource<com.oguzdogdu.walliescompose.domain.model.auth.User?>> {

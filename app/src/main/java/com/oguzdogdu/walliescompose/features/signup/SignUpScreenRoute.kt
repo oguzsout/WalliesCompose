@@ -60,6 +60,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -71,6 +72,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.oguzdogdu.walliescompose.R
@@ -273,13 +275,9 @@ fun SignUpScreenContent(
                     ruleSetVisible = false
                 }
 
-                SignUpSteps.SIGN_UP_STATUS -> {
-                    ResultScreen(successSignUpText = stringResource(R.string.successfull_registration_message_text))
-                }
+                SignUpSteps.SIGN_UP_STATUS -> { ResultScreen(uiState = signUpUIState) }
 
-                null -> {
-
-                }
+                null -> {}
             }
             Button(
                 onClick = {
@@ -543,7 +541,26 @@ fun PasswordRuleSet(
 }
 
 @Composable
-fun ResultScreen(successSignUpText: String?, modifier: Modifier = Modifier) {
+fun ResultScreen(uiState: SignUpUIState,modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    var resultMessage by remember {
+        mutableStateOf("")
+    }
+    var resultAnimation by remember {
+        mutableStateOf(0)
+    }
+    LaunchedEffect(uiState.isSignUp) {
+        when (uiState.isSignUp and uiState.errorMessage.isNullOrEmpty()) {
+            true -> {
+                resultMessage = context.getString(R.string.successfull_registration_message_text)
+                resultAnimation = R.raw.success_animation
+            }
+            false -> {
+                resultMessage = uiState.errorMessage.orEmpty()
+                resultAnimation = R.raw.error_animation
+            }
+        }
+    }
     Box(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = modifier
@@ -553,10 +570,12 @@ fun ResultScreen(successSignUpText: String?, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center
         ) {
 
-            SuccessResultAnimation(modifier = modifier.size(width = 180.dp, height = 180.dp))
+            ResultAnimationScreen(animationResource = resultAnimation,
+                modifier = modifier.size(180.dp)
+            )
             Spacer(modifier = modifier.size(8.dp))
             Text(
-                text = successSignUpText.orEmpty(),
+                text = resultMessage,
                 fontSize = 16.sp,
                 fontFamily = regular,
                 textAlign = TextAlign.Center
@@ -566,16 +585,16 @@ fun ResultScreen(successSignUpText: String?, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun SuccessResultAnimation(modifier: Modifier) {
+fun ResultAnimationScreen(animationResource: Int, modifier: Modifier) {
     val preloaderLottieComposition by rememberLottieComposition(
         LottieCompositionSpec.RawRes(
-            R.raw.success_animation
+            animationResource
         )
     )
 
     val preloaderProgress by animateLottieCompositionAsState(
         preloaderLottieComposition,
-        iterations = 1,
+        iterations = LottieConstants.IterateForever,
         isPlaying = true
     )
 
@@ -585,8 +604,4 @@ fun SuccessResultAnimation(modifier: Modifier) {
         progress = preloaderProgress,
         modifier = modifier
     )
-}
-enum class TypeOfResult {
-    SUCCESS,
-    ERROR
 }
