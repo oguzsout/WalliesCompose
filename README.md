@@ -9,6 +9,10 @@ In this application consisting of multiple screens, you can review popular and r
 
 You can switch to the `develop` branch to get the latest changes build.
 
+
+## 📸 Screenshots
+![Group 1](https://github.com/oguzsout/WalliesCompose/assets/73955284/f5b53358-f147-483f-8ab7-ea8d5189cde3)
+
 # 🏭 Tech Stacks
 This project uses many of the popular libraries, plugins and tools of the android ecosystem.
 - [Clean Architecture](https://developer.android.com/topic/architecture) - Clean architecture is a method of software development in which you should be able to identify what a program performs merely by looking at its source code.
