@@ -13,10 +13,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -24,6 +22,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -260,7 +259,9 @@ fun SharedTransitionScope.DetailScreenRoute(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalFoundationApi::class,
+    ExperimentalMaterial3Api::class
+)
 @Composable
 fun SharedTransitionScope.DetailScreenContent(
     animatedVisibilityScope: AnimatedVisibilityScope,
@@ -324,7 +325,7 @@ fun SharedTransitionScope.DetailScreenContent(
             onAddFavoriteClick = { photo -> onAddFavoriteButtonClick.invoke(photo) },
             onRemoveFavoriteClick = { photo -> onRemoveFavoriteButtonClick.invoke(photo) },
             onTagClick = { tag -> onTagButtonClick.invoke(tag) })
-        DownloadImageBottomSheet(modifier = modifier,
+        DownloadImageBottomSheet(
             isOpen = stateOfDownloadBottomSheet,
             onDismiss = { onDownloadBottomSheetDismiss.invoke(false) },
             onRawButtonClick = { onRawButtonClick.invoke(TypeOfPhotoQuality.RAW) },
@@ -332,7 +333,6 @@ fun SharedTransitionScope.DetailScreenContent(
             onMediumButtonClick = { onMediumButtonClick.invoke(TypeOfPhotoQuality.MEDIUM) },
             onLowButtonClick = { onLowButtonClick.invoke(TypeOfPhotoQuality.LOW) })
         SetWallpaperImageBottomSheet(
-            modifier = modifier,
             isOpen = stateOfSetWallpaperBottomSheet,
             onDismiss = { onSetWallpaperBottomSheetDismiss.invoke(false) },
             onSetLockButtonClick = { onSetLockButtonClick.invoke(TypeOfSetWallpaper.LOCK) },
