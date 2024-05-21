@@ -1,4 +1,4 @@
-package com.oguzdogdu.walliescompose.features.downloadimage
+package com.oguzdogdu.walliescompose.features.setwallpaper
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -47,14 +46,13 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DownloadImageBottomSheet(
-    modifier: Modifier,
+fun SetWallpaperImageBottomSheet(
+    modifier: Modifier = Modifier,
     isOpen: Boolean,
     onDismiss: () -> Unit,
-    onRawButtonClick: () -> Unit,
-    onFullButtonClick: () -> Unit,
-    onMediumButtonClick: () -> Unit,
-    onLowButtonClick: () -> Unit,
+    onSetLockButtonClick: () -> Unit,
+    onSetHomeButtonClick: () -> Unit,
+    onSetHomeAndLockButtonClick: () -> Unit
 ) {
     var openBottomSheet by remember { mutableStateOf(isOpen) }
     val bottomSheetState = rememberModalBottomSheetState()
@@ -63,13 +61,11 @@ fun DownloadImageBottomSheet(
     LaunchedEffect(key1 = isOpen) {
         openBottomSheet = isOpen
     }
-
     if (openBottomSheet) {
 
         ModalBottomSheet(
-            modifier = modifier,
+            modifier = modifier.navigationBarsPadding(),
             sheetState = bottomSheetState,
-            windowInsets = WindowInsets(0, 0, 0, 0),
             onDismissRequest = {
                 scope.launch { bottomSheetState.hide() }
                     .invokeOnCompletion { openBottomSheet = false }
@@ -84,12 +80,12 @@ fun DownloadImageBottomSheet(
                 ) {
                     BottomSheetDefaults.DragHandle()
                     Icon(
-                        painter = painterResource(id = R.drawable.download),
+                        painter = painterResource(id = R.drawable.wallpaper),
                         contentDescription = ""
                     )
                     Spacer(modifier = modifier.size(8.dp))
                     Text(
-                        text = stringResource(id = R.string.download_photo_desc_text),
+                        text = stringResource(id = R.string.set_wallpaper_desc_text),
                         fontSize = 14.sp,
                         fontFamily = medium,
                         color = Color.Unspecified,
@@ -108,17 +104,15 @@ fun DownloadImageBottomSheet(
                     .wrapContentHeight(),
             ) {
                 BottomSheetContent(modifier.navigationBarsPadding(),
-                    onRawButtonClick = {
-                    onRawButtonClick.invoke()
+                    onSetLockButtonClick = {
+                    onSetLockButtonClick.invoke()
                 },
-                    onFullButtonClick = {
-                    onFullButtonClick.invoke()
+                    onSetHomeButtonClick = {
+                    onSetHomeButtonClick.invoke()
                 },
-                    onMediumButtonClick = {
-                    onMediumButtonClick.invoke()
-                }, onLowButtonClick = {
-                        onLowButtonClick.invoke()
-                    })
+                    onSetHomeAndLockButtonClick = {
+                    onSetHomeAndLockButtonClick.invoke()
+                })
             }
         }
     }
@@ -128,10 +122,9 @@ fun DownloadImageBottomSheet(
 @Composable
 fun BottomSheetContent(
     modifier: Modifier,
-    onRawButtonClick: () -> Unit,
-    onFullButtonClick: () -> Unit,
-    onMediumButtonClick: () -> Unit,
-    onLowButtonClick: () -> Unit,
+    onSetLockButtonClick: () -> Unit,
+    onSetHomeButtonClick: () -> Unit,
+    onSetHomeAndLockButtonClick: () -> Unit,
 ) {
     BoxWithConstraints(
         modifier
@@ -148,7 +141,7 @@ fun BottomSheetContent(
         ) {
             Button(
                 onClick = {
-                    onRawButtonClick.invoke()
+                    onSetLockButtonClick.invoke()
                 },
                 modifier = modifier
                     .fillMaxWidth()
@@ -160,7 +153,7 @@ fun BottomSheetContent(
                 contentPadding = PaddingValues(16.dp)
             ) {
                 Text(
-                    text = stringResource(id = R.string.raw_very_high_quality_text),
+                    text = stringResource(id = R.string.set_to_lock_screen_text),
                     fontSize = 14.sp,
                     fontFamily = medium,
                     color = Color.Black
@@ -169,7 +162,7 @@ fun BottomSheetContent(
             Spacer(modifier = modifier.size(8.dp))
             Button(
                 onClick = {
-                    onFullButtonClick.invoke()
+                    onSetHomeButtonClick.invoke()
                 },
                 modifier = modifier
                     .fillMaxWidth()
@@ -181,7 +174,7 @@ fun BottomSheetContent(
                 contentPadding = PaddingValues(16.dp)
             ) {
                 Text(
-                    text = stringResource(id = R.string.full_high_quality_text),
+                    text = stringResource(id = R.string.set_to_home_screen_text),
                     fontSize = 14.sp,
                     fontFamily = medium,
                     color = Color.Black
@@ -190,7 +183,7 @@ fun BottomSheetContent(
             Spacer(modifier = modifier.size(8.dp))
             Button(
                 onClick = {
-                    onMediumButtonClick.invoke()
+                    onSetHomeAndLockButtonClick.invoke()
                 },
                 modifier = modifier
                     .fillMaxWidth()
@@ -202,28 +195,7 @@ fun BottomSheetContent(
                 contentPadding = PaddingValues(16.dp)
             ) {
                 Text(
-                    text = stringResource(id = R.string.medium_quality_text),
-                    fontSize = 14.sp,
-                    fontFamily = medium,
-                    color = Color.Black
-                )
-            }
-            Spacer(modifier = modifier.size(8.dp))
-            Button(
-                onClick = {
-                    onLowButtonClick.invoke()
-                },
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                ),
-                shape = RoundedCornerShape(16.dp),
-                contentPadding = PaddingValues(16.dp)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.low_quality_text),
+                    text = stringResource(id = R.string.set_to_home_amp_lockscreens_text),
                     fontSize = 14.sp,
                     fontFamily = medium,
                     color = Color.Black
