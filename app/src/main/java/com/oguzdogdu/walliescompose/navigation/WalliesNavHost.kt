@@ -187,7 +187,10 @@ fun WalliesNavHost(
                     navController.popBackStack()
                 }, searchPhotoClick = {
                     navController.navigateToDetailScreen(photoId = it)
-                })
+                }, searchUserClick = {
+                    navController.navigateToProfileDetailScreen(username = it)
+                }
+                    )
                 detailScreen(
                     transitionScope = this@SharedTransitionLayout,
                     onBackClick = {

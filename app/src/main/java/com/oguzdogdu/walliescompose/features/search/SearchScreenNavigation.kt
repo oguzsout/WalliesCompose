@@ -17,7 +17,11 @@ fun NavController.navigateToSearchScreen(
     this.navigate("$SearchScreenNavigationRoute/$queryFromDetail", navOptions)
 }
 
-fun NavGraphBuilder.searchScreen(onBackClick: () -> Unit,searchPhotoClick: (String) -> Unit) {
+fun NavGraphBuilder.searchScreen(
+    onBackClick: () -> Unit,
+    searchPhotoClick: (String) -> Unit,
+    searchUserClick: (String) -> Unit
+) {
     composable(
         "$SearchScreenNavigationRoute/{queryFromDetail}",
         arguments = listOf(
@@ -33,6 +37,8 @@ fun NavGraphBuilder.searchScreen(onBackClick: () -> Unit,searchPhotoClick: (Stri
             onBackClick.invoke()
         }, searchPhotoClick = {id ->
             searchPhotoClick.invoke(id)
-        }, queryFromDetail = queryFromDetail.orEmpty())
+        }, searchUserClick = {id ->
+            searchUserClick.invoke(id)
+        },queryFromDetail = queryFromDetail.orEmpty())
     }
 }
