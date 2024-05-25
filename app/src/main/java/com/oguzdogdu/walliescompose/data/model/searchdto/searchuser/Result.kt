@@ -1,6 +1,7 @@
 package com.oguzdogdu.walliescompose.data.model.searchdto.searchuser
 
 import android.os.Parcelable
+import com.oguzdogdu.walliescompose.domain.model.search.searchuser.SearchUser
 
 @kotlinx.parcelize.Parcelize
 data class Result(
@@ -27,3 +28,6 @@ data class Result(
     val updated_at: String,
     val username: String
 ):Parcelable
+fun Result.toSearchUser() = SearchUser(
+    id = id, username = username, profileImage = profile_image.medium, name = name
+)
