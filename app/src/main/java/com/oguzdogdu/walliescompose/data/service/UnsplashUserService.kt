@@ -3,6 +3,7 @@ package com.oguzdogdu.walliescompose.data.service
 import com.oguzdogdu.walliescompose.data.model.userdetail.UserDetailResponse
 import com.oguzdogdu.walliescompose.data.model.collection.CollectionResponse
 import com.oguzdogdu.walliescompose.data.model.maindto.Photo
+import com.oguzdogdu.walliescompose.data.model.searchdto.searchuser.SearchUsersResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -24,4 +25,10 @@ interface UnsplashUserService {
     suspend fun getUserCollections(
         @Path("username") username: String?,
     ): Response<List<CollectionResponse>>
+
+    @GET("search/users")
+    suspend fun getSearchUserData(
+        @Query("page") page: Int?,
+        @Query("query") query: String,
+    ): Response<SearchUsersResponse>
 }

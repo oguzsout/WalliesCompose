@@ -20,7 +20,9 @@ import com.oguzdogdu.walliescompose.ui.theme.regular
 @Composable
 fun EmptyView(modifier: Modifier) {
     Column(
-        modifier = modifier.fillMaxSize().padding(8.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -29,6 +31,27 @@ fun EmptyView(modifier: Modifier) {
         Spacer(modifier = modifier.size(8.dp))
         Text(
             text = stringResource(R.string.search_desc),
+            fontSize = 16.sp,
+            fontFamily = regular,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun EmptySearchUserListView(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        SearchUserAnimation(modifier = modifier.size(width = 120.dp, height = 120.dp))
+        Spacer(modifier = modifier.size(8.dp))
+        Text(
+            text = stringResource(R.string.user_search_desc),
             fontSize = 16.sp,
             fontFamily = regular,
             textAlign = TextAlign.Center
