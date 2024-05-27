@@ -1,24 +1,10 @@
 package com.oguzdogdu.walliescompose.features.search
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.EaseInBounce
-import androidx.compose.animation.core.EaseInCirc
-import androidx.compose.animation.core.EaseInElastic
-import androidx.compose.animation.core.EaseOutBounce
-import androidx.compose.animation.core.EaseOutElastic
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -78,6 +64,7 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
@@ -206,26 +193,36 @@ fun SearchScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
+        val rotation by animateFloatAsState(
+            targetValue = if (listPositionForVisibility) 0f else 90f,
+            animationSpec = tween(1000),
+            label = ""
+        )
         AnimatedVisibility(
             visible = listPositionForVisibility,
-            enter = slideInVertically() + expandVertically(
-                spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMediumLow
-            )),
-            exit = slideOutVertically() + shrinkVertically(
-                spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessMediumLow
+            enter = expandVertically(
+                tween(1000)
+            ),
+            exit = shrinkVertically(
+                animationSpec = tween(1000)
+            )
+            )
+         {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer {
+                        rotationX = rotation
+                        cameraDistance = 12 * density
+                    }
+            ) {
+                SearchTextField(
+                    query = query,
+                    onBackClick = { onBackClick.invoke() },
+                    onQuerySearch = { onQuerySearch.invoke(it) },
+                    queryFromDetail = queryFromDetail
                 )
-            )
-        ) {
-            SearchTextField(
-                query = query,
-                onBackClick = { onBackClick.invoke() },
-                onQuerySearch = { onQuerySearch.invoke(it) },
-                queryFromDetail = queryFromDetail
-            )
+            }
         }
 
         TabPagerSearchScreen(searchLazyPagingItems = searchLazyPagingItems,
@@ -298,7 +295,11 @@ fun TabPagerSearchScreen(
             modifier = Modifier
                 .padding(8.dp)
                 .wrapContentHeight()
-                .border(1.dp, color = MaterialTheme.colorScheme.surfaceVariant,RoundedCornerShape(64.dp))
+                .border(
+                    1.dp,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    RoundedCornerShape(64.dp)
+                )
                 .clip(RoundedCornerShape(64.dp)),
             divider = {},
             indicator = {}
