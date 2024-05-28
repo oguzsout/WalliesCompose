@@ -599,7 +599,7 @@ fun SearchTextField(
                 onQuerySearch.invoke(queryString.orEmpty())
                 keyboardController?.hide()
             }),
-            shape = ShapeDefaults.Medium,
+            shape = RoundedCornerShape(64.dp),
             colors = TextFieldDefaults.colors(
                 focusedTextColor = MaterialTheme.colorScheme.onBackground,
                 disabledTextColor = Color.Transparent,

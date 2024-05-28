@@ -2,6 +2,7 @@
 accompanist-permissions = "0.35.0-alpha"
 accompanist-swiperefresh = "0.34.0"
 agp = "8.2.2"
+kotlin = "2.0.0"
 balloon-compose = "1.6.4"
 datastore-preferences = "1.0.0"
 firebase-bom = "32.7.4"
@@ -11,7 +12,6 @@ glance-appwidget = "1.0.0"
 gson = "2.10.1"
 hilt-android = "2.50"
 hilt-work = "1.2.0"
-kotlin = "1.9.22"
 core-ktx = "1.12.0"
 junit = "4.13.2"
 lottie-compose = "4.0.0"
@@ -97,6 +97,7 @@ firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigation-testing" }
 
 [plugins]
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 
