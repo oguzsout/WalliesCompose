@@ -2,24 +2,26 @@ package com.oguzdogdu.walliescompose.features.signup
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
+import kotlinx.serialization.Serializable
 
-const val SignUpScreenNavigationRoute = "sign_up_screen_route"
+@Serializable
+data object SignUpScreenNavigationRoute
 
 fun NavController.navigateToSignUpScreen(
-    navOptions: NavOptions? = null,
+    navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    this.navigate(SignUpScreenNavigationRoute, navOptions)
+    navigate(route = SignUpScreenNavigationRoute) {
+        navOptions()
+    }
 }
 
 fun NavGraphBuilder.signUpScreen(
     navigateBack: () -> Unit,
     goToLoginScreen: () -> Unit
 ) {
-    composable(
-        SignUpScreenNavigationRoute
-    ) {
+    composable<SignUpScreenNavigationRoute> {
         SignUpScreenRoute(onBackClick = {
             navigateBack.invoke()
         }, goToLoginScreen = {

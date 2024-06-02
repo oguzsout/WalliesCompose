@@ -1,6 +1,11 @@
 package com.oguzdogdu.walliescompose.navigation.utils
 
-object NavigationConstants {
-    const val AUTH = "auth"
-    const val CONTENT = "content"
+import kotlinx.serialization.Serializable
+
+@Serializable
+sealed class Routes(val route : String) {
+    @Serializable
+    data object Auth : Routes("auth")
+    @Serializable
+    data object Home : Routes("home")
 }

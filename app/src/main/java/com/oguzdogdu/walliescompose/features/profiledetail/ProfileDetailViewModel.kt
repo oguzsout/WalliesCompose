@@ -3,30 +3,25 @@ package com.oguzdogdu.walliescompose.features.profiledetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.oguzdogdu.walliescompose.domain.repository.UnsplashUserRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.onFailure
-import com.oguzdogdu.walliescompose.domain.wrapper.onLoading
 import com.oguzdogdu.walliescompose.domain.wrapper.onSuccess
 import com.oguzdogdu.walliescompose.features.profiledetail.event.ProfileDetailEvent
+import com.oguzdogdu.walliescompose.features.profiledetail.navigation.ProfileDetailScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.profiledetail.state.ProfileDetailState
 import com.oguzdogdu.walliescompose.features.profiledetail.state.ProfileDetailUIState
 import com.oguzdogdu.walliescompose.features.profiledetail.state.UserCollectionState
 import com.oguzdogdu.walliescompose.features.profiledetail.state.UserPhotosState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,7 +30,7 @@ class ProfileDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    val username: String = checkNotNull(savedStateHandle["username"])
+    val username: String = checkNotNull(savedStateHandle.toRoute<ProfileDetailScreenNavigationRoute>().username)
 
     private val _getProfileDetailState = MutableStateFlow<ProfileDetailUIState?>(null)
     val getProfileDetailState = _getProfileDetailState.asStateFlow()

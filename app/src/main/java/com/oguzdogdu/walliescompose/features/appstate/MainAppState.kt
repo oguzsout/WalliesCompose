@@ -5,15 +5,20 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import com.oguzdogdu.walliescompose.features.collections.CollectionScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.collections.navigateToCollectionScreen
+import com.oguzdogdu.walliescompose.features.favorites.FavoritesScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.favorites.navigateToFavoritesScreen
+import com.oguzdogdu.walliescompose.features.home.HomeScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.home.navigateToHomeScreen
+import com.oguzdogdu.walliescompose.features.settings.SettingsScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.settings.navigateToSettingsScreen
 import com.oguzdogdu.walliescompose.navigation.TopLevelDestination
 import com.oguzdogdu.walliescompose.util.NetworkMonitor
@@ -43,12 +48,24 @@ class MainAppState(
         @Composable get() = navController
             .currentBackStackEntryAsState().value?.destination
 
+    private val currentTopLevelDestination: TopLevelDestination?
+        @Composable get() {
+            return when {
+                currentDestination?.hasRoute<HomeScreenNavigationRoute>() == true -> TopLevelDestination.WALLPAPERS
+                currentDestination?.hasRoute<CollectionScreenNavigationRoute>() == true -> TopLevelDestination.COLLECTIONS
+                currentDestination?.hasRoute<FavoritesScreenNavigationRoute>() == true -> TopLevelDestination.FAVORITES
+                currentDestination?.hasRoute<SettingsScreenNavigationRoute>() == true -> TopLevelDestination.SETTINGS
+                else -> null
+            }
+        }
+
     val shouldShowBottomBar: Boolean
         @Composable get() = currentDestination?.hierarchy?.any { destination ->
-            topLevelDestinations.any {
-                destination.route?.contains(it.route) ?: false
-            }
+            currentTopLevelDestination?.let {
+                destination.hasRoute(it.route)
+            } ?: false
         } ?: false
+
 
     val isOffline = networkMonitor.isOnline
         .map(Boolean::not)

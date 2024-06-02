@@ -7,13 +7,15 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import kotlinx.serialization.Serializable
 
-const val HomeScreenNavigationRoute = "home_screen_route"
+@Serializable
+data object HomeScreenNavigationRoute
 
 fun NavController.navigateToHomeScreen(
     navOptions: NavOptions? = null,
 ) {
-    this.navigate(HomeScreenNavigationRoute, navOptions)
+    navigate(route = HomeScreenNavigationRoute,navOptions)
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -29,9 +31,7 @@ fun NavGraphBuilder.homeScreen(
     onUserPhotoClick: () -> Unit,
     navigateBack:() -> Unit
 ) {
-    composable(
-        HomeScreenNavigationRoute
-    ) {
+    composable<HomeScreenNavigationRoute> {
         val viewModel : HomeViewModel = hiltViewModel()
         transitionScope.HomeScreenRoute(
             animatedVisibilityScope = this,

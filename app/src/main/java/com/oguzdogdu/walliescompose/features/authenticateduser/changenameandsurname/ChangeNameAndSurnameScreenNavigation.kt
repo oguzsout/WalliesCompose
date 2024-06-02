@@ -2,23 +2,25 @@ package com.oguzdogdu.walliescompose.features.authenticateduser.changenameandsur
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
+import kotlinx.serialization.Serializable
 
-const val ChangeNameAndSurnameScreenNavigationRoute = "change_name_and_surname_screen_route"
+@Serializable
+data object ChangeNameAndSurnameScreenRoute
 
 fun NavController.navigateToChangeNameAndASurnameScreen(
-    navOptions: NavOptions? = null,
+    navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    this.navigate(ChangeNameAndSurnameScreenNavigationRoute, navOptions)
+    navigate(route = ChangeNameAndSurnameScreenRoute) {
+        navOptions()
+    }
 }
 
 fun NavGraphBuilder.changeNameAndSurnameScreen(
     navigateBack: () -> Unit,
 ) {
-    composable(
-        ChangeNameAndSurnameScreenNavigationRoute
-    ) {
+    composable<ChangeNameAndSurnameScreenRoute> {
         ChangeNameAndSurnameScreenRoute(navigateBack = {
             navigateBack.invoke()
         })

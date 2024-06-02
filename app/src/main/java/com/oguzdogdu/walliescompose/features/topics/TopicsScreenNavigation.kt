@@ -2,21 +2,23 @@ package com.oguzdogdu.walliescompose.features.topics
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
+import kotlinx.serialization.Serializable
 
-const val TopicsScreenNavigationRoute = "topics_screen_route"
+@Serializable
+data object TopicsScreenNavigationRoute
 
 fun NavController.navigateToTopicsScreen(
-    navOptions: NavOptions? = null,
+    navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    this.navigate(TopicsScreenNavigationRoute, navOptions)
+    navigate(route = TopicsScreenNavigationRoute) {
+        navOptions()
+    }
 }
 
 fun NavGraphBuilder.topicsScreen(onBackClick: () -> Unit,onTopicClick: (String) -> Unit) {
-    composable(
-        TopicsScreenNavigationRoute
-    ) {
+    composable<TopicsScreenNavigationRoute >{
         TopicsScreenRoute(onBackClick = { onBackClick.invoke() }, onTopicClick = {
             onTopicClick.invoke(it)
         })

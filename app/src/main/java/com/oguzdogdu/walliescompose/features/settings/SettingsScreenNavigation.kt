@@ -4,19 +4,19 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import kotlinx.serialization.Serializable
 
-const val SettingsScreenNavigationRoute = "settings_screen_route"
+@Serializable
+data object SettingsScreenNavigationRoute
 
 fun NavController.navigateToSettingsScreen(
     navOptions: NavOptions? = null,
 ) {
-    this.navigate(SettingsScreenNavigationRoute, navOptions)
+    navigate(route = SettingsScreenNavigationRoute, navOptions)
 }
 
 fun NavGraphBuilder.settingsScreen() {
-    composable(
-        SettingsScreenNavigationRoute
-    ) {
+    composable<SettingsScreenNavigationRoute >{
         SettingsScreenRoute()
     }
 }

@@ -2,31 +2,28 @@ package com.oguzdogdu.walliescompose.features.topics.topicdetaillist
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
-import androidx.navigation.NavType
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
+import kotlinx.serialization.Serializable
 
-const val TopicDetailListScreenNavigationRoute = "topic_detail_list_screen_route"
+@Serializable
+data class TopicDetailListScreenNavigationRoute(val topicId: String? = null)
 
 fun NavController.navigateToTopicDetailListScreen(
     topicId: String?,
-    navOptions: NavOptions? = null,
+    navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    this.navigate("$TopicDetailListScreenNavigationRoute/$topicId", navOptions)
+    navigate(route = TopicDetailListScreenNavigationRoute(topicId)) {
+        navOptions()
+    }
 }
 
 fun NavGraphBuilder.topicDetailListScreen(onTopicClick: (String) -> Unit, onBackClick: () -> Unit) {
-    composable(
-        "$TopicDetailListScreenNavigationRoute/{topicId}",
-        arguments = listOf(
-            navArgument("topicId") {
-                type = NavType.StringType
-            }
-        )
-    ) {
-        val topicId = it.arguments?.getString("topicId")
-        TopicDetailListRoute(topicId = topicId, onTopicClick = {id ->
+    composable<TopicDetailListScreenNavigationRoute> { backStackEntry ->
+        val topicDetailListScreenNavArgs =
+            backStackEntry.toRoute<TopicDetailListScreenNavigationRoute>()
+        TopicDetailListRoute(topicId = topicDetailListScreenNavArgs.topicId, onTopicClick = { id ->
             onTopicClick.invoke(id)
         }, onBackClick = { onBackClick.invoke() })
     }

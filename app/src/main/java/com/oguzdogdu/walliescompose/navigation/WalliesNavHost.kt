@@ -46,22 +46,19 @@ import com.oguzdogdu.walliescompose.features.search.searchScreen
 import com.oguzdogdu.walliescompose.features.settings.settingsScreen
 import com.oguzdogdu.walliescompose.features.signup.navigateToSignUpScreen
 import com.oguzdogdu.walliescompose.features.signup.signUpScreen
-import com.oguzdogdu.walliescompose.features.splash.SplashScreenNavigationRoute
+import com.oguzdogdu.walliescompose.features.splash.SplashScreenRoute
 import com.oguzdogdu.walliescompose.features.splash.splashScreen
 import com.oguzdogdu.walliescompose.features.topics.navigateToTopicsScreen
 import com.oguzdogdu.walliescompose.features.topics.topicdetaillist.navigateToTopicDetailListScreen
 import com.oguzdogdu.walliescompose.features.topics.topicdetaillist.topicDetailListScreen
 import com.oguzdogdu.walliescompose.features.topics.topicsScreen
-import com.oguzdogdu.walliescompose.navigation.utils.NavigationConstants.AUTH
-import com.oguzdogdu.walliescompose.navigation.utils.NavigationConstants.CONTENT
-
+import com.oguzdogdu.walliescompose.navigation.utils.Routes
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun WalliesNavHost(
     appState: MainAppState,
     modifier: Modifier = Modifier,
-    startDestination: String = SplashScreenNavigationRoute,
     isAuthenticated:Boolean,
     googleAuthUiClient: GoogleAuthUiClient
 ) {
@@ -76,24 +73,24 @@ fun WalliesNavHost(
     SharedTransitionLayout {
         NavHost(
             navController = navController,
-            startDestination = startDestination,
+            startDestination = SplashScreenRoute,
             modifier = modifier
         ) {
             splashScreen(goToLoginFlow = {
                 navController.navigate(LoginScreenNavigationRoute) {
-                    popUpTo(SplashScreenNavigationRoute) {
+                    popUpTo(SplashScreenRoute) {
                         inclusive = true
                     }
                 }
             }, goToContentScreen = {
                 navController.navigate(HomeScreenNavigationRoute) {
-                    popUpTo(SplashScreenNavigationRoute) {
+                    popUpTo(SplashScreenRoute) {
                         inclusive = true
                     }
                 }
             })
 
-            navigation(startDestination = LoginScreenNavigationRoute, route = AUTH) {
+            navigation<Routes.Auth>(startDestination = LoginScreenNavigationRoute) {
                 loginScreen(googleAuthUiClient = googleAuthUiClient,navigateToHome = {
                     navController.navigate(HomeScreenNavigationRoute) {
                         popUpTo(LoginScreenNavigationRoute){
@@ -139,8 +136,7 @@ fun WalliesNavHost(
                     }
                 })
             }
-
-            navigation(startDestination = HomeScreenNavigationRoute, route = CONTENT) {
+            navigation<Routes.Home>(startDestination = HomeScreenNavigationRoute) {
                 homeScreen(
                     transitionScope = this@SharedTransitionLayout,
                     onTopicDetailListClick = {
@@ -173,7 +169,7 @@ fun WalliesNavHost(
                 )
                 collectionScreen(
                     transitionScope = this@SharedTransitionLayout,
-                    onCollectionClick = {id,title ->
+                    onCollectionClick = { id, title ->
                         navController.navigateToCollectionDetailListScreen(
                             collectionDetailListId = id,
                             collectionDetailListTitle = title
@@ -190,7 +186,7 @@ fun WalliesNavHost(
                 }, searchUserClick = {
                     navController.navigateToProfileDetailScreen(username = it)
                 }
-                    )
+                )
                 detailScreen(
                     transitionScope = this@SharedTransitionLayout,
                     onBackClick = {
@@ -251,8 +247,8 @@ fun WalliesNavHost(
                     navigateBack = {
                         navController.popBackStack()
                     }, navigateToLogin = {
-                        navController.navigate(AUTH) {
-                            popUpTo(CONTENT){
+                        navController.navigate(Routes.Auth.route) {
+                            popUpTo(Routes.Home.route) {
                                 inclusive = true
                             }
                         }

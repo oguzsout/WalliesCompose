@@ -2,24 +2,25 @@ package com.oguzdogdu.walliescompose.features.authenticateduser.changepassword
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import com.oguzdogdu.walliescompose.features.authenticateduser.AuthenticatedUserScreenRoute
+import kotlinx.serialization.Serializable
 
-const val ChangePasswordScreenNavigationRoute = "change_password_screen_route"
+@Serializable
+data object ChangePasswordScreenRoute
 
 fun NavController.navigateToChangePasswordScreen(
-    navOptions: NavOptions? = null,
+    navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    this.navigate(ChangePasswordScreenNavigationRoute, navOptions)
+    navigate(route = ChangePasswordScreenRoute) {
+        navOptions()
+    }
 }
 
 fun NavGraphBuilder.changePasswordScreen(
     navigateBack: () -> Unit,
 ) {
-    composable(
-        ChangePasswordScreenNavigationRoute
-    ) {
+    composable<ChangePasswordScreenRoute> {
         ChangePasswordScreenRoute(navigateBack = {
             navigateBack.invoke()
         })

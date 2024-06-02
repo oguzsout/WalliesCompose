@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
@@ -50,7 +51,7 @@ class DetailViewModel@Inject constructor(
     private val _setWallpaperPlace = MutableStateFlow("")
     val setWallpaperPlace = _setWallpaperPlace.asStateFlow()
 
-     val id: String = checkNotNull(savedStateHandle["photoId"])
+     val id: String = checkNotNull(savedStateHandle.toRoute<DetailScreenRoute>().photoId)
 
     fun handleScreenEvents(event: DetailScreenEvent) {
         when (event) {

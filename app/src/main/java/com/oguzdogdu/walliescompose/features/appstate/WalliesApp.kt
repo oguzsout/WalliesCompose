@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
@@ -173,5 +174,5 @@ internal fun AppNavBar(
 
 private fun NavDestination?.isTopLevelDestinationInHierarchy(destination: TopLevelDestination) =
     this?.hierarchy?.any {
-        it.route?.contains(destination.route, true) ?: false
+        it.hasRoute(destination.route)
     } ?: false

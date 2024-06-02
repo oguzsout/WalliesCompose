@@ -2,24 +2,21 @@ package com.oguzdogdu.walliescompose.features.popular
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
-import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
+import kotlinx.serialization.Serializable
 
-const val PopularScreenNavigationRoute = "popular_screen_route"
+@Serializable
+data object PopularScreenNavigationRoute
 
 fun NavController.navigateToPopularScreen(
-    navOptions: NavOptions? = null,
+    navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    this.navigate(PopularScreenNavigationRoute, navOptions)
+    navigate(route = PopularScreenNavigationRoute) {
+        navOptions()
+    }
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -27,9 +24,7 @@ fun NavGraphBuilder.popularScreen(
     transitionScope: SharedTransitionScope,
     onPopularClick: (String?) -> Unit, onBackClick: () -> Unit
 ) {
-    composable(
-        PopularScreenNavigationRoute
-    ) {
+    composable<PopularScreenNavigationRoute> {
         transitionScope.PopularScreenRoute(
             animatedVisibilityScope = this,
             onPopularClick = {id ->

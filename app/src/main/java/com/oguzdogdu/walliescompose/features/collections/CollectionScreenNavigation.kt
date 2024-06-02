@@ -6,20 +6,20 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import kotlinx.serialization.Serializable
 
-const val CollectionScreenNavigationRoute = "collection_screen_route"
+@Serializable
+data object CollectionScreenNavigationRoute
 
 fun NavController.navigateToCollectionScreen(
     navOptions: NavOptions? = null,
 ) {
-    this.navigate(CollectionScreenNavigationRoute, navOptions)
+    navigate(route = CollectionScreenNavigationRoute, navOptions)
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.collectionScreen(transitionScope: SharedTransitionScope, onCollectionClick: (String, String) -> Unit) {
-    composable(
-        CollectionScreenNavigationRoute
-    ) {
+    composable<CollectionScreenNavigationRoute> {
         transitionScope.CollectionsScreenRoute(
             animatedVisibilityScope = this,
             onCollectionClick = {id,title ->
