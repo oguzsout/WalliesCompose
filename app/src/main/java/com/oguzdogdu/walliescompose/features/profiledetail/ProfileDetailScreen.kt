@@ -506,16 +506,19 @@ fun PersonalAccountMenu(modifier: Modifier,profileDetailState: ProfileDetailStat
                     onClick = {
                         when(itemValue.title) {
                             "Instagram" -> {
-                                openProfileLinks.launch(profileDetailState?.userDetails?.instagram?.openInstagramProfile())
+                                profileDetailState?.userDetails?.instagram?.openInstagramProfile()
+                                    ?.let { openProfileLinks.launch(it) }
                                 Toast.makeText(context,"in",Toast.LENGTH_SHORT).show()
                             }
                             "Twitter" -> {
-                                openProfileLinks.launch(profileDetailState?.userDetails?.twitter?.openTwitterProfile())
+                                profileDetailState?.userDetails?.twitter?.openTwitterProfile()
+                                    ?.let { openProfileLinks.launch(it) }
                                 Toast.makeText(context,"tw",Toast.LENGTH_SHORT).show()
 
                             }
                             "Portfolio" -> {
-                                openProfileLinks.launch(profileDetailState?.userDetails?.portfolio?.openPortfolioUrl())
+                                profileDetailState?.userDetails?.portfolio?.openPortfolioUrl()
+                                    ?.let { openProfileLinks.launch(it) }
                                 Toast.makeText(context,"pr",Toast.LENGTH_SHORT).show()
 
                             }

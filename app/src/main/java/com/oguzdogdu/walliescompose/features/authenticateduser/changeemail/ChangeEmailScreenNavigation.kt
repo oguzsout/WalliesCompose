@@ -2,23 +2,25 @@ package com.oguzdogdu.walliescompose.features.authenticateduser.changeemail
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
+import kotlinx.serialization.Serializable
 
-const val ChangeEmailScreenNavigationRoute = "change_email_screen_route"
+@Serializable
+data object ChangeEmailScreenRoute
 
 fun NavController.navigateToChangeEmailScreen(
-    navOptions: NavOptions? = null,
+    navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    this.navigate(ChangeEmailScreenNavigationRoute, navOptions)
+    navigate(route = ChangeEmailScreenRoute) {
+        navOptions()
+    }
 }
 
 fun NavGraphBuilder.changeEmailScreen(
     navigateBack: () -> Unit,
 ) {
-    composable(
-        ChangeEmailScreenNavigationRoute
-    ) {
+    composable<ChangeEmailScreenRoute> {
         ChangeEmailScreenRoute(navigateBack = {
             navigateBack.invoke()
         })

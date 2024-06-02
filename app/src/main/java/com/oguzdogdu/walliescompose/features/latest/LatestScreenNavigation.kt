@@ -4,15 +4,19 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
+import kotlinx.serialization.Serializable
 
-const val LatestScreenNavigationRoute = "latest_screen_route"
+@Serializable
+data object LatestScreenNavigationRoute
 
 fun NavController.navigateToLatestScreen(
-    navOptions: NavOptions? = null,
+    navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    this.navigate(LatestScreenNavigationRoute, navOptions)
+    navigate(route = LatestScreenNavigationRoute) {
+        navOptions()
+    }
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -21,9 +25,7 @@ fun NavGraphBuilder.latestScreen(
     onLatestClick: (String?) -> Unit,
     onBackClick: () -> Unit
 ) {
-    composable(
-        LatestScreenNavigationRoute
-    ) {
+    composable<LatestScreenNavigationRoute> {
         transitionScope.LatestScreenRoute(
             animatedVisibilityScope = this,
             onLatestClick = { id ->

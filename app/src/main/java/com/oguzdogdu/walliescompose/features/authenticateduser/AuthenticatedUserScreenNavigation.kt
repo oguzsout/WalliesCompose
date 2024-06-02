@@ -4,16 +4,20 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
+import kotlinx.serialization.Serializable
 
-const val AuthenticatedUserScreenNavigationRoute = "authenticated_user_screen_route"
+@Serializable
+data object AuthenticatedUserScreenRoute
 
 fun NavController.navigateToAuthenticatedUserScreen(
-    navOptions: NavOptions? = null,
+    navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    this.navigate(AuthenticatedUserScreenNavigationRoute, navOptions)
-}
+    navigate(route = AuthenticatedUserScreenRoute) {
+        navOptions()
+    }
+ }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.authenticatedUserScreen(
@@ -25,9 +29,7 @@ fun NavGraphBuilder.authenticatedUserScreen(
     navigateToChangeEmail: () -> Unit,
 
     ) {
-    composable(
-        AuthenticatedUserScreenNavigationRoute
-    ) {
+    composable<AuthenticatedUserScreenRoute> {
         transitionScope.AuthenticatedUserScreenRoute(
             animatedVisibilityScope = this,
            navigateBack = {

@@ -2,16 +2,20 @@ package com.oguzdogdu.walliescompose.features.login
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
+import kotlinx.serialization.Serializable
 
-const val LoginScreenNavigationRoute = "login_screen_route"
+@Serializable
+data object LoginScreenNavigationRoute
 
 fun NavController.navigateToLoginScreen(
-    navOptions: NavOptions? = null,
+    navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    this.navigate(LoginScreenNavigationRoute, navOptions)
+    navigate(route = LoginScreenNavigationRoute) {
+        navOptions()
+    }
 }
 
 fun NavGraphBuilder.loginScreen(
@@ -21,9 +25,7 @@ fun NavGraphBuilder.loginScreen(
     onContinueWithoutLoginClick: () -> Unit,
     navigateBack: () -> Unit
 ) {
-    composable(
-        LoginScreenNavigationRoute
-    ) {
+    composable<LoginScreenNavigationRoute> {
        LoginScreenRoute(googleAuthUiClient = googleAuthUiClient,navigateToHome = {
            navigateToHome.invoke()
        },

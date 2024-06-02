@@ -2,19 +2,21 @@ package com.oguzdogdu.walliescompose.features.search
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
-import androidx.navigation.NavType
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
-import com.oguzdogdu.walliescompose.features.detail.DetailScreenNavigationRoute
+import androidx.navigation.toRoute
+import kotlinx.serialization.Serializable
 
-const val SearchScreenNavigationRoute = "search_screen_route"
+@Serializable
+data class SearchScreenNavigationRoute(val queryFromDetail:String? = null)
 
 fun NavController.navigateToSearchScreen(
     queryFromDetail:String? = null,
-    navOptions: NavOptions? = null,
+    navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    this.navigate("$SearchScreenNavigationRoute/$queryFromDetail", navOptions)
+    navigate(route = SearchScreenNavigationRoute(queryFromDetail)) {
+        navOptions()
+    }
 }
 
 fun NavGraphBuilder.searchScreen(
@@ -22,23 +24,14 @@ fun NavGraphBuilder.searchScreen(
     searchPhotoClick: (String) -> Unit,
     searchUserClick: (String) -> Unit
 ) {
-    composable(
-        "$SearchScreenNavigationRoute/{queryFromDetail}",
-        arguments = listOf(
-            navArgument("queryFromDetail") {
-                defaultValue = ""
-                type = NavType.StringType
-                nullable = true
-            }
-        )
-    ) {
-        val queryFromDetail = it.arguments?.getString("queryFromDetail")
+    composable<SearchScreenNavigationRoute>{backStackEntry ->
+        val searchScreenArgs = backStackEntry.toRoute<SearchScreenNavigationRoute>()
         SearchScreenRoute(onBackClick = {
             onBackClick.invoke()
         }, searchPhotoClick = {id ->
             searchPhotoClick.invoke(id)
         }, searchUserClick = {id ->
             searchUserClick.invoke(id)
-        },queryFromDetail = queryFromDetail.orEmpty())
+        },queryFromDetail = searchScreenArgs.queryFromDetail)
     }
 }

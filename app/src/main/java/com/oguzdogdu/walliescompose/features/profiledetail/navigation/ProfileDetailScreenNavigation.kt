@@ -2,19 +2,21 @@ package com.oguzdogdu.walliescompose.features.profiledetail.navigation
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
-import androidx.navigation.NavType
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import com.oguzdogdu.walliescompose.features.profiledetail.ProfileDetailScreenRoute
+import kotlinx.serialization.Serializable
 
-const val ProfileDetailScreenNavigationRoute = "profile_detail_screen_route"
+@Serializable
+data class ProfileDetailScreenNavigationRoute(val username: String? = null)
 
 fun NavController.navigateToProfileDetailScreen(
     username: String?,
-    navOptions: NavOptions? = null,
+    navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    this.navigate("$ProfileDetailScreenNavigationRoute/$username", navOptions)
+    navigate(route = ProfileDetailScreenNavigationRoute(username)) {
+        navOptions()
+    }
 }
 
 fun NavGraphBuilder.profileDetailScreen(
@@ -22,16 +24,7 @@ fun NavGraphBuilder.profileDetailScreen(
     onCollectionItemClick: (String, String) -> Unit,
     onBackClick: () -> Unit
 ) {
-    composable(
-        "$ProfileDetailScreenNavigationRoute/{username}",
-        arguments = listOf(
-            navArgument("username") {
-                defaultValue = ""
-                type = NavType.StringType
-                nullable = true
-            }
-        )
-    ) {
+    composable<ProfileDetailScreenNavigationRoute> {
         ProfileDetailScreenRoute(onUserPhotoListClick = { id ->
             onUserPhotoListClick.invoke(id) },
             onCollectionItemClick = { id, title ->
