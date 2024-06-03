@@ -1,12 +1,8 @@
 package com.oguzdogdu.walliescompose.data.model.userdetail
 
-import android.os.Parcelable
-import com.oguzdogdu.walliescompose.data.model.userdetail.Links
-import com.oguzdogdu.walliescompose.data.model.userdetail.Urls
-import com.oguzdogdu.walliescompose.data.model.userdetail.User
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
+@Serializable
 data class CoverPhoto(
     val alt_description: String?,
     val blur_hash: String?,
@@ -26,4 +22,4 @@ data class CoverPhoto(
     val urls: Urls?,
     val user: User?,
     val width: Int?
-):Parcelable
+)

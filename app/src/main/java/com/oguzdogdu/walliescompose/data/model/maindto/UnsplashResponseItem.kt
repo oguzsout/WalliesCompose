@@ -1,12 +1,12 @@
 package com.oguzdogdu.walliescompose.data.model.maindto
 
-import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import com.oguzdogdu.walliescompose.domain.model.detail.Photo
 import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
+import kotlinx.serialization.Serializable
 
-@kotlinx.parcelize.Parcelize
+@Serializable
 data class UnsplashResponseItem(
     @SerializedName("alt_description") val altDescription: String?,
     @SerializedName("blur_hash") val blurHash: String?,
@@ -27,13 +27,13 @@ data class UnsplashResponseItem(
     @SerializedName("width") val width: Int?,
     @SerializedName("views") val views: Double?,
     @SerializedName("downloads") val downloads: Int?
-):Parcelable
+)
 
-@kotlinx.parcelize.Parcelize
+@Serializable
 data class Tags(
     val type: String?,
     val title: String?,
-):Parcelable
+)
 fun UnsplashResponseItem.convertList() = tags.map { it?.title }
 fun UnsplashResponseItem.toDomainModelPopular() = PopularImage(id = id, url = urls?.regular, imageDesc = altDescription)
 fun UnsplashResponseItem.toDomainModelLatest() = LatestImage(id = id, url = urls?.regular, imageDesc = altDescription)

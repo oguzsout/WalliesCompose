@@ -1,10 +1,9 @@
 package com.oguzdogdu.walliescompose.data.model.userdetail
 
-import android.os.Parcelable
 import com.oguzdogdu.walliescompose.domain.model.userdetail.UserDetails
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
+@Serializable
 data class UserDetailResponse(
     val accepted_tos: Boolean,
     val allow_messages: Boolean,
@@ -34,7 +33,7 @@ data class UserDetailResponse(
     val twitter_username: String?,
     val updated_at: String?,
     val username: String?
-) : Parcelable
+)
 
 fun UserDetailResponse.toDomain() : UserDetails {
     val nonNullPortfolioList = listOfNotNull(

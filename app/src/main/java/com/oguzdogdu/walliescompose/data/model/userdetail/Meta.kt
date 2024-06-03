@@ -1,9 +1,8 @@
 package com.oguzdogdu.walliescompose.data.model.userdetail
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
+@Serializable
 data class Meta(
     val index: Boolean
-):Parcelable
+)

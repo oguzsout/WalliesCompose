@@ -1,9 +1,9 @@
 package com.oguzdogdu.walliescompose.data.model.maindto
 
-import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
-@kotlinx.parcelize.Parcelize
+@Serializable
 data class Social(
     @SerializedName("instagram_username")
     val instagramUsername: String?,
@@ -11,4 +11,4 @@ data class Social(
     val portfolioUrl: String?,
     @SerializedName("twitter_username")
     val twitterUsername: String?
-):Parcelable
+)

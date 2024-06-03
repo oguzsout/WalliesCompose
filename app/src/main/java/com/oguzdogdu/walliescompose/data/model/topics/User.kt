@@ -1,9 +1,10 @@
 package com.oguzdogdu.walliescompose.data.model.topics
 
 
-import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-@kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class User(
     @SerializedName("accepted_tos") val acceptedTos: Boolean?,
     @SerializedName("bio") val bio: String?,
@@ -25,4 +26,4 @@ data class User(
     @SerializedName("twitter_username") val twitterUsername: String?,
     @SerializedName("updated_at") val updatedAt: String?,
     @SerializedName("username") val username: String?
-):Parcelable
+)

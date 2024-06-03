@@ -1,7 +1,9 @@
 package com.oguzdogdu.walliescompose.domain.model.favorites
 
 import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Immutable
 data class FavoriteImages(
     val id: String? = null,
