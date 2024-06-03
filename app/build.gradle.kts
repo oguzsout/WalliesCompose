@@ -8,7 +8,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("dagger.hilt.android.plugin")
     id("com.google.gms.google-services")
-    id ("kotlinx-serialization")
+    id("kotlinx-serialization")
 }
 
 val releaseApiKey: String = gradleLocalProperties(rootDir).getProperty("RELEASE_API_KEY")
@@ -108,6 +108,15 @@ dependencies {
     implementation (libs.androidx.lifecycle.viewmodel.compose)
     implementation (libs.androidx.lifecycle.viewmodel.ktx)
     implementation (libs.androidx.lifecycle.runtime.compose)
+
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.android)
+    implementation (libs.ktor.client.logging)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.serialization.gson)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.client.serialization)
 
     implementation (libs.androidx.navigation.compose)
     implementation(libs.lottie.compose)
