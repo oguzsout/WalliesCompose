@@ -32,13 +32,13 @@ class UnsplashUserRepositoryImpl @Inject constructor(private val service: Unspla
     UnsplashUserRepository {
     override suspend fun getUserDetails(username: String?): Flow<Resource<UserDetails?>> {
         return safeApiCall(ioDispatcher) {
-            service.getUserDetailInfos(username = username).body()?.toDomain()
+            service.getUserDetailInfos(username = username).toDomain()
         }
     }
 
     override suspend fun getUsersPhotos(username: String?): Flow<Resource<List<UsersPhotos>?>>{
         return safeApiCall(ioDispatcher) {
-            service.getUserPhotos(username = username, perPage = PAGE_ITEM_LIMIT).body().orEmpty().map {
+            service.getUserPhotos(username = username).mapNotNull {
                 it.toDomainUsersPhotos()
             }
         }
@@ -46,7 +46,7 @@ class UnsplashUserRepositoryImpl @Inject constructor(private val service: Unspla
 
     override suspend fun getUsersCollections(username: String?): Flow<Resource<List<UserCollections>?>> {
         return safeApiCall(dispatcher = ioDispatcher) {
-            service.getUserCollections(username = username).body().orEmpty().map {
+            service.getUserCollections(username = username).mapNotNull {
                 it.toUserCollection()
             }
         }

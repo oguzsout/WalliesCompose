@@ -1,7 +1,9 @@
 package com.oguzdogdu.walliescompose.domain.model.collections
 
 import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Immutable
 data class WallpaperCollections(
     val id: String?,

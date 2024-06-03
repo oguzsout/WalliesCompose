@@ -1,10 +1,10 @@
 package com.oguzdogdu.walliescompose.data.model.searchdto.searchuser
 
-import android.os.Parcelable
+import kotlinx.serialization.Serializable
 
-@kotlinx.parcelize.Parcelize
+@Serializable
 data class SearchUsersResponse(
     val results: List<Result>,
     val total: Int,
     val total_pages: Int
-):Parcelable
+)

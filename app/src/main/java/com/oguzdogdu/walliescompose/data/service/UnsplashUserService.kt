@@ -1,34 +1,25 @@
 package com.oguzdogdu.walliescompose.data.service
 
-import com.oguzdogdu.walliescompose.data.model.userdetail.UserDetailResponse
 import com.oguzdogdu.walliescompose.data.model.collection.CollectionResponse
 import com.oguzdogdu.walliescompose.data.model.maindto.Photo
 import com.oguzdogdu.walliescompose.data.model.searchdto.searchuser.SearchUsersResponse
-import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Path
-import retrofit2.http.Query
+import com.oguzdogdu.walliescompose.data.model.userdetail.UserDetailResponse
 
 interface UnsplashUserService {
-    @GET("users/{username}")
     suspend fun getUserDetailInfos(
-        @Path("username") username: String?,
-    ): Response<UserDetailResponse>
+        username: String?,
+    ): UserDetailResponse
 
-    @GET("users/{username}/photos")
     suspend fun getUserPhotos(
-        @Path("username") username: String?,
-        @Query("per_page") perPage: Int?,
-    ): Response<List<Photo>>
+        username: String?,
+    ): List<Photo>
 
-    @GET("users/{username}/collections")
     suspend fun getUserCollections(
-        @Path("username") username: String?,
-    ): Response<List<CollectionResponse>>
+        username: String?,
+    ): List<CollectionResponse>
 
-    @GET("search/users")
     suspend fun getSearchUserData(
-        @Query("page") page: Int?,
-        @Query("query") query: String,
-    ): Response<SearchUsersResponse>
+        page: Int?,
+        query: String?,
+    ): SearchUsersResponse
 }

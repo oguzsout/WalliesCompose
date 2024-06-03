@@ -20,8 +20,7 @@ PagingSource<Int, CollectionResponse>() {
         return try {
             val page = params.key ?: 1
             val response =
-                service.getCollections(page = page, perPage = Constants.PAGE_ITEM_LIMIT).body()
-                    .orEmpty()
+                service.getCollections(page = page, perPage = Constants.PAGE_ITEM_LIMIT)
             val filteredAndSortedResponse = response.sortedByDescending { it.updated_at?.formatDate() }
             LoadResult.Page(
                 data = filteredAndSortedResponse,

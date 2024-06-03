@@ -20,11 +20,11 @@ class TopicListSource (private val service: WallpaperService, private val idOrSl
             val response = service.getTopicList(
                 id = idOrSlug,
                 perPage = 10, page = page
-            ).body()
+            )
             LoadResult.Page(
-                data = response.orEmpty(),
+                data = response,
                 prevKey = if (page == 1) null else page - 1,
-                nextKey = if (response?.isEmpty() == true) null else page + 1
+                nextKey = if (response.isEmpty()) null else page + 1
             )
         } catch (e: Exception) {
             LoadResult.Error(e)
