@@ -1,8 +1,8 @@
 package com.oguzdogdu.walliescompose.data.model.searchdto.searchuser
 
-import android.os.Parcelable
+import kotlinx.serialization.Serializable
 
-@kotlinx.parcelize.Parcelize
+@Serializable
 data class Photo(
     val blur_hash: String,
     val created_at: String,
@@ -10,4 +10,4 @@ data class Photo(
     val slug: String,
     val updated_at: String,
     val urls: Urls
-):Parcelable
+)

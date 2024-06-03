@@ -1,8 +1,9 @@
 package com.oguzdogdu.walliescompose.data.model.maindto
 
-import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-@kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Sponsorship(
     @SerializedName("sponsor")
     val sponsor: Sponsor?,
@@ -10,4 +11,4 @@ data class Sponsorship(
     val tagline: String?,
     @SerializedName("tagline_url")
     val taglineUrl: String?
-):Parcelable
+)

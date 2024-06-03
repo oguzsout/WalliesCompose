@@ -21,8 +21,7 @@ class CollectionsPagingSource(private val service: WallpaperService) :
             val page = params.key ?: 1
             delay(1000)
             val response =
-                service.getCollections(page = page, perPage = Constants.PAGE_ITEM_LIMIT).body()
-                    .orEmpty()
+                service.getCollections(page = page, perPage = Constants.PAGE_ITEM_LIMIT)
             LoadResult.Page(
                 data = response,
                 prevKey = if (page == 1) null else page - 1,

@@ -1,7 +1,9 @@
 package com.oguzdogdu.walliescompose.domain.model.userdetail
 
 import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Immutable
 data class UserDetails(
     val name: String?,

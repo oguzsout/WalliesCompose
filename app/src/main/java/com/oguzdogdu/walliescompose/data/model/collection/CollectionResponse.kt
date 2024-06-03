@@ -1,14 +1,14 @@
 package com.oguzdogdu.walliescompose.data.model.collection
 
-import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import com.oguzdogdu.walliescompose.data.model.maindto.Link
 import com.oguzdogdu.walliescompose.data.model.maindto.Photo
 import com.oguzdogdu.walliescompose.data.model.maindto.User
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
 import com.oguzdogdu.walliescompose.domain.model.userdetail.UserCollections
+import kotlinx.serialization.Serializable
 
-@kotlinx.parcelize.Parcelize
+@Serializable
 data class CollectionResponse(
     @SerializedName("id")
     val id: String?,
@@ -30,7 +30,7 @@ data class CollectionResponse(
     val user: User?,
     @SerializedName("links")
     val links: Link?,
-):Parcelable
+)
 
 fun CollectionResponse.toCollectionDomain() =
     WallpaperCollections(

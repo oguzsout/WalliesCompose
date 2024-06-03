@@ -1,10 +1,10 @@
 package com.oguzdogdu.walliescompose.data.model.topics
 
-
-import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
-@kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class TopicsResponseItem(
     @SerializedName("cover_photo") val coverPhoto: CoverPhoto?,
     @SerializedName("description") val description: String?,
@@ -22,7 +22,7 @@ data class TopicsResponseItem(
     @SerializedName("total_photos") val totalPhotos: Int?,
     @SerializedName("updated_at") val updatedAt: String?,
     @SerializedName("visibility") val visibility: String?
-):Parcelable
+)
 
 fun TopicsResponseItem.toDomainTopics() =
     Topics(id = id, title = slug, titleBackground = previewPhotos?.first()?.urls?.regular)

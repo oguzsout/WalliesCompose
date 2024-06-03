@@ -1,9 +1,9 @@
 package com.oguzdogdu.walliescompose.data.model.maindto
 
-import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
-@kotlinx.parcelize.Parcelize
+@Serializable
 data class Link(
     @SerializedName("download")
     val download: String,
@@ -13,4 +13,4 @@ data class Link(
     val html: String,
     @SerializedName("self")
     val self: String
-):Parcelable
+)

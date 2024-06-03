@@ -1,9 +1,9 @@
 package com.oguzdogdu.walliescompose.data.model.searchdto.searchuser
 
-import android.os.Parcelable
 import com.oguzdogdu.walliescompose.domain.model.search.searchuser.SearchUser
+import kotlinx.serialization.Serializable
 
-@kotlinx.parcelize.Parcelize
+@Serializable
 data class Result(
     val accepted_tos: Boolean,
     val bio: String,
@@ -27,7 +27,7 @@ data class Result(
     val twitter_username: String,
     val updated_at: String,
     val username: String
-):Parcelable
+)
 fun Result.toSearchUser() = SearchUser(
     id = id, username = username, profileImage = profile_image.medium, name = name
 )

@@ -1,10 +1,10 @@
 package com.oguzdogdu.walliescompose.data.model.topics
 
 
-import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
-@kotlinx.parcelize.Parcelize
+@Serializable
 data class Links(
     @SerializedName("followers") val followers: String?,
     @SerializedName("following") val following: String?,
@@ -13,4 +13,4 @@ data class Links(
     @SerializedName("photos") val photos: String?,
     @SerializedName("portfolio") val portfolio: String?,
     @SerializedName("self") val self: String?
-):Parcelable
+)

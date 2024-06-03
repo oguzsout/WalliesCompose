@@ -1,8 +1,8 @@
 package com.oguzdogdu.walliescompose.data.model.searchdto.searchuser
 
-import android.os.Parcelable
+import kotlinx.serialization.Serializable
 
-@kotlinx.parcelize.Parcelize
+@Serializable
 data class Urls(
     val full: String,
     val raw: String,
@@ -10,4 +10,4 @@ data class Urls(
     val small: String,
     val small_s3: String,
     val thumb: String
-):Parcelable
+)

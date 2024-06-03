@@ -24,7 +24,7 @@ class LatestPagingSource(private val service: WallpaperService) :
                 perPage = PAGE_ITEM_LIMIT,
                 page = page,
                 order = Constants.LATEST
-            ).body().orEmpty()
+            )
             LoadResult.Page(
                 data = response,
                 prevKey = if (page == 1) null else page - 1,

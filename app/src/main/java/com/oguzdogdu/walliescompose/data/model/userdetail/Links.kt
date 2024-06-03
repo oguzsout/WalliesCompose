@@ -1,9 +1,8 @@
 package com.oguzdogdu.walliescompose.data.model.userdetail
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
+@Serializable
 data class Links(
     val followers: String?,
     val following: String?,
@@ -12,4 +11,4 @@ data class Links(
     val photos: String?,
     val portfolio: String?,
     val self: String?
-):Parcelable
+)

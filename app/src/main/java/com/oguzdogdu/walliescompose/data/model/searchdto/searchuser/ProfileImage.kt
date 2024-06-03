@@ -1,10 +1,10 @@
 package com.oguzdogdu.walliescompose.data.model.searchdto.searchuser
 
-import android.os.Parcelable
+import kotlinx.serialization.Serializable
 
-@kotlinx.parcelize.Parcelize
+@Serializable
 data class ProfileImage(
     val large: String,
     val medium: String,
     val small: String
-):Parcelable
+)

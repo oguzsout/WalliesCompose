@@ -1,12 +1,13 @@
 package com.oguzdogdu.walliescompose.data.model.searchdto
 
-import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-import com.oguzdogdu.walliescompose.domain.model.search.SearchPhoto
 import com.oguzdogdu.walliescompose.data.model.maindto.Link
 import com.oguzdogdu.walliescompose.data.model.maindto.User
 import com.oguzdogdu.walliescompose.data.model.searchdto.searchuser.Urls
-@kotlinx.parcelize.Parcelize
+import com.oguzdogdu.walliescompose.domain.model.search.SearchPhoto
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Result(
     @SerializedName("alt_description")
     val alt_description: String?,
@@ -30,7 +31,7 @@ data class Result(
     val urls: Urls?,
     @SerializedName("user")
     val user: User?,
-):Parcelable
+)
 
 fun Result.toDomainSearch() = SearchPhoto(
     id = id,

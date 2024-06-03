@@ -57,8 +57,8 @@ class WallpaperRepositoryImpl @Inject constructor(
     WallpaperRepository {
     override suspend fun getHomeImagesByPopulars(): Flow<Resource<List<PopularImage>?>> {
         return safeApiCall(ioDispatcher) {
-            service.getImagesByOrders(perPage = 10, page = 1, order = Constants.POPULAR).body()
-                ?.map {
+            service.getImagesByOrders(perPage = 10, page = 1, order = Constants.POPULAR)
+                .mapNotNull {
                     it.toDomainModelPopular()
                 }
         }
@@ -66,8 +66,8 @@ class WallpaperRepositoryImpl @Inject constructor(
 
     override suspend fun getHomeImagesByLatest(): Flow<Resource<List<LatestImage>?>> {
         return safeApiCall(ioDispatcher) {
-            service.getImagesByOrders(perPage = 10, page = 1, order = Constants.LATEST).body()
-                ?.map {
+            service.getImagesByOrders(perPage = 10, page = 1, order = Constants.LATEST)
+                .mapNotNull {
                     it.toDomainModelLatest()
                 }
         }
@@ -75,7 +75,7 @@ class WallpaperRepositoryImpl @Inject constructor(
 
     override suspend fun getHomeTopicsImages(): Flow<Resource<List<Topics>?>> {
         return safeApiCall(ioDispatcher) {
-            service.getTopics(perPage = 6, page = 1).body()?.map {
+            service.getTopics(perPage = 6, page = 1).mapNotNull {
                 it.toDomainTopics()
             }
         }
@@ -172,7 +172,7 @@ class WallpaperRepositoryImpl @Inject constructor(
 
     override suspend fun getPhoto(id: String?): Flow<Resource<Photo?>> {
         return safeApiCall(ioDispatcher) {
-            service.getPhoto(id = id).body()?.toDomainModelPhoto()
+            service.getPhoto(id = id).toDomainModelPhoto()
         }
     }
 
@@ -219,7 +219,7 @@ class WallpaperRepositoryImpl @Inject constructor(
     }
     override suspend fun getCollectionsListById(id: String?): Flow<Resource<List<CollectionList>?>> {
         return safeApiCall(ioDispatcher){
-            service.getCollectionsListById(id).body()?.map {
+            service.getCollectionsListById(id).mapNotNull {
                 it.toDomainCollectionDetailList()
             }
         }

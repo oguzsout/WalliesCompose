@@ -1,8 +1,9 @@
 package com.oguzdogdu.walliescompose.data.model.maindto
 
-import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-@kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Sponsor(
     @SerializedName("accepted_tos")
     val acceptedTos: Boolean?,
@@ -36,4 +37,4 @@ data class Sponsor(
     val updatedAt: String?,
     @SerializedName("username")
     val username: String?
-):Parcelable
+)

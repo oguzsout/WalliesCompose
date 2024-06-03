@@ -1,12 +1,10 @@
 package com.oguzdogdu.walliescompose.data.model.userdetail
 
-import android.os.Parcelable
-import com.oguzdogdu.walliescompose.data.model.userdetail.Source
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
+@Serializable
 data class Aggregated(
     val source: Source?,
     val title: String?,
     val type: String?
-):Parcelable
+)
