@@ -7,6 +7,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,22 +28,29 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -80,6 +88,9 @@ fun SharedTransitionScope.DetailScreenRoute(
     var shareEnabled by remember { mutableStateOf(false) }
     val launcherOfShare = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         shareEnabled = true
+    }
+    var colorFilter by remember {
+        mutableStateOf<ColorFilter?>(null)
     }
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
@@ -125,7 +136,8 @@ fun SharedTransitionScope.DetailScreenRoute(
             context.setWallpaperFromUrl(
                 lifecycleOwner = lifecycleOwner,
                 imageUrl = state.detail?.rawQuality?.adjustUrlForScreenConstraints(context),
-                place = wallpaperPlace
+                place = wallpaperPlace,
+                colorFilter = colorFilter
             )
         }
     }
@@ -254,6 +266,9 @@ fun SharedTransitionScope.DetailScreenRoute(
             },
             onTagButtonClick = {tag ->
                 onTagClick.invoke(tag)
+            },
+            newBitmap = {
+                colorFilter = it
             }
         )
     }
@@ -284,16 +299,52 @@ fun SharedTransitionScope.DetailScreenContent(
     onAddFavoriteButtonClick: (FavoriteImages) -> Unit,
     onRemoveFavoriteButtonClick: (FavoriteImages) -> Unit,
     onTagButtonClick: (String) -> Unit,
+    newBitmap: (ColorFilter) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
     var isExpand by remember {
         mutableStateOf(false)
     }
+
+    var brightness by remember {
+        mutableFloatStateOf(0f)
+    }
+
+    var contrast by remember { mutableFloatStateOf(1f) }
+
+    var saturation by remember { mutableFloatStateOf(1f) }
+
+    val colorMatrix: FloatArray = floatArrayOf(
+        contrast * saturation,
+        (1 - saturation) * 0.3086f * contrast,
+        (1 - saturation) * 0.6094f * contrast,
+        0f,
+        brightness,
+        (1 - saturation) * 0.3086f * contrast,
+        contrast * saturation,
+        (1 - saturation) * 0.082f * contrast,
+        0f,
+        brightness,
+        (1 - saturation) * 0.6094f * contrast,
+        (1 - saturation) * 0.082f * contrast,
+        contrast * saturation,
+        0f,
+        brightness,
+        0f,
+        0f,
+        0f,
+        1f,
+        0f
+    )
+
+    var interactionSource = remember { MutableInteractionSource() }
 
     Box(modifier = modifier
         .fillMaxSize()
         .padding(paddingValues = paddingValues)
     ) {
+
     Column(
         modifier = modifier
             .padding(8.dp)
@@ -308,13 +359,114 @@ fun SharedTransitionScope.DetailScreenContent(
                     sharedContentState = rememberSharedContentState(key = "popularImage-${state.detail?.id}"),
                     animatedVisibilityScope = animatedVisibilityScope
                 )
-                .weight(1f)
+                .fillMaxSize()
                 .clip(RoundedCornerShape(16.dp))
                 .combinedClickable(onClick = {}, onLongClick = { isExpand = !isExpand }),
             model = state.detail?.mediumQuality,
             contentDescription = state.detail?.desc,
             contentScale = ContentScale.FillBounds,
-        )
+            colorFilter =  ColorFilter.colorMatrix(
+                ColorMatrix(colorMatrix)
+        ))
+        Spacer(modifier = modifier.size(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                painterResource(id = R.drawable.round_brightness_6_24),
+                contentDescription = "",
+                tint = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.size(24.dp)
+            )
+            
+            Spacer(modifier = modifier.size(8.dp))
+
+            Slider(
+                interactionSource = interactionSource,
+                thumb = {
+                    SliderDefaults.Thumb(
+                        interactionSource = interactionSource,
+                        thumbSize = DpSize(8.dp,32.dp)
+                    )
+                },
+                value = brightness,
+                onValueChange = { brightness = it },
+                valueRange = 0f..100f,
+                steps = 10,
+                colors = SliderDefaults.colors(activeTickColor = MaterialTheme.colorScheme.primary,
+                    inactiveTickColor = MaterialTheme.colorScheme.onPrimary,
+                    inactiveTrackColor = Color.LightGray,
+                    activeTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+                    thumbColor = Color.Black)
+            )
+        }
+        Spacer(modifier = modifier.size(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                painterResource(id = R.drawable.round_contrast_24),
+                contentDescription = "",
+                tint = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.size(24.dp)
+            )
+
+            Spacer(modifier = modifier.size(8.dp))
+
+            Slider(
+                interactionSource = interactionSource,
+                thumb = {
+                    SliderDefaults.Thumb(
+                        interactionSource = interactionSource,
+                        thumbSize = DpSize(8.dp,32.dp)
+                    )
+                },
+                value = contrast,
+                onValueChange = { contrast = it },
+                valueRange = 0f..5f,
+                steps = 10,
+                colors = SliderDefaults.colors(activeTickColor = MaterialTheme.colorScheme.primary,
+                    inactiveTickColor = MaterialTheme.colorScheme.onPrimary,
+                    inactiveTrackColor = Color.LightGray,
+                    activeTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+                    thumbColor = Color.Black)
+            )
+        }
+        Spacer(modifier = modifier.size(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                painterResource(id = R.drawable.round_invert_colors_24),
+                contentDescription = "",
+                tint = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.size(24.dp)
+            )
+
+            Spacer(modifier = modifier.size(8.dp))
+
+            Slider(
+                interactionSource = interactionSource,
+                thumb = {
+                    SliderDefaults.Thumb(
+                        interactionSource = interactionSource,
+                        thumbSize = DpSize(8.dp,32.dp)
+                    )
+                },
+                value = saturation,
+                onValueChange = { saturation = it },
+                valueRange = 0f..2f,
+                steps = 10,
+                colors = SliderDefaults.colors(activeTickColor = MaterialTheme.colorScheme.primary,
+                    inactiveTickColor = MaterialTheme.colorScheme.onPrimary,
+                    inactiveTrackColor = Color.LightGray,
+                    activeTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+                    thumbColor = Color.Black)
+            )
+        }
         Spacer(modifier = modifier.size(8.dp))
         PhotoDetailedInformationCard(
             modifier = Modifier.align(Alignment.End),
@@ -335,9 +487,18 @@ fun SharedTransitionScope.DetailScreenContent(
         SetWallpaperImageBottomSheet(
             isOpen = stateOfSetWallpaperBottomSheet,
             onDismiss = { onSetWallpaperBottomSheetDismiss.invoke(false) },
-            onSetLockButtonClick = { onSetLockButtonClick.invoke(TypeOfSetWallpaper.LOCK) },
-            onSetHomeButtonClick = { onSetHomeButtonClick.invoke(TypeOfSetWallpaper.HOME) },
-            onSetHomeAndLockButtonClick = { onSetHomeAndLockButtonClick.invoke(TypeOfSetWallpaper.HOME_AND_LOCK) })
+            onSetLockButtonClick = {
+                onSetLockButtonClick.invoke(TypeOfSetWallpaper.LOCK)
+                newBitmap.invoke(ColorFilter.colorMatrix(ColorMatrix(colorMatrix)))
+            },
+            onSetHomeButtonClick = {
+                onSetHomeButtonClick.invoke(TypeOfSetWallpaper.HOME)
+                newBitmap.invoke(ColorFilter.colorMatrix(ColorMatrix(colorMatrix)))
+            },
+            onSetHomeAndLockButtonClick = {
+                onSetHomeAndLockButtonClick.invoke(TypeOfSetWallpaper.HOME_AND_LOCK)
+                newBitmap.invoke(ColorFilter.colorMatrix(ColorMatrix(colorMatrix)))
+            })
         }
     }
 }
