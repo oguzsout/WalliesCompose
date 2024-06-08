@@ -1,5 +1,6 @@
 package com.oguzdogdu.walliescompose.features.detail
 
+import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibilityScope
@@ -22,7 +23,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,10 +33,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -59,6 +65,7 @@ import com.oguzdogdu.walliescompose.util.adjustUrlForScreenConstraints
 import com.oguzdogdu.walliescompose.util.downloadImageFromWeb
 import com.oguzdogdu.walliescompose.util.setWallpaperFromUrl
 import com.oguzdogdu.walliescompose.util.shareExternal
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -80,6 +87,9 @@ fun SharedTransitionScope.DetailScreenRoute(
     var shareEnabled by remember { mutableStateOf(false) }
     val launcherOfShare = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         shareEnabled = true
+    }
+    var colorFilter by remember {
+        mutableStateOf<ColorFilter?>(null)
     }
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
@@ -125,7 +135,16 @@ fun SharedTransitionScope.DetailScreenRoute(
             context.setWallpaperFromUrl(
                 lifecycleOwner = lifecycleOwner,
                 imageUrl = state.detail?.rawQuality?.adjustUrlForScreenConstraints(context),
-                place = wallpaperPlace
+                place = wallpaperPlace,
+                colorFilter = colorFilter,
+                onSuccess = {
+                    detailViewModel.handleScreenEvents(
+                        DetailScreenEvent.OpenSetWallpaperBottomSheet(
+                            isOpen = false
+                        )
+                    )
+                }
+                , onError = {}
             )
         }
     }
@@ -254,13 +273,15 @@ fun SharedTransitionScope.DetailScreenRoute(
             },
             onTagButtonClick = {tag ->
                 onTagClick.invoke(tag)
+            },
+            newBitmap = {
+                colorFilter = it
             }
         )
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalFoundationApi::class,
-    ExperimentalMaterial3Api::class
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalFoundationApi::class
 )
 @Composable
 fun SharedTransitionScope.DetailScreenContent(
@@ -284,16 +305,23 @@ fun SharedTransitionScope.DetailScreenContent(
     onAddFavoriteButtonClick: (FavoriteImages) -> Unit,
     onRemoveFavoriteButtonClick: (FavoriteImages) -> Unit,
     onTagButtonClick: (String) -> Unit,
+    newBitmap: (ColorFilter) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isExpand by remember {
         mutableStateOf(false)
+    }
+    val coroutineScope = rememberCoroutineScope()
+    val graphicsLayer = rememberGraphicsLayer()
+    var bitmapForDialog by remember{
+        mutableStateOf<Bitmap?>(null)
     }
 
     Box(modifier = modifier
         .fillMaxSize()
         .padding(paddingValues = paddingValues)
     ) {
+
     Column(
         modifier = modifier
             .padding(8.dp)
@@ -308,18 +336,30 @@ fun SharedTransitionScope.DetailScreenContent(
                     sharedContentState = rememberSharedContentState(key = "popularImage-${state.detail?.id}"),
                     animatedVisibilityScope = animatedVisibilityScope
                 )
+                .fillMaxSize()
                 .weight(1f)
                 .clip(RoundedCornerShape(16.dp))
-                .combinedClickable(onClick = {}, onLongClick = { isExpand = !isExpand }),
+                .combinedClickable(onClick = {}, onLongClick = { isExpand = !isExpand })
+                .drawWithContent {
+                    graphicsLayer.record {
+                        this@drawWithContent.drawContent()
+                    }
+                    drawLayer(graphicsLayer)
+                },
             model = state.detail?.mediumQuality,
             contentDescription = state.detail?.desc,
-            contentScale = ContentScale.FillBounds,
-        )
+            contentScale = ContentScale.FillBounds)
+
         Spacer(modifier = modifier.size(8.dp))
+
         PhotoDetailedInformationCard(
             modifier = Modifier.align(Alignment.End),
             state = state,
-            onSetWallpaperClick = { isOpen -> onSetWallpaperButtonClick.invoke(isOpen) },
+            onSetWallpaperClick = { isOpen -> onSetWallpaperButtonClick.invoke(isOpen)
+                coroutineScope.launch {
+                    val bitmap = graphicsLayer.toImageBitmap().asAndroidBitmap()
+                    bitmapForDialog = bitmap
+                } },
             onShareClick = { url -> onShareButtonClick.invoke(url) },
             onDownloadClick = { isOpen -> onDownloadButtonClick.invoke(isOpen) },
             onAddFavoriteClick = { photo -> onAddFavoriteButtonClick.invoke(photo) },
@@ -333,11 +373,21 @@ fun SharedTransitionScope.DetailScreenContent(
             onMediumButtonClick = { onMediumButtonClick.invoke(TypeOfPhotoQuality.MEDIUM) },
             onLowButtonClick = { onLowButtonClick.invoke(TypeOfPhotoQuality.LOW) })
         SetWallpaperImageBottomSheet(
+            imageForFilter = bitmapForDialog,
             isOpen = stateOfSetWallpaperBottomSheet,
             onDismiss = { onSetWallpaperBottomSheetDismiss.invoke(false) },
-            onSetLockButtonClick = { onSetLockButtonClick.invoke(TypeOfSetWallpaper.LOCK) },
-            onSetHomeButtonClick = { onSetHomeButtonClick.invoke(TypeOfSetWallpaper.HOME) },
-            onSetHomeAndLockButtonClick = { onSetHomeAndLockButtonClick.invoke(TypeOfSetWallpaper.HOME_AND_LOCK) })
+            onSetLockButtonClick = {
+                onSetLockButtonClick.invoke(TypeOfSetWallpaper.LOCK)
+            },
+            onSetHomeButtonClick = {
+                onSetHomeButtonClick.invoke(TypeOfSetWallpaper.HOME)
+            },
+            onSetHomeAndLockButtonClick = {
+                onSetHomeAndLockButtonClick.invoke(TypeOfSetWallpaper.HOME_AND_LOCK)
+            },
+            adjustColorFilter = {
+                newBitmap.invoke(it)
+            })
         }
     }
 }

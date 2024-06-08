@@ -2,58 +2,94 @@ package com.oguzdogdu.walliescompose.util
 
 import android.app.WallpaperManager
 import android.content.Context
-import android.os.Build
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.widget.Toast
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.asAndroidColorFilter
 import androidx.core.graphics.drawable.toBitmapOrNull
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import coil.Coil
-import coil.request.CachePolicy
+import coil.ImageLoader
 import coil.request.ImageRequest
 import com.oguzdogdu.walliescompose.features.detail.TypeOfSetWallpaper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-fun Context.setWallpaperFromUrl(lifecycleOwner: LifecycleOwner, imageUrl: String?, place: String?) {
+suspend fun Context.setWallpaperFromUrl(
+    lifecycleOwner: LifecycleOwner,
+    imageUrl: String?,
+    place: String?,
+    colorFilter: ColorFilter?,
+    onSuccess: () -> Unit,
+    onError: () -> Unit
+) {
+    val wallpaperManager = WallpaperManager.getInstance(this)
+    val androidColorFilter = colorFilter?.asAndroidColorFilter()
     val imageLoader = Coil.imageLoader(this)
-    val request = ImageRequest.Builder(this)
-        .data(imageUrl)
-        .transformationDispatcher(Dispatchers.Main.immediate)
-        .lifecycle(lifecycleOwner)
-        .allowConversionToBitmap(true)
-        .memoryCachePolicy(CachePolicy.READ_ONLY)
-        .target(
-            onSuccess = { result ->
-                val wallpaperManager = WallpaperManager.getInstance(this)
-                try {
-                    when (place.orEmpty()) {
-                        TypeOfSetWallpaper.LOCK.name ->
-                            wallpaperManager
-                                .setBitmap(
-                                    result.toBitmapOrNull(),
-                                    null,
-                                    true,
-                                    WallpaperManager.FLAG_LOCK
-                                )
+    val bitmap = loadImageBitmap(this@setWallpaperFromUrl, imageLoader, imageUrl)
 
-                        TypeOfSetWallpaper.HOME_AND_LOCK.name ->
-                            wallpaperManager.setBitmap(result.toBitmapOrNull())
-
-                        TypeOfSetWallpaper.HOME.name ->
-                            wallpaperManager.setBitmap(
-                                result.toBitmapOrNull(),
-                                null,
-                                true,
-                                WallpaperManager.FLAG_SYSTEM
-                            )
-                    }
-                    Toast.makeText(this,"Success", Toast.LENGTH_SHORT).show()
-                } catch (e: Exception) {
-                    Toast.makeText(this,e.message, Toast.LENGTH_SHORT).show()
+    lifecycleOwner.lifecycleScope.launch {
+        try {
+            when {
+                bitmap != null && androidColorFilter != null -> {
+                    val filteredBitmap = applyColorFilter(bitmap, androidColorFilter)
+                    setWallpaper(wallpaperManager, filteredBitmap, place.orEmpty())
+                    onSuccess.invoke()
                 }
-            },
-            onError = { error ->
-                Toast.makeText(this,"Something Went Wrong", Toast.LENGTH_SHORT).show()
+                else -> {
+                    onError.invoke()
+                }
             }
-        )
-        .build()
-    imageLoader.enqueue(request)
+        } catch (e: Exception) {
+            showToast(e.message ?: "Unknown error")
+        }
+    }.invokeOnCompletion {
+
+    }
+}
+
+private suspend fun loadImageBitmap(
+    context: Context,
+    imageLoader: ImageLoader,
+    imageUrl: String?
+): Bitmap? {
+    return withContext(Dispatchers.IO) {
+        val request = ImageRequest.Builder(context)
+            .data(imageUrl)
+            .build()
+
+        val result = async { imageLoader.execute(request) }
+        result.await().drawable?.toBitmapOrNull()
+    }
+}
+
+private fun applyColorFilter(bitmap: Bitmap, colorFilter: android.graphics.ColorFilter?): Bitmap {
+    val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+    val paint = Paint()
+    paint.colorFilter = colorFilter
+    val canvas = Canvas(mutableBitmap)
+    canvas.drawBitmap(mutableBitmap, 0f, 0f, paint)
+    return mutableBitmap
+}
+
+private fun Context.setWallpaper(
+    wallpaperManager: WallpaperManager,
+    bitmap: Bitmap,
+    place: String
+) {
+    when (place) {
+        TypeOfSetWallpaper.LOCK.name -> wallpaperManager.setBitmap(bitmap, null, true, WallpaperManager.FLAG_LOCK)
+        TypeOfSetWallpaper.HOME_AND_LOCK.name -> wallpaperManager.setBitmap(bitmap)
+        TypeOfSetWallpaper.HOME.name -> wallpaperManager.setBitmap(bitmap, null, true, WallpaperManager.FLAG_SYSTEM)
+        else -> wallpaperManager.setBitmap(bitmap)
+    }
+}
+
+private fun Context.showToast(message: String) {
+    Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 }
