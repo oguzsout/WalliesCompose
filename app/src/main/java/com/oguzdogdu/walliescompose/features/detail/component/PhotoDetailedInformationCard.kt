@@ -31,14 +31,14 @@ import com.oguzdogdu.walliescompose.ui.theme.regular
 
 @Composable
 fun PhotoDetailedInformationCard(
-    modifier: Modifier = Modifier,
     state: DetailState,
     onSetWallpaperClick: (Boolean) -> Unit,
     onShareClick: (String) -> Unit,
     onDownloadClick: (Boolean) -> Unit,
     onAddFavoriteClick: (FavoriteImages) -> Unit,
     onRemoveFavoriteClick: (FavoriteImages) -> Unit,
-    onTagClick:(String) -> Unit
+    onTagClick:(String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Card(
         colors = CardDefaults.cardColors(
