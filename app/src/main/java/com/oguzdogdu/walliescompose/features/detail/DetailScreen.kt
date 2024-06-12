@@ -91,6 +91,9 @@ fun SharedTransitionScope.DetailScreenRoute(
     var colorFilter by remember {
         mutableStateOf<ColorFilter?>(null)
     }
+    var isLoadingForSetWallpaper by remember {
+        mutableStateOf(false)
+    }
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
         detailViewModel.handleScreenEvents(DetailScreenEvent.GetPhotoDetails)
@@ -144,7 +147,10 @@ fun SharedTransitionScope.DetailScreenRoute(
                         )
                     )
                 }
-                , onError = {}
+                , onError = {},
+                isLoading = {
+                    isLoadingForSetWallpaper = it
+                }
             )
         }
     }
@@ -202,6 +208,7 @@ fun SharedTransitionScope.DetailScreenRoute(
             animatedVisibilityScope = animatedVisibilityScope,
             paddingValues = paddingValues,
             state = state,
+            wallpaperPlace = wallpaperPlace,
             stateOfDownloadBottomSheet = stateOfDownloadBottomSheet,
             stateOfSetWallpaperBottomSheet = stateOfSetWallpaperBottomSheet,
             onDownloadBottomSheetDismiss = { isOpen ->
@@ -276,7 +283,8 @@ fun SharedTransitionScope.DetailScreenRoute(
             },
             newBitmap = {
                 colorFilter = it
-            }
+            },
+            loadingForSetWallpaperButton = isLoadingForSetWallpaper
         )
     }
 }
@@ -288,6 +296,7 @@ fun SharedTransitionScope.DetailScreenContent(
     animatedVisibilityScope: AnimatedVisibilityScope,
     paddingValues: PaddingValues,
     state: DetailState,
+    wallpaperPlace: String?,
     stateOfDownloadBottomSheet: Boolean,
     stateOfSetWallpaperBottomSheet: Boolean,
     onDownloadBottomSheetDismiss: (Boolean) -> Unit,
@@ -306,6 +315,7 @@ fun SharedTransitionScope.DetailScreenContent(
     onRemoveFavoriteButtonClick: (FavoriteImages) -> Unit,
     onTagButtonClick: (String) -> Unit,
     newBitmap: (ColorFilter) -> Unit,
+    loadingForSetWallpaperButton: Boolean,
     modifier: Modifier = Modifier
 ) {
     var isExpand by remember {
@@ -374,7 +384,9 @@ fun SharedTransitionScope.DetailScreenContent(
             onLowButtonClick = { onLowButtonClick.invoke(TypeOfPhotoQuality.LOW) })
         SetWallpaperImageBottomSheet(
             imageForFilter = bitmapForDialog,
+            wallpaperPlace = wallpaperPlace,
             isOpen = stateOfSetWallpaperBottomSheet,
+            isLoading = loadingForSetWallpaperButton,
             onDismiss = { onSetWallpaperBottomSheetDismiss.invoke(false) },
             onSetLockButtonClick = {
                 onSetLockButtonClick.invoke(TypeOfSetWallpaper.LOCK)
