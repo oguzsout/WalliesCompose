@@ -1,8 +1,8 @@
 package com.oguzdogdu.walliescompose.features.setwallpaper
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -26,6 +26,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -46,7 +48,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +55,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -61,6 +63,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.features.detail.TypeOfSetWallpaper
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
 import kotlinx.coroutines.launch
@@ -69,13 +72,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun SetWallpaperImageBottomSheet(
     imageForFilter: Bitmap?,
-    modifier: Modifier = Modifier,
+    wallpaperPlace: String?,
     isOpen: Boolean,
+    isLoading: Boolean,
     onDismiss: () -> Unit,
     onSetLockButtonClick: () -> Unit,
     onSetHomeButtonClick: () -> Unit,
     onSetHomeAndLockButtonClick: () -> Unit,
-    adjustColorFilter:(ColorFilter) -> Unit
+    adjustColorFilter:(ColorFilter) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var openBottomSheet by remember { mutableStateOf(isOpen) }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -83,9 +88,6 @@ fun SetWallpaperImageBottomSheet(
 
     LaunchedEffect(key1 = isOpen) {
         openBottomSheet = isOpen
-        snapshotFlow {
-            Log.d("Sheet","${bottomSheetState.requireOffset().dp}")
-        }
     }
 
     if (openBottomSheet) {
@@ -173,24 +175,22 @@ fun SetWallpaperImageBottomSheet(
                     Spacer(modifier = Modifier.height(8.dp))
                     HorizontalDivider()
                 }
-            }
-        ) {
-
-                BottomSheetContent(
-                    imageForFilter = imageForFilter,
-                    onSetLockButtonClick = {
+            }) {
+            BottomSheetContent(imageForFilter = imageForFilter,
+                bottomSheetState = bottomSheetState,
+                wallpaperPlace = wallpaperPlace,
+                onSetLockButtonClick = {
                     onSetLockButtonClick.invoke()
                 },
-                    onSetHomeButtonClick = {
+                onSetHomeButtonClick = {
                     onSetHomeButtonClick.invoke()
                 },
-                    onSetHomeAndLockButtonClick = {
+                onSetHomeAndLockButtonClick = {
                     onSetHomeAndLockButtonClick.invoke()
                 },
-                    adjustColorFilter = {
-                        adjustColorFilter.invoke(it)
-                    })
-
+                adjustColorFilter = {
+                    adjustColorFilter.invoke(it)
+                }, isLoading = isLoading)
         }
     }
 }
@@ -199,20 +199,18 @@ fun SetWallpaperImageBottomSheet(
 @Composable
 fun BottomSheetContent(
     imageForFilter: Bitmap?,
-    modifier: Modifier = Modifier,
+    bottomSheetState: SheetState,
+    wallpaperPlace: String?,
     onSetLockButtonClick: () -> Unit,
     onSetHomeButtonClick: () -> Unit,
     onSetHomeAndLockButtonClick: () -> Unit,
-    adjustColorFilter:(ColorFilter) -> Unit
+    adjustColorFilter:(ColorFilter) -> Unit,
+    isLoading: Boolean,
+    modifier: Modifier = Modifier,
 ) {
-    var brightness by remember {
-        mutableFloatStateOf(0f)
-    }
-
+    var brightness by remember { mutableFloatStateOf(0f) }
     var contrast by remember { mutableFloatStateOf(1f) }
-
     var saturation by remember { mutableFloatStateOf(1f) }
-
     val colorMatrix: FloatArray = floatArrayOf(
         contrast * saturation,
         (1 - saturation) * 0.3086f * contrast,
@@ -235,14 +233,22 @@ fun BottomSheetContent(
         1f,
         0f
     )
-
     val brightnessInteractionSource = remember { MutableInteractionSource() }
     val contrastInteractionSource = remember { MutableInteractionSource() }
     val saturationInteractionSource = remember { MutableInteractionSource() }
+    val anim by animateFloatAsState(
+        targetValue = when (bottomSheetState.currentValue) {
+            SheetValue.Hidden -> 90f
+            SheetValue.PartiallyExpanded -> 45f
+            SheetValue.Expanded -> 0f
+        },
+        animationSpec = tween(1000),
+        label = ""
+    )
     Column(
-        modifier = modifier
-            .fillMaxHeight(0.9f)
-            .padding(8.dp)
+        modifier = Modifier
+            .fillMaxHeight(0.87f)
+            .padding(horizontal = 16.dp)
             .verticalScroll(state = rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -250,168 +256,205 @@ fun BottomSheetContent(
             Image(
                 bitmap = it,
                 contentDescription = "",
-                modifier = Modifier.clip(RoundedCornerShape(16.dp)),
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp)),
                 colorFilter = ColorFilter.colorMatrix(ColorMatrix(colorMatrix))
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                painterResource(id = R.drawable.round_brightness_6_24),
-                contentDescription = "",
-                tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(24.dp)
-            )
-
-            Spacer(modifier = modifier.size(8.dp))
-
-            Slider(
-                interactionSource = brightnessInteractionSource,
-                colors = SliderDefaults.colors(
-                    inactiveTrackColor = MaterialTheme.colorScheme.tertiary,
-                    activeTrackColor = MaterialTheme.colorScheme.primary,
-                    thumbColor = MaterialTheme.colorScheme.inversePrimary),
-                thumb = {
-                    SliderDefaults.Thumb(
-                        interactionSource = brightnessInteractionSource,
-                        thumbSize = DpSize(4.dp,24.dp)
-                    )
-                },
-                value = brightness,
-                onValueChange = { brightness = it },
-                valueRange = 0f..100f,
-            )
-        }
-        Spacer(modifier = modifier.size(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                painterResource(id = R.drawable.round_contrast_24),
-                contentDescription = "",
-                tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(24.dp)
-            )
-
-            Spacer(modifier = modifier.size(8.dp))
-
-            Slider(
-                interactionSource = contrastInteractionSource,
-                colors = SliderDefaults.colors(
-                    inactiveTrackColor = MaterialTheme.colorScheme.tertiary,
-                    activeTrackColor = MaterialTheme.colorScheme.primary,
-                    thumbColor = MaterialTheme.colorScheme.inversePrimary),
-                thumb = {
-                    SliderDefaults.Thumb(
-                        interactionSource = contrastInteractionSource,
-                        thumbSize = DpSize(4.dp,24.dp)
-                    )
-                },
-                value = contrast,
-                onValueChange = { contrast = it },
-                valueRange = 0f..5f
-            )
-        }
-        Spacer(modifier = modifier.size(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                painterResource(id = R.drawable.round_invert_colors_24),
-                contentDescription = "",
-                tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(24.dp)
-            )
-
-            Spacer(modifier = modifier.size(8.dp))
-
-            Slider(
-                interactionSource = saturationInteractionSource,
-                colors = SliderDefaults.colors(
-                    inactiveTrackColor = MaterialTheme.colorScheme.tertiary,
-                    activeTrackColor = MaterialTheme.colorScheme.primary,
-                    thumbColor = MaterialTheme.colorScheme.inversePrimary),
-                thumb = {
-                    SliderDefaults.Thumb(
-                        interactionSource = saturationInteractionSource,
-                        thumbSize = DpSize(4.dp,24.dp)
-                    )
-                },
-                value = saturation,
-                onValueChange = { saturation = it },
-                valueRange = 0f..2f,
-            )
-        }
-        Spacer(modifier = modifier.size(8.dp))
-        OutlinedButton(
-            onClick = {
-                onSetLockButtonClick.invoke()
-                adjustColorFilter.invoke(ColorFilter.colorMatrix(ColorMatrix(colorMatrix)))
+        Column(modifier = Modifier
+            .graphicsLayer {
+                translationY = anim
             },
-            modifier = modifier
-                .fillMaxWidth(),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ),
-            shape = RoundedCornerShape(16.dp),
-            contentPadding = PaddingValues(16.dp),
-            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onSurface)
-        ) {
-            Text(
-                text = stringResource(id = R.string.set_to_lock_screen_text),
-                fontSize = 14.sp,
-                fontFamily = medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-        Spacer(modifier = modifier.size(8.dp))
-        OutlinedButton(
-            onClick = {
-                onSetHomeButtonClick.invoke()
-                adjustColorFilter.invoke(ColorFilter.colorMatrix(ColorMatrix(colorMatrix)))
-            },
-            modifier = modifier
-                .fillMaxWidth(),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ),
-            shape = RoundedCornerShape(16.dp),
-            contentPadding = PaddingValues(16.dp),
-            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onSurface)
-        ) {
-            Text(
-                text = stringResource(id = R.string.set_to_home_screen_text),
-                fontSize = 14.sp,
-                fontFamily = medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-        Spacer(modifier = modifier.size(8.dp))
-        OutlinedButton(
-            onClick = {
-                onSetHomeAndLockButtonClick.invoke()
-                adjustColorFilter.invoke(ColorFilter.colorMatrix(ColorMatrix(colorMatrix)))
-            },
-            modifier = modifier
-                .fillMaxWidth(),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ),
-            shape = RoundedCornerShape(16.dp),
-            contentPadding = PaddingValues(16.dp),
-            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onSurface)
-        ) {
-            Text(
-                text = stringResource(id = R.string.set_to_home_amp_lockscreens_text),
-                fontSize = 14.sp,
-                fontFamily = medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painterResource(id = R.drawable.round_brightness_6_24),
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.size(24.dp)
+                )
+
+                Spacer(modifier = Modifier.size(8.dp))
+
+                Slider(
+                    interactionSource = brightnessInteractionSource,
+                    colors = SliderDefaults.colors(
+                        inactiveTrackColor = MaterialTheme.colorScheme.tertiary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        thumbColor = MaterialTheme.colorScheme.inversePrimary),
+                    thumb = {
+                        SliderDefaults.Thumb(
+                            interactionSource = brightnessInteractionSource,
+                            thumbSize = DpSize(4.dp,24.dp)
+                        )
+                    },
+                    value = brightness,
+                    onValueChange = { brightness = it },
+                    valueRange = 0f..100f,
+                )
+            }
+            Spacer(modifier = Modifier.size(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painterResource(id = R.drawable.round_contrast_24),
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.size(24.dp)
+                )
+
+                Spacer(modifier = Modifier.size(8.dp))
+
+                Slider(
+                    interactionSource = contrastInteractionSource,
+                    colors = SliderDefaults.colors(
+                        inactiveTrackColor = MaterialTheme.colorScheme.tertiary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        thumbColor = MaterialTheme.colorScheme.inversePrimary),
+                    thumb = {
+                        SliderDefaults.Thumb(
+                            interactionSource = contrastInteractionSource,
+                            thumbSize = DpSize(4.dp,24.dp)
+                        )
+                    },
+                    value = contrast,
+                    onValueChange = { contrast = it },
+                    valueRange = 0f..5f
+                )
+            }
+            Spacer(modifier = Modifier.size(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painterResource(id = R.drawable.round_invert_colors_24),
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.size(24.dp)
+                )
+
+                Spacer(modifier = modifier.size(8.dp))
+
+                Slider(
+                    interactionSource = saturationInteractionSource,
+                    colors = SliderDefaults.colors(
+                        inactiveTrackColor = MaterialTheme.colorScheme.tertiary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        thumbColor = MaterialTheme.colorScheme.inversePrimary),
+                    thumb = {
+                        SliderDefaults.Thumb(
+                            interactionSource = saturationInteractionSource,
+                            thumbSize = DpSize(4.dp,24.dp)
+                        )
+                    },
+                    value = saturation,
+                    onValueChange = { saturation = it },
+                    valueRange = 0f..2f,
+                )
+            }
+            Spacer(modifier = Modifier.size(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Absolute.SpaceBetween
+            ) {
+                OutlinedButton(
+                    onClick = {
+                        onSetLockButtonClick.invoke()
+                        adjustColorFilter.invoke(ColorFilter.colorMatrix(ColorMatrix(colorMatrix)))
+                    },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                    contentPadding = PaddingValues(12.dp),
+                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onSurface)
+                ) {
+                    when {
+                        isLoading && wallpaperPlace == TypeOfSetWallpaper.LOCK.name -> {
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = modifier.size(16.dp),
+                                strokeWidth = 2.dp
+                            )
+                        }
+                        else -> {
+                            Text(
+                                text = stringResource(id = R.string.set_to_lock_screen_text),
+                                fontSize = 12.sp,
+                                fontFamily = medium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.size(8.dp))
+                OutlinedButton(
+                    onClick = {
+                        onSetHomeButtonClick.invoke()
+                        adjustColorFilter.invoke(ColorFilter.colorMatrix(ColorMatrix(colorMatrix)))
+                    },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                    contentPadding = PaddingValues(12.dp),
+                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onSurface)
+                ) {
+                    when {
+                        isLoading && wallpaperPlace == TypeOfSetWallpaper.HOME.name -> {
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = modifier.size(16.dp),
+                                strokeWidth = 2.dp
+                            )
+                        }
+                        else -> {
+                            Text(
+                                text = stringResource(id = R.string.set_to_home_screen_text),
+                                fontSize = 12.sp,
+                                fontFamily = medium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.size(8.dp))
+                OutlinedButton(
+                    onClick = {
+                        onSetHomeAndLockButtonClick.invoke()
+                        adjustColorFilter.invoke(ColorFilter.colorMatrix(ColorMatrix(colorMatrix)))
+                    },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                    contentPadding = PaddingValues(12.dp),
+                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.onSurface)
+                ) {
+                    when {
+                        isLoading && wallpaperPlace == TypeOfSetWallpaper.HOME_AND_LOCK.name -> {
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = modifier.size(16.dp),
+                                strokeWidth = 2.dp
+                            )
+                        }
+                        else -> {
+                            Text(
+                                text = stringResource(id = R.string.set_to_home_amp_lockscreens_text),
+                                fontSize = 12.sp,
+                                fontFamily = medium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
