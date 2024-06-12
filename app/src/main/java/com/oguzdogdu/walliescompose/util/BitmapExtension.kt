@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.widget.Toast
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asAndroidColorFilter
 import androidx.core.graphics.drawable.toBitmapOrNull
@@ -17,6 +18,7 @@ import coil.request.ImageRequest
 import com.oguzdogdu.walliescompose.features.detail.TypeOfSetWallpaper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -26,7 +28,8 @@ suspend fun Context.setWallpaperFromUrl(
     place: String?,
     colorFilter: ColorFilter?,
     onSuccess: () -> Unit,
-    onError: () -> Unit
+    onError: () -> Unit,
+    isLoading: (Boolean) -> Unit
 ) {
     val wallpaperManager = WallpaperManager.getInstance(this)
     val androidColorFilter = colorFilter?.asAndroidColorFilter()
@@ -34,6 +37,8 @@ suspend fun Context.setWallpaperFromUrl(
     val bitmap = loadImageBitmap(this@setWallpaperFromUrl, imageLoader, imageUrl)
 
     lifecycleOwner.lifecycleScope.launch {
+        isLoading(true)
+        delay(1000)
         try {
             when {
                 bitmap != null && androidColorFilter != null -> {
@@ -47,6 +52,8 @@ suspend fun Context.setWallpaperFromUrl(
             }
         } catch (e: Exception) {
             showToast(e.message ?: "Unknown error")
+        } finally {
+            isLoading(false)
         }
     }.invokeOnCompletion {
 
