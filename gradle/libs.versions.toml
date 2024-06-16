@@ -24,7 +24,7 @@ room = "2.6.1"
 lifecycle-runtime-ktx = "2.7.0"
 activity-compose = "1.8.2"
 compose-bom = "2024.03.00"
-navigation-compose = "2.8.0-beta01"
+navigation-compose = "2.8.0-beta03"
 okhttp = "4.12.0"
 paging-runtime = "3.2.1"
 retrofit = "2.9.0"
@@ -43,6 +43,7 @@ ktorClientCore = "2.3.11"
 ktorClientLogging = "2.3.11"
 ktorSerializationGson = "2.3.11"
 ktorSerializationKotlinxJson = "2.3.11"
+junitKtx = "1.1.5"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist-permissions" }
@@ -108,6 +109,7 @@ material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3-android" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebase-storage-ktx" }
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigation-testing" }
+androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
 
 [plugins]
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
