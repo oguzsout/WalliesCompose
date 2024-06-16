@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.androidx.material3.android)
     implementation(libs.firebase.storage.ktx)
     implementation(libs.androidx.navigation.testing)
+    implementation(libs.androidx.junit.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -88,6 +89,13 @@ dependencies {
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
     androidTestImplementation(libs.hilt.android.testing)
+
+    testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.2")
+    testImplementation ("org.mockito:mockito-core:4.6.1")
+    testImplementation ("org.mockito:mockito-inline:3.11.2")
+    testImplementation ("androidx.arch.core:core-testing:2.2.0")
+    testImplementation ("io.mockk:mockk:1.12.3")
+    testImplementation ("org.mockito.kotlin:mockito-kotlin:4.0.0")
 
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
