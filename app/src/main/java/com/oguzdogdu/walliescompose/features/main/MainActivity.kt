@@ -48,7 +48,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            enableEdgeToEdge()
             val mainState by viewModel.appPreferencesState.collectAsStateWithLifecycle()
             LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
                 viewModel.handleScreenEvents(MainScreenEvent.CheckUserAuthState)
