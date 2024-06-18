@@ -14,6 +14,8 @@ interface UserAuthenticationRepository {
     suspend fun signUp(user: User?, password: String?) : Flow<Resource<User?>>
     suspend fun signInWithGoogle(idToken: String?):Flow<Resource<AuthResult>>
     suspend fun fetchUserInfos():Flow<Resource<User?>>
+    suspend fun addFavorites(id:String?,favorite: String?)
+    suspend fun deleteFavorites(id: String?, favorite: String?)
     suspend fun forgotMyPassword(email: String): Task<Void>
     suspend fun signOut()
     suspend fun changeProfilePhoto(photo: String?)
