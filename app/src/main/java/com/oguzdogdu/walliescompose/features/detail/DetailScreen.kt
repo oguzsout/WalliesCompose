@@ -260,7 +260,8 @@ fun SharedTransitionScope.DetailScreenRoute(
                             profileImage = state.detail?.profileimage,
                             name = state.detail?.name,
                             portfolioUrl = state.detail?.portfolio,
-                            isChecked = true)
+                            isChecked = true
+                        )
                     )
                 )
             },
