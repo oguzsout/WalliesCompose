@@ -123,6 +123,62 @@ class UserAuthenticationRepositoryImpl @Inject constructor(
         return flowOf(result.toUserDomain()).toResource()
     }
 
+    override suspend fun addFavorites(id: String?, favorite: String?) {
+        auth.currentUser?.uid?.let { userId ->
+            val userDocRef = firebaseFirestore.collection(COLLECTION_PATH).document(userId)
+            userDocRef.get().addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    val currentFavorites = documentSnapshot[FAVORITES] as? List<HashMap<String, String>>
+                    val updatedFavorites = mutableListOf<HashMap<String, String>>()
+
+                    if (currentFavorites != null) {
+                        updatedFavorites.addAll(currentFavorites)
+                    }
+
+                    val newFavorite = hashMapOf(
+                        ID to id.orEmpty(),
+                        FAVORITES to favorite.orEmpty()
+                    )
+
+                    updatedFavorites.add(newFavorite)
+
+                    val dataToUpdate = mapOf(FAVORITES to updatedFavorites)
+
+                    userDocRef.update(dataToUpdate)
+                }
+            }
+        }
+    }
+
+    override suspend fun deleteFavorites(id: String?, favorite: String?) {
+        auth.currentUser?.uid?.let { userId ->
+            if (id == null && favorite == null) {
+                return
+            }
+
+            val userDocRef = firebaseFirestore.collection(COLLECTION_PATH).document(userId)
+            userDocRef.get().addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    val currentFavorites =
+                        documentSnapshot[FAVORITES] as? List<HashMap<String, String>>
+
+                    if (currentFavorites != null) {
+                        val updatedFavorites = currentFavorites.toMutableList()
+
+                        updatedFavorites.filterIndexed { index, hashMap ->
+                            hashMap["id"] != id && hashMap["favorite"] != favorite
+                        }.toMutableList().also { filteredList ->
+                            if (filteredList.size != updatedFavorites.size) {
+                                val dataToUpdate = mapOf(FAVORITES to filteredList)
+                                userDocRef.update(dataToUpdate)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     override suspend fun forgotMyPassword(email: String): Task<Void> {
         return auth.sendPasswordResetEmail(email)
     }

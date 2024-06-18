@@ -14,6 +14,7 @@ import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.oguzdogdu.walliescompose.WalliesApplication
 import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
+import com.oguzdogdu.walliescompose.domain.repository.UserAuthenticationRepository
 import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.onFailure
 import com.oguzdogdu.walliescompose.domain.wrapper.onLoading
@@ -35,6 +36,7 @@ import javax.inject.Inject
 class DetailViewModel@Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val repository: WallpaperRepository,
+    private val userAuthenticationRepository: UserAuthenticationRepository
 ) : ViewModel() {
     private val _getPhoto = MutableStateFlow(DetailState())
     val photo = _getPhoto.asStateFlow()
@@ -59,12 +61,12 @@ class DetailViewModel@Inject constructor(
                 getSinglePhoto()
             }
 
-            is DetailScreenEvent.AddFavorites -> addImagesToFavorites(
-              event.favorites
+            is DetailScreenEvent.AddFavorites -> addOrDeleteFavoritesToAnyDatabase(
+              favoriteImage = event.favorites, process = DatabaseProcess.ADD.name
             )
 
-            is DetailScreenEvent.DeleteFavorites -> deleteImageFromFavorites(
-              event.favorites
+            is DetailScreenEvent.DeleteFavorites -> addOrDeleteFavoritesToAnyDatabase(
+                favoriteImage = event.favorites, process = DatabaseProcess.DELETE.name
             )
 
             is DetailScreenEvent.GetFavoriteCheckStat -> getFavoritesFromRoom(id)
@@ -112,16 +114,77 @@ class DetailViewModel@Inject constructor(
         }
     }
 
+    private fun addOrDeleteFavoritesToAnyDatabase(favoriteImage: FavoriteImages, process: String?) {
+        viewModelScope.launch {
+            userAuthenticationRepository.isUserAuthenticatedInFirebase().collectLatest { status ->
+                when (status) {
+                    true -> {
+                        when (process) {
+                            DatabaseProcess.ADD.name -> addImagesToFavorites(
+                                favoriteImage,
+                                storage = ChooseDB.FIREBASE.name
+                            )
+
+                            DatabaseProcess.DELETE.name -> deleteImageFromFavorites(
+                                favoriteImage,
+                                storage = ChooseDB.FIREBASE.name
+                            )
+                        }
+                    }
+
+                    false -> {
+                        when (process) {
+                            DatabaseProcess.ADD.name -> {
+                                addImagesToFavorites(
+                                    favoriteImage,
+                                    storage = ChooseDB.ROOM.name
+                                )
+                            }
+
+                            DatabaseProcess.DELETE.name -> deleteImageFromFavorites(
+                                favoriteImage,
+                                storage = ChooseDB.ROOM.name
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun addImagesToFavorites(
         favoriteImage: FavoriteImages,
-        ) = viewModelScope.launch(Dispatchers.IO) {
-        repository.insertImageToFavorites(favoriteImage)
+        storage: String
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        when (storage) {
+            ChooseDB.FIREBASE.name -> {
+                userAuthenticationRepository.addFavorites(
+                    id = favoriteImage.id,
+                    favorite = favoriteImage.url
+                )
+            }
+
+            ChooseDB.ROOM.name -> {
+                repository.insertImageToFavorites(favoriteImage)
+            }
+        }
     }
 
     private fun deleteImageFromFavorites(
-        favoriteImage: FavoriteImages
+        favoriteImage: FavoriteImages,
+        storage: String
     ) = viewModelScope.launch {
-        repository.deleteFavorites(favoriteImage)
+        when(storage) {
+            ChooseDB.FIREBASE.name -> {
+                userAuthenticationRepository.deleteFavorites(
+                    id = favoriteImage.id,
+                    favorite = favoriteImage.url
+                )
+            }
+            ChooseDB.ROOM.name -> {
+                repository.deleteFavorites(favoriteImage)
+            }
+        }
     }
 
     private fun getFavoritesFromRoom(id: String?) {
@@ -147,4 +210,12 @@ enum class TypeOfSetWallpaper {
     LOCK,
     HOME,
     HOME_AND_LOCK
+}
+enum class ChooseDB(name: String) {
+    FIREBASE("firebase"),
+    ROOM("room")
+}
+enum class DatabaseProcess(name: String) {
+    ADD("add"),
+    DELETE("delete")
 }

@@ -105,7 +105,7 @@ fun WalliesNavHost(
                             }
                         }
                     }, navigateBack = {
-                        navController.popBackStack()
+                        navController.navigateUp()
                     }, navigateToSignInEmail = {
                         navController.navigate(SignInWithEmailScreenNavigationRoute)
                     })
@@ -117,7 +117,7 @@ fun WalliesNavHost(
                         }
                     }
                 }, navigateBack = {
-                    navController.popBackStack()
+                    navController.navigateUp()
                 }, navigateToForgotPassword = {
                     navController.navigateToForgotPasswordScreen()
                 },
@@ -126,9 +126,9 @@ fun WalliesNavHost(
                     }
                 )
                 forgotPasswordScreen(navigateToHome = {}, navigateBack = {
-                    navController.popBackStack()
+                    navController.navigateUp()
                 })
-                signUpScreen(navigateBack = { navController.popBackStack() }, goToLoginScreen = {
+                signUpScreen(navigateBack = { navController.navigateUp() }, goToLoginScreen = {
                     navController.navigate(LoginScreenNavigationRoute) {
                         popUpTo(LoginScreenNavigationRoute){
                             inclusive = true
@@ -161,7 +161,7 @@ fun WalliesNavHost(
                         navController.navigateToLatestScreen()
                     },
                     navigateBack = {
-                        navController.popBackStack()
+                        navController.navigateUp()
                     },
                     onUserPhotoClick = {
                         navController.navigateToAuthenticatedUserScreen()
@@ -180,7 +180,7 @@ fun WalliesNavHost(
                 })
                 settingsScreen()
                 searchScreen(onBackClick = {
-                    navController.popBackStack()
+                    navController.navigateUp()
                 }, searchPhotoClick = {
                     navController.navigateToDetailScreen(photoId = it)
                 }, searchUserClick = {
@@ -190,7 +190,7 @@ fun WalliesNavHost(
                 detailScreen(
                     transitionScope = this@SharedTransitionLayout,
                     onBackClick = {
-                        navController.popBackStack()
+                        navController.navigateUp()
                     },
                     onTagClick = {
                         navController.navigateToSearchScreen(queryFromDetail = it)
@@ -200,28 +200,28 @@ fun WalliesNavHost(
                     }
                 )
                 topicsScreen(onBackClick = {
-                    navController.popBackStack()
+                    navController.navigateUp()
                 }, onTopicClick = {
                     navController.navigateToTopicDetailListScreen(topicId = it)
                 })
                 topicDetailListScreen(onTopicClick = {
                     navController.navigateToDetailScreen(photoId = it)
                 }, onBackClick = {
-                    navController.popBackStack()
+                    navController.navigateUp()
                 })
                 collectionDetailListScreen(
                     transitionScope = this@SharedTransitionLayout,
                     onCollectionClick = {
                         navController.navigateToDetailScreen(photoId = it)
                     }, onBackClick = {
-                        navController.popBackStack()
+                        navController.navigateUp()
                     })
                 popularScreen(
                     transitionScope = this@SharedTransitionLayout, onPopularClick = {
                         navController.navigateToDetailScreen(photoId = it)
                     },
                     onBackClick = {
-                        navController.popBackStack()
+                        navController.navigateUp()
                     })
                 latestScreen(
                     transitionScope = this@SharedTransitionLayout,
@@ -229,7 +229,7 @@ fun WalliesNavHost(
                         navController.navigateToDetailScreen(photoId = it)
                     },
                     onBackClick = {
-                        navController.popBackStack()
+                        navController.navigateUp()
                     })
                 profileDetailScreen(onUserPhotoListClick = { id ->
                     navController.navigateToDetailScreen(photoId = id)
@@ -240,12 +240,12 @@ fun WalliesNavHost(
                         collectionDetailListTitle = title
                     )
                 }, onBackClick = {
-                    navController.popBackStack()
+                    navController.navigateUp()
                 })
                 authenticatedUserScreen(
                     transitionScope = this@SharedTransitionLayout,
                     navigateBack = {
-                        navController.popBackStack()
+                        navController.navigateUp()
                     }, navigateToLogin = {
                         navController.navigate(Routes.Auth.route) {
                             popUpTo(Routes.Home.route) {
@@ -260,13 +260,13 @@ fun WalliesNavHost(
                         navController.navigateToChangeEmailScreen()
                     })
                 changeNameAndSurnameScreen(navigateBack = {
-                    navController.popBackStack()
+                    navController.navigateUp()
                 })
                 changePasswordScreen(navigateBack = {
-                    navController.popBackStack()
+                    navController.navigateUp()
                 })
                 changeEmailScreen(navigateBack = {
-                    navController.popBackStack()
+                    navController.navigateUp()
                 })
             }
         }
