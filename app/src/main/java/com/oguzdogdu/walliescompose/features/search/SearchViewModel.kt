@@ -14,9 +14,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.single
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,6 +34,9 @@ class SearchViewModel @Inject constructor(
         MutableStateFlow(value = PagingData.empty())
     val searchUserListState= _searchUserListState.asStateFlow()
 
+    private val _searchScreenState = MutableStateFlow(SearchState())
+    val searchScreenState = _searchScreenState.asStateFlow()
+
     var query = MutableStateFlow("")
 
     var appLanguage = MutableStateFlow("")
@@ -47,6 +50,7 @@ class SearchViewModel @Inject constructor(
             }
 
             is SearchEvent.GetAppLanguageValue -> getLanguageValue()
+            is SearchEvent.OpenSpeechDialog -> { stateOfSpeechDialog(event.isOpen) }
         }
     }
 
@@ -60,6 +64,14 @@ class SearchViewModel @Inject constructor(
             }.collect { users ->
                 _searchUserListState.value = users
             }
+        }
+    }
+
+    private fun stateOfSpeechDialog(isOpen:Boolean) {
+        viewModelScope.launch {
+           _searchScreenState.update {
+               it.copy(speechDialogState = isOpen)
+           }
         }
     }
 
