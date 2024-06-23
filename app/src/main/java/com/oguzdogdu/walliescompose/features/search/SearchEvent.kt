@@ -6,4 +6,5 @@ sealed class SearchEvent {
         val language: String?,
     ) : SearchEvent()
     data object GetAppLanguageValue : SearchEvent()
+    data class OpenSpeechDialog(val isOpen: Boolean) : SearchEvent()
 }
