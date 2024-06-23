@@ -1,6 +1,11 @@
 package com.oguzdogdu.walliescompose.features.search
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -43,7 +48,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -66,8 +70,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -75,6 +81,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -92,6 +99,7 @@ import com.oguzdogdu.walliescompose.features.search.components.EmptySearchUserLi
 import com.oguzdogdu.walliescompose.features.search.components.EmptyView
 import com.oguzdogdu.walliescompose.features.search.components.ErrorItem
 import com.oguzdogdu.walliescompose.features.search.components.SearchItem
+import com.oguzdogdu.walliescompose.features.search.components.SpeechToTextDialog
 import com.oguzdogdu.walliescompose.navigation.utils.WalliesIcons
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
@@ -117,14 +125,17 @@ fun SearchScreenRoute(
         viewModel.searchUserListState.collectAsLazyPagingItems()
     val appLanguage by viewModel.appLanguage.collectAsStateWithLifecycle()
     val query by viewModel.query.collectAsStateWithLifecycle()
+    val stateOfSearchScreen by viewModel.searchScreenState.collectAsStateWithLifecycle()
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
         viewModel.handleUIEvent(SearchEvent.GetAppLanguageValue)
     }
 
+
     Scaffold(modifier = modifier.fillMaxSize()) {
         SearchScreen(
             query = query,
+            searchState = stateOfSearchScreen,
             paddingValues = it,
             onQuerySearch = { query ->
                 viewModel::handleUIEvent.invoke(
@@ -137,6 +148,9 @@ fun SearchScreenRoute(
             searchUserLazyPagingItems = searchUserListState,
             onBackClick = {
                 onBackClick.invoke()
+            },
+            openSpeechDialog = { isOpen ->
+                viewModel.handleUIEvent(SearchEvent.OpenSpeechDialog(isOpen))
             },
             searchPhotoClick = { photoId ->
                 searchPhotoClick.invoke(photoId)
@@ -152,12 +166,14 @@ fun SearchScreenRoute(
 @Composable
 fun SearchScreen(
     query: String?,
+    searchState: SearchState,
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
     onQuerySearch: (String) -> Unit,
     searchLazyPagingItems: LazyPagingItems<SearchPhoto>,
     searchUserLazyPagingItems: LazyPagingItems<SearchUser>,
     onBackClick: () -> Unit,
+    openSpeechDialog: (Boolean) -> Unit,
     searchPhotoClick: (String) -> Unit,
     searchUserClick: (String) -> Unit,
     queryFromDetail: String?
@@ -177,6 +193,28 @@ fun SearchScreen(
     var listPositionForVisibility by remember {
         mutableStateOf(true)
     }
+
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var permission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val recordAudioLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            permission = isGranted
+            if (isGranted) {
+                openSpeechDialog.invoke(true)
+            }
+        }
+    )
+
     LaunchedEffect(photoListPosition,userListPosition,tabIndex) {
         listPositionForVisibility = when (tabIndex) {
                 0 -> photoListPosition < 2
@@ -192,6 +230,18 @@ fun SearchScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        if (searchState.speechDialogState) {
+            SpeechToTextDialog(
+                onDismiss = {
+                    openSpeechDialog.invoke(false)
+                },
+                searchState = searchState,
+                spokenText = {
+                    onQuerySearch.invoke(it)
+                }
+            )
+        }
 
         val rotation by animateFloatAsState(
             targetValue = if (listPositionForVisibility) 0f else 90f,
@@ -220,7 +270,21 @@ fun SearchScreen(
                     query = query,
                     onBackClick = { onBackClick.invoke() },
                     onQuerySearch = { onQuerySearch.invoke(it) },
-                    queryFromDetail = queryFromDetail
+                    queryFromDetail = queryFromDetail,
+                    openSpeechDialog = {
+                        coroutineScope.launch {
+                            when {
+                                !permission -> {
+                                    coroutineScope.launch {
+                                        recordAudioLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                                    }
+                                }
+                                else -> {
+                                    openSpeechDialog.invoke(it)
+                                }
+                            }
+                        }
+                    }
                 )
             }
         }
@@ -254,7 +318,7 @@ fun TabPagerSearchScreen(
     userListPosition: (Int) -> Unit,
     tabIndex: (Int) -> Unit
 ) {
-    val tabItems = immutableListOf(
+    val tabItems = listOf(
         stringResource(R.string.photos),
         stringResource(R.string.users)
     )
@@ -558,16 +622,23 @@ fun SearchTextField(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
     onQuerySearch: (String) -> Unit,
-    queryFromDetail: String?
+    queryFromDetail: String?,
+    openSpeechDialog: (Boolean) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     var queryString by remember {
-        mutableStateOf(query)
+        mutableStateOf("")
     }
 
     LaunchedEffect(key1 = queryFromDetail) {
-        if (queryFromDetail?.isNotEmpty() == true) {
-            queryString = queryFromDetail.toString()
+        if (queryFromDetail != null) {
+            queryString = queryFromDetail
+        }
+    }
+
+    LaunchedEffect(key1 = query) {
+        if (query != null) {
+            queryString = query
         }
     }
 
@@ -579,7 +650,7 @@ fun SearchTextField(
         verticalAlignment = CenterVertically
     ) {
         TextField(modifier = modifier.fillMaxWidth(),
-            value = queryString.orEmpty(),
+            value = queryString,
             onValueChange = {
                 queryString = it
             },
@@ -596,7 +667,7 @@ fun SearchTextField(
                 keyboardType = KeyboardType.Text, imeAction = ImeAction.Search
             ),
             keyboardActions = KeyboardActions(onSearch = {
-                onQuerySearch.invoke(queryString.orEmpty())
+                onQuerySearch.invoke(queryString)
                 keyboardController?.hide()
             }),
             shape = RoundedCornerShape(64.dp),
@@ -621,18 +692,37 @@ fun SearchTextField(
                 }
             },
             trailingIcon = {
-                if (queryString?.isNotEmpty() == true) {
+                Row(
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .animateContentSize(),
+                    verticalAlignment = CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
                     IconButton(
-                        onClick = { queryString = "" }, modifier = modifier.wrapContentSize()
+                        onClick = { openSpeechDialog.invoke(true) }, modifier = modifier.wrapContentSize()
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.Clear,
+                            painter = painterResource(id = R.drawable.round_mic_24),
                             contentDescription = "",
                             tint = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = modifier.wrapContentSize()
                         )
                     }
+                    if (queryString.isNotEmpty()) {
+                        IconButton(
+                            onClick = { queryString = "" }, modifier = modifier.wrapContentSize()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Clear,
+                                contentDescription = "",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = modifier.wrapContentSize()
+                            )
+                        }
+                    }
                 }
+
             })
     }
 }
