@@ -25,9 +25,7 @@ class SpeechToTextParser(
     override fun onReadyForSpeech(params: Bundle?) {
         _stateOfSpeech.update {
             it.copy(
-                error = null,
-                isStart = true,
-                spokenText = ""
+                error = null
             )
         }
     }
@@ -47,8 +45,8 @@ class SpeechToTextParser(
     override fun onEndOfSpeech() {
         _stateOfSpeech.update {
             it.copy(
-                isStart = false,
-                isSpeaking = false
+                isSpeaking = false,
+                isStart = false
             )
         }
     }
@@ -59,7 +57,9 @@ class SpeechToTextParser(
         }
         _stateOfSpeech.update {
             it.copy(
-                error = "Error: $error"
+                error = "Error: $error",
+                isSpeaking = false,
+                isStart = false
             )
         }
     }
@@ -83,21 +83,12 @@ class SpeechToTextParser(
 
     override fun onEvent(eventType: Int, params: Bundle?) {}
     fun startListening() {
-        _stateOfSpeech.update { SpeechToTextParserState() }
-        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
-            _stateOfSpeech.update {
-                it.copy(
-                    error = "Speech recognition is not available"
-                )
-            }
-        }
         _stateOfSpeech.update {
             it.copy(
                 isSpeaking = true,
                 isStart = true
             )
         }
-
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -107,8 +98,17 @@ class SpeechToTextParser(
         }
         recognizer.setRecognitionListener(this)
         recognizer.startListening(intent)
+
+        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
+            _stateOfSpeech.update {
+                it.copy(
+                    error = "Speech recognition is not available"
+                )
+            }
+        }
     }
     fun stopListening() {
+        recognizer.stopListening()
         _stateOfSpeech.update {
             it.copy(
                 isSpeaking = false,
@@ -117,7 +117,7 @@ class SpeechToTextParser(
                 isStart = false
             )
         }
-        recognizer.stopListening()
+
     }
 }
 @Stable
