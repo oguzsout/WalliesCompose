@@ -1,6 +1,5 @@
 package com.oguzdogdu.walliescompose.features.search.components
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
@@ -11,9 +10,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,6 +17,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -31,7 +28,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -68,7 +65,7 @@ import kotlin.math.sin
 
 @Composable
 fun SpeechToTextDialog(
-    searchState: SearchState, onDismiss: () -> Unit,spokenText:(String) -> Unit
+    searchState: SearchState, onDismiss: () -> Unit, spokenText: (String) -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -104,103 +101,78 @@ fun SpeechToTextDialog(
             dismissOnClickOutside = true, dismissOnBackPress = true, usePlatformDefaultWidth = false
         )
     ) {
-        Surface(modifier = Modifier.fillMaxWidth(0.92f),
-            shape = RoundedCornerShape(8.dp),
-            color = Color.Transparent,
-            content = {
-                Card(
-                    modifier = Modifier
-                        .animateContentSize(
-                            spring(
-                                stiffness = Spring.StiffnessMediumLow
-                            )
-                        )
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    shape = RoundedCornerShape(16.dp),
-                ) {
-                    Column(
+        Card(
+            modifier = Modifier
+                .animateContentSize(spring(stiffness = Spring.StiffnessMediumLow))
+                .fillMaxWidth(fraction = 0.90f)
+                .heightIn(min = 240.dp, max = 480.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier
+                    .animateContentSize()
+                    .heightIn(min = 240.dp, max = 480.dp),
+            ) {
+                if (displayState.spokenText?.isNotEmpty() == false) {
+                    Row(
                         modifier = Modifier
-                            .animateContentSize(
-                                spring(
-                                    stiffness = Spring.StiffnessMediumLow
-                                )
-                            )
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                            .animateContentSize()
+                            .align(Alignment.TopStart)
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .animateContentSize(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            AnimatedContent(
-                                targetState = displayState,
-                                label = "",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .wrapContentHeight(),
-                                transitionSpec = {
-                                    slideInHorizontally(
-                                        animationSpec = tween(1000),
-                                        initialOffsetX = { fullWidth -> fullWidth }
-                                    ) togetherWith
-                                            slideOutHorizontally(
-                                                animationSpec = tween(1000),
-                                                targetOffsetX = { fullWidth -> -fullWidth }
-                                            )
-                                }
-                            ) { voiceState ->
-                                when {
-                                    voiceState.error?.isNotEmpty() == true -> {
-                                        Text(
-                                            text = "Try again!",
-                                            fontSize = 16.sp,
-                                            fontFamily = medium,
-                                            color = Color.Unspecified,
-                                            maxLines = 3,
-                                            textAlign = TextAlign.Start,
-                                        )
-                                    }
-                                    voiceState.isStart && voiceState.spokenText?.isEmpty() == true -> {
-                                        Text(
-                                            text = "Please speak into the microphone to start the search",
-                                            fontSize = 16.sp,
-                                            fontFamily = medium,
-                                            color = Color.Unspecified,
-                                            maxLines = 3,
-                                            textAlign = TextAlign.Start,
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.size(8.dp))
-                       if (displayState.spokenText?.isNotEmpty() == true && !displayState.isSpeaking) {
-                           LoadingState()
-                       } else {
-                           VoiceWaveform(
-                               speechToTextState = speechToTextState
-                           )
-                       }
-
-                        AnimatedVisibility(visible=displayState.error?.isNotEmpty() == true) {
-                            MicrophoneButton(onClick = {
-                                coroutineScope.launch {
-                                    speechToText.stopListening()
-                                    delay(500)
-                                    speechToText.startListening()
-                                }
-                            })
+                        if (displayState.error?.isNotEmpty() == true) {
+                            Text(
+                                text = stringResource(R.string.try_again),
+                                fontSize = 16.sp,
+                                fontFamily = medium,
+                                color = Color.Unspecified,
+                                maxLines = 3,
+                                textAlign = TextAlign.Start,
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(R.string.speech_dialog_title_text),
+                                fontSize = 16.sp,
+                                fontFamily = medium,
+                                color = Color.Unspecified,
+                                maxLines = 3,
+                                textAlign = TextAlign.Start,
+                            )
                         }
                     }
                 }
-            })
+                Spacer(modifier = Modifier.size(8.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(16.dp)
+                        .align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    if (speechToTextState.spokenText?.isNotEmpty() == true && !speechToTextState.isSpeaking) {
+                        LoadingState()
+                    } else {
+                        VoiceWaveform(
+                            speechToTextState = speechToTextState
+                        )
+                    }
+
+                    AnimatedVisibility(visible = speechToTextState.error?.isNotEmpty() == true) {
+                        MicrophoneButton(onClick = {
+                            coroutineScope.launch {
+                                speechToText.startListening()
+                            }
+                        })
+                    }
+                }
+            }
+
+        }
     }
 }
 
