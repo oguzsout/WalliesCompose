@@ -139,5 +139,7 @@
     <string name="email_password_sub_title_text">Use Your Email and Password to Create an Account</string>
     <string name="image_name_surname_sub_title_text">Customize your profile with your picture, name and surname information</string>
     <string name="user_search_desc">Search for people, companies and more.</string>
+    <string name="speech_dialog_title_text">Please speak into the microphone to start the search</string>
+    <string name="try_again">Try again</string>
 
 </resources>
