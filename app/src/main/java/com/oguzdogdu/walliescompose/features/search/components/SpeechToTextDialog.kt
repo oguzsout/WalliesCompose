@@ -1,26 +1,24 @@
 package com.oguzdogdu.walliescompose.features.search.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,15 +26,17 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -45,6 +45,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -59,6 +60,7 @@ import com.oguzdogdu.walliescompose.features.search.SearchState
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.util.SpeechToTextParser
 import com.oguzdogdu.walliescompose.util.SpeechToTextParserState
+import com.oguzdogdu.walliescompose.util.VoiceSteps
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.sin
@@ -73,27 +75,21 @@ fun SpeechToTextDialog(
         mutableStateOf(SpeechToTextParser(context = context))
     }
     val speechToTextState by speechToText.stateOfSpeech.collectAsState()
-    var displayState by remember { mutableStateOf(speechToTextState) }
 
     LaunchedEffect(searchState.speechDialogState) {
         if (searchState.speechDialogState) {
-            speechToText.startListening()
+            speechToText.setVoiceSteps()
         } else {
             speechToText.stopListening()
         }
     }
 
-    LaunchedEffect(key1 = displayState.isSpeaking, key2 = displayState.spokenText) {
-        if (!displayState.isSpeaking && displayState.spokenText?.isNotEmpty() == true) {
+    LaunchedEffect(key1 = speechToTextState.isSpeaking, key2 = speechToTextState.spokenText) {
+        if (!speechToTextState.isSpeaking && speechToTextState.spokenText?.isNotEmpty() == true) {
             delay(1000)
-            spokenText.invoke(displayState.spokenText.orEmpty())
+            spokenText.invoke(speechToTextState.spokenText.orEmpty())
             onDismiss.invoke()
         }
-    }
-
-    LaunchedEffect(speechToTextState) {
-        delay(200)
-        displayState = speechToTextState
     }
 
     Dialog(
@@ -103,81 +99,63 @@ fun SpeechToTextDialog(
     ) {
         Card(
             modifier = Modifier
-                .animateContentSize(spring(stiffness = Spring.StiffnessMediumLow))
-                .fillMaxWidth(fraction = 0.90f)
-                .heightIn(min = 240.dp, max = 480.dp),
+                .fillMaxWidth(fraction = 0.75f)
+                .heightIn(min = 240.dp, max = 360.dp),
             shape = RoundedCornerShape(16.dp),
         ) {
-            androidx.compose.foundation.layout.Box(
-                modifier = Modifier
-                    .animateContentSize()
-                    .heightIn(min = 240.dp, max = 480.dp),
-            ) {
-                if (displayState.spokenText?.isNotEmpty() == false) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .animateContentSize()
-                            .align(Alignment.TopStart)
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        if (displayState.error?.isNotEmpty() == true) {
-                            Text(
-                                text = stringResource(R.string.try_again),
-                                fontSize = 16.sp,
-                                fontFamily = medium,
-                                color = Color.Unspecified,
-                                maxLines = 3,
-                                textAlign = TextAlign.Start,
-                            )
-                        } else {
-                            Text(
-                                text = stringResource(R.string.speech_dialog_title_text),
-                                fontSize = 16.sp,
-                                fontFamily = medium,
-                                color = Color.Unspecified,
-                                maxLines = 3,
-                                textAlign = TextAlign.Start,
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.size(8.dp))
-                Column(
+            Column(modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 240.dp, max = 360.dp)
+                .padding(8.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                AnimatedContent(
+                    targetState = speechToTextState.voiceSteps,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .padding(16.dp)
-                        .align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    if (speechToTextState.spokenText?.isNotEmpty() == true && !speechToTextState.isSpeaking) {
-                        LoadingState()
-                    } else {
-                        VoiceWaveform(
-                            speechToTextState = speechToTextState
-                        )
-                    }
-
-                    AnimatedVisibility(visible = speechToTextState.error?.isNotEmpty() == true) {
-                        MicrophoneButton(onClick = {
+                        .fillMaxWidth(),
+                    transitionSpec = {
+                        slideInHorizontally(
+                            animationSpec = tween(1000),
+                            initialOffsetX = { fullWidth -> fullWidth }
+                        ) togetherWith
+                                slideOutHorizontally(
+                                    animationSpec = tween(1000),
+                                    targetOffsetX = { fullWidth -> -fullWidth }
+                                )
+                    }, label = ""
+                ) { targetState ->
+                    when(targetState) {
+                        VoiceSteps.FIRST_OPENED -> BeforeSpeechContent(onClick = {
                             coroutineScope.launch {
                                 speechToText.startListening()
                             }
                         })
+                        VoiceSteps.SPEAKING -> ProcessOfSpeechWave(speechToTextState = speechToTextState)
+                        VoiceSteps.END_OF_SPEAK -> {
+                            when {
+                                speechToTextState.error.isNullOrEmpty().not() -> {
+                                    ErrorSpeechContent(
+                                        onClick = {
+                                            coroutineScope.launch {
+                                                speechToText.startListening()
+                                            }
+                                        })
+                                }
+                                speechToTextState.spokenText.isNullOrEmpty().not() -> LoadingState()
+                            }
+                        }
+                        null -> {
+                            return@AnimatedContent
+                        }
                     }
                 }
             }
-
         }
     }
 }
 
 @Composable
-fun VoiceWaveform(speechToTextState:SpeechToTextParserState) {
+fun ProcessOfSpeechWave(speechToTextState:SpeechToTextParserState) {
     val infiniteTransition = rememberInfiniteTransition(label = "")
     val waveOffset by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -188,23 +166,18 @@ fun VoiceWaveform(speechToTextState:SpeechToTextParserState) {
         ), label = ""
     )
 
-    val barCount by remember {
-        mutableStateOf(5)
-    }
-    val maxBarHeight = 48.dp.toPx()
-    val barWidth = 6.dp.toPx()
+    val barCount by remember { mutableIntStateOf(7) }
+    val maxBarHeight = 96.dp.toPx()
+    val barWidth = 4.dp.toPx()
     val barSpacing = 8.dp.toPx()
-    val maxAmplitude by remember {
-        mutableStateOf(10f)
-    }
+    val maxAmplitude by remember { mutableFloatStateOf(10f) }
+    val barColor: Color = colorResource(id = R.color.orange)
     val cornerRadius = 8.dp.toPx()
-
     val scaledAmplitude = (speechToTextState.volume?.coerceIn(0f, maxAmplitude) ?: 0f) / maxAmplitude
 
     Canvas(modifier = Modifier
         .fillMaxWidth()
         .height(96.dp)
-        .padding(horizontal = 8.dp)
     ) {
         val canvasWidth = size.width
         val startX = (canvasWidth - (barCount * barWidth + (barCount - 1) * barSpacing)) / 2
@@ -213,7 +186,8 @@ fun VoiceWaveform(speechToTextState:SpeechToTextParserState) {
             val barHeight: Float = when {
                 speechToTextState.isSpeaking && speechToTextState.volume!! < 4f -> maxBarHeight * 0.5f
                 speechToTextState.isSpeaking -> {
-                    maxBarHeight * (0.5f + 0.5f * scaledAmplitude * sin(waveOffset + i))
+                    val clampedAmplitude = scaledAmplitude.coerceIn(0f, 0.4f)
+                    maxBarHeight * (0.5f + clampedAmplitude * sin(waveOffset + i) * 0.5f)
                 }
                 else -> {
                     maxBarHeight * 0.5f
@@ -222,7 +196,7 @@ fun VoiceWaveform(speechToTextState:SpeechToTextParserState) {
 
             val top = (size.height - barHeight) / 2
             drawRoundRect(
-                color = Color.Gray,
+                color = barColor,
                 topLeft = Offset(startX + i * (barWidth + barSpacing), top),
                 size = Size(barWidth, barHeight),
                 cornerRadius = CornerRadius(cornerRadius, cornerRadius)
@@ -237,18 +211,71 @@ fun Dp.toPx(): Float {
 }
 
 @Composable
-fun MicrophoneButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Button(
-        onClick = onClick,
-        modifier = modifier
-            .wrapContentSize(),
-        shape = CircleShape,
-        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+fun BeforeSpeechContent(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(96.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            painter = painterResource(id = R.drawable.round_mic_24),
-            contentDescription = "Microphone",
-            modifier = Modifier.wrapContentSize()
+        Text(
+            text = stringResource(R.string.speech_dialog_title_text),
+            fontSize = 16.sp,
+            fontFamily = medium,
+            color = Color.Unspecified,
+            maxLines = 3,
+            textAlign = TextAlign.Start,
         )
+        Spacer(modifier = Modifier.size(16.dp))
+        Button(
+            onClick = onClick,
+            modifier = modifier
+                .wrapContentSize(),
+            shape = CircleShape,
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.round_mic_24),
+                contentDescription = "Microphone",
+                modifier = Modifier.wrapContentSize(),
+                tint = MaterialTheme.colorScheme.onBackground
+            )
+        }
+    }
+}
+
+@Composable
+fun ErrorSpeechContent(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(96.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(R.string.try_again),
+            fontSize = 16.sp,
+            fontFamily = medium,
+            color = Color.Unspecified,
+            maxLines = 3,
+            textAlign = TextAlign.Start,
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        Button(
+            onClick = onClick,
+            modifier = modifier
+                .wrapContentSize(),
+            shape = CircleShape,
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.round_mic_24),
+                contentDescription = "Microphone",
+                modifier = Modifier.wrapContentSize(),
+                tint = MaterialTheme.colorScheme.onBackground
+            )
+        }
     }
 }
