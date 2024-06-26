@@ -25,7 +25,8 @@ class SpeechToTextParser(
     override fun onReadyForSpeech(params: Bundle?) {
         _stateOfSpeech.update {
             it.copy(
-                error = null
+                error = null,
+                voiceSteps = VoiceSteps.SPEAKING
             )
         }
     }
@@ -46,7 +47,8 @@ class SpeechToTextParser(
         _stateOfSpeech.update {
             it.copy(
                 isSpeaking = false,
-                isStart = false
+                isStart = false,
+                voiceSteps = VoiceSteps.END_OF_SPEAK
             )
         }
     }
@@ -59,7 +61,8 @@ class SpeechToTextParser(
             it.copy(
                 error = "Error: $error",
                 isSpeaking = false,
-                isStart = false
+                isStart = false,
+                voiceSteps = VoiceSteps.END_OF_SPEAK
             )
         }
     }
@@ -73,7 +76,8 @@ class SpeechToTextParser(
                     it.copy(
                         spokenText = text,
                         isSpeaking = false,
-                        isStart = false
+                        isStart = false,
+                        voiceSteps = VoiceSteps.END_OF_SPEAK
                     )
                 }
             }
@@ -86,7 +90,8 @@ class SpeechToTextParser(
         _stateOfSpeech.update {
             it.copy(
                 isSpeaking = true,
-                isStart = true
+                isStart = true,
+                voiceSteps = VoiceSteps.SPEAKING
             )
         }
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
@@ -114,11 +119,24 @@ class SpeechToTextParser(
                 isSpeaking = false,
                 error = null,
                 spokenText = null,
-                isStart = false
+                isStart = false,
+                voiceSteps = VoiceSteps.END_OF_SPEAK
             )
         }
 
     }
+    fun setVoiceSteps() {
+        _stateOfSpeech.update {
+            val currentState = it
+            val newVoiceStep = when {
+                !currentState.isStart -> VoiceSteps.FIRST_OPENED
+                currentState.isSpeaking -> VoiceSteps.SPEAKING
+                else -> VoiceSteps.END_OF_SPEAK
+            }
+            currentState.copy(voiceSteps = newVoiceStep)
+        }
+    }
+
 }
 @Stable
 data class SpeechToTextParserState(
@@ -126,5 +144,11 @@ data class SpeechToTextParserState(
     val isSpeaking: Boolean = false,
     val spokenText: String? = "",
     val error: String? = null,
-    val volume: Float? = 0f
+    val volume: Float? = 0f,
+    val voiceSteps: VoiceSteps? = null
 )
+enum class VoiceSteps {
+    FIRST_OPENED,
+    SPEAKING,
+    END_OF_SPEAK
+}
