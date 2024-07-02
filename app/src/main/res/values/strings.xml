@@ -141,5 +141,6 @@
     <string name="user_search_desc">Search for people, companies and more.</string>
     <string name="speech_dialog_title_text">Please tap the button to talk</string>
     <string name="try_again">Try again</string>
+    <string name="available_for_hire">Available for hire</string>
 
 </resources>

@@ -56,6 +56,7 @@ fun UserDetailResponse.toDomain() : UserDetails {
         instagram = social?.instagram_username,
         twitter = social?.twitter_username,
         portfolioList = nonNullPortfolioList,
-        portfolio = social?.portfolio_url
+        portfolio = social?.portfolio_url,
+        forHire = for_hire
     )
 }
