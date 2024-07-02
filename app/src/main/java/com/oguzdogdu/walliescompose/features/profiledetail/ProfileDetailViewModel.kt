@@ -61,8 +61,10 @@ class ProfileDetailViewModel @Inject constructor(
 
                 awaitAll(userDetailsDeferred,usersPhotosDeferred,usersCollectionsDeferred)
 
-                _getProfileDetailState.update {
-                    ProfileDetailUIState.ReadyForShown
+                if (userDetailsDeferred.isCompleted && usersPhotosDeferred.isCompleted && usersCollectionsDeferred.isCompleted) {
+                    _getProfileDetailState.update {
+                        ProfileDetailUIState.ReadyForShown
+                    }
                 }
             } catch (e: Exception) {
                 _getProfileDetailState.update {

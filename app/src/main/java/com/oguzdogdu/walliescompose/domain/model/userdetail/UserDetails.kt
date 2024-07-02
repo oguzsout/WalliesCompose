@@ -20,5 +20,6 @@ data class UserDetails(
     val instagram: String?,
     val twitter: String?,
     val portfolioList: List<String>,
-    val portfolio: String?
+    val portfolio: String?,
+    val forHire: Boolean = false
 )

@@ -141,4 +141,5 @@
     <string name="user_search_desc">Kişileri, şirketleri ve daha fazlasını ara.</string>
     <string name="speech_dialog_title_text">Konuşmak için lütfen butona dokunun</string>
     <string name="try_again">Tekrar dene</string>
+    <string name="available_for_hire">Çalışmaya uygun</string>
 </resources>
