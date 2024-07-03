@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,7 +56,6 @@ fun ChangeEmailScreenRoute(
     viewModel: ChangeEmailViewModel = hiltViewModel(),
     navigateBack: () -> Unit
 ) {
-
     val stateOfEmail by viewModel.emailState.collectAsStateWithLifecycle()
 
     Scaffold(modifier = modifier
@@ -126,35 +124,6 @@ fun ChangeEmailScreenContent(
     var email by remember {
         mutableStateOf("")
     }
-    var buttonEnabled by remember { mutableStateOf(false) }
-
-    var loading by remember {
-        mutableStateOf(false)
-    }
-
-    LaunchedEffect(state) {
-        when (state) {
-            is ChangeEmailScreenState.ButtonEnabled -> {
-                buttonEnabled = state.isEnabled
-            }
-
-            is ChangeEmailScreenState.Loading -> {
-                loading = state.isLoading
-            }
-
-            is ChangeEmailScreenState.ChangedEmailError -> {
-                Toast.makeText(context,state.errorMessage,Toast.LENGTH_SHORT).show()
-            }
-
-            is ChangeEmailScreenState.ChangedEmail -> {
-                Toast.makeText(context,state.emailChanged,Toast.LENGTH_SHORT).show()
-            }
-
-            is ChangeEmailScreenState.Start -> {
-
-            }
-        }
-    }
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(
@@ -164,6 +133,12 @@ fun ChangeEmailScreenContent(
                 .wrapContentHeight(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
+            if (state.errorMessage?.isNotEmpty() == true) {
+                Toast.makeText(context,state.errorMessage,Toast.LENGTH_SHORT).show()
+            }
+            if (state.emailChanged?.isNotEmpty() == true) {
+                Toast.makeText(context,state.emailChanged,Toast.LENGTH_SHORT).show()
+            }
 
             Text(
                 text = stringResource(R.string.email),
@@ -253,7 +228,7 @@ fun ChangeEmailScreenContent(
             onClick = {
                 onLoginButtonClick.invoke()
             },
-            enabled = buttonEnabled,
+            enabled = state.isEnabled,
             modifier = modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -266,13 +241,11 @@ fun ChangeEmailScreenContent(
             contentPadding = PaddingValues(16.dp)
         ) {
             when {
-                loading -> {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = modifier.size(16.dp),
-                        strokeWidth = 2.dp
-                    )
-                }
+                state.isLoading -> CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = modifier.size(16.dp),
+                    strokeWidth = 2.dp
+                )
                 else -> {
                     Text(
                         text = stringResource(R.string.send_info),
