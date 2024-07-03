@@ -247,8 +247,8 @@ fun WalliesNavHost(
                     navigateBack = {
                         navController.navigateUp()
                     }, navigateToLogin = {
-                        navController.navigate(Routes.Auth.route) {
-                            popUpTo(Routes.Home.route) {
+                        navController.navigate(Routes.Auth) {
+                            popUpTo(Routes.Home) {
                                 inclusive = true
                             }
                         }
