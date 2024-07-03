@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oguzdogdu.walliescompose.domain.repository.UserAuthenticationRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.onFailure
+import com.oguzdogdu.walliescompose.domain.wrapper.onLoading
 import com.oguzdogdu.walliescompose.domain.wrapper.onSuccess
 import com.oguzdogdu.walliescompose.util.FieldValidators
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,7 +20,7 @@ class ChangeEmailViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _emailState: MutableStateFlow<ChangeEmailScreenState> = MutableStateFlow(
-        ChangeEmailScreenState.Start
+        ChangeEmailScreenState()
     )
     val emailState = _emailState.asStateFlow()
 
@@ -56,34 +56,31 @@ class ChangeEmailViewModel @Inject constructor(
                 FieldValidators.isValidEmail(email = userEmail.value) && FieldValidators.isValidPasswordCheck(
                     input = userPassword.value
                 )
-            _emailState.update { ChangeEmailScreenState.ButtonEnabled(isEnabled = buttonState) }
+            _emailState.update { it.copy(isEnabled = buttonState) }
         }
     }
 
-    private fun changeEmail(email: String?, password: String?) {
+     fun changeEmail(email: String?, password: String?) {
         viewModelScope.launch {
-            _emailState.update {
-                ChangeEmailScreenState.Loading(true)
-            }
-
             authenticationRepository.changeEmail(email = email, password = password)
                 .collect { result ->
+                    result.onLoading {
+                        _emailState.update {
+                            it.copy(isLoading = true)
+                        }
+                    }
                     result.onFailure { error ->
                         _emailState.update {
-                            ChangeEmailScreenState.ChangedEmailError(error)
+                            it.copy(isLoading = false, errorMessage = error)
                         }
                     }
 
                     result.onSuccess { auth ->
                         _emailState.update {
-                            ChangeEmailScreenState.ChangedEmail("Email Changed")
+                            it.copy(isLoading = false, emailChanged = "Email Changed")
                         }
                     }
                 }
-            delay(1000)
-            _emailState.update {
-                ChangeEmailScreenState.Loading(false)
-            }
         }
     }
 }

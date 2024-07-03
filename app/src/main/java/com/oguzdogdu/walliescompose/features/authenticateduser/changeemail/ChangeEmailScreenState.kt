@@ -1,9 +1,8 @@
 package com.oguzdogdu.walliescompose.features.authenticateduser.changeemail
 
-sealed class ChangeEmailScreenState {
-    data object Start : ChangeEmailScreenState()
-    data class Loading(val isLoading:Boolean) : ChangeEmailScreenState()
-    data class ChangedEmailError(val errorMessage: String?) : ChangeEmailScreenState()
-    data class ChangedEmail(val emailChanged:String) : ChangeEmailScreenState()
-    data class ButtonEnabled(val isEnabled: Boolean) : ChangeEmailScreenState()
-}
+data class ChangeEmailScreenState(
+    val isLoading: Boolean = false,
+    var errorMessage: String? = null,
+    val emailChanged: String? = null,
+    val isEnabled: Boolean = false
+)
