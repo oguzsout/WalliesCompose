@@ -96,6 +96,9 @@ dependencies {
     testImplementation ("androidx.arch.core:core-testing:2.2.0")
     testImplementation ("io.mockk:mockk:1.12.3")
     testImplementation ("org.mockito.kotlin:mockito-kotlin:4.0.0")
+    testImplementation ("app.cash.turbine:turbine:0.7.0")
+    testImplementation ("io.mockk:mockk-android:1.12.3")
+    testImplementation ("io.mockk:mockk-agent-jvm:1.12.3")
 
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
