@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -21,7 +20,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,51 +36,27 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.features.settings.components.MenuRowItems
 import com.oguzdogdu.walliescompose.features.settings.components.SingleSelectDialog
-import com.oguzdogdu.walliescompose.navigation.utils.WalliesIcons
-import com.oguzdogdu.walliescompose.util.MenuRow
 import com.oguzdogdu.walliescompose.util.ReusableMenuRow
+import com.oguzdogdu.walliescompose.util.ReusableMenuRowLists.generalOptionList
+import com.oguzdogdu.walliescompose.util.ReusableMenuRowLists.storageOptionList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import okhttp3.internal.immutableListOf
 
+typealias onSettingsScreenEvent = (SettingsScreenEvent) -> Unit
 
 @Composable
 fun SettingsScreenRoute(
     modifier: Modifier = Modifier, viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val settingsUiState by viewModel.settingsState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackState = remember { SnackbarHostState() }
 
-    val themes = listOf(
-        ThemeValues.LIGHT_MODE.title, ThemeValues.DARK_MODE.title, ThemeValues.SYSTEM_DEFAULT.title
-    )
-    val languages = listOf(LanguageValues.English.title, LanguageValues.Turkish.title)
-    var themeLocation by remember {
-        mutableIntStateOf(0)
-    }
-    var languageLocation by remember {
-        mutableIntStateOf(0)
-    }
-    var selectedLanguage by remember {
-        mutableStateOf("")
-    }
-
-    LaunchedEffect(key1 = settingsUiState.getThemeValue) {
-        viewModel.handleScreenEvents(SettingsScreenEvent.ThemeChanged)
-        themeLocation = if (settingsUiState.getThemeValue.isNullOrEmpty()) {
-            2
-        } else {
-            themes.indexOf(settingsUiState.getThemeValue)
-        }
-    }
-    LaunchedEffect(key1 = settingsUiState.getLanguageValue) {
-        viewModel.handleScreenEvents(SettingsScreenEvent.LanguageChanged)
-        languageLocation = if (settingsUiState.getLanguageValue.isNullOrEmpty()) {
-            0
-        } else {
-            languages.indexOf(settingsUiState.getLanguageValue)
+    LaunchedEffect(key1 = settingsUiState.showSnackBar) {
+        when(settingsUiState.showSnackBar) {
+            true -> snackState.showSnackbar("Cache directory deleted successfully")
+            false -> snackState.showSnackbar("Error deleting cache directory")
+            null -> return@LaunchedEffect
         }
     }
 
@@ -105,103 +79,107 @@ fun SettingsScreenRoute(
         )
     }) {
         Column(modifier = modifier.padding(it)) {
-            if (settingsUiState.openThemeDialog) {
-                SingleSelectDialog(modifier = modifier,
-                    title = stringResource(id = R.string.choise_theme),
-                    optionsList = themes,
-                    defaultSelected = themeLocation,
-                    submitButtonText = stringResource(id = R.string.ok),
-                    dismissButtonText = stringResource(id = R.string.cancel),
-                    onSubmitButtonClick = { id ->
-                        coroutineScope.launch {
-                            viewModel.handleScreenEvents(SettingsScreenEvent.SetNewTheme(themes[id]))
-                            viewModel.handleScreenEvents(SettingsScreenEvent.ThemeChanged)
-                        }
-                    },
-                    onDismissRequest = { value ->
-                        coroutineScope.launch {
-                            viewModel.handleScreenEvents(SettingsScreenEvent.OpenThemeDialog(value))
-                        }
-                    })
-
-            }
-            if (settingsUiState.openLanguageDialog) {
-                SingleSelectDialog(modifier = modifier,
-                    title = stringResource(id = R.string.choise_language),
-                    optionsList = languages,
-                    defaultSelected = languageLocation,
-                    submitButtonText = stringResource(id = R.string.ok),
-                    dismissButtonText = stringResource(id = R.string.cancel),
-                    onSubmitButtonClick = { id ->
-                        coroutineScope.launch {
-                            selectedLanguage = languages[id]
-                            viewModel.handleScreenEvents(
-                                SettingsScreenEvent.SetNewLanguage(
-                                    selectedLanguage
-                                )
-                            )
-                            viewModel.handleScreenEvents(SettingsScreenEvent.LanguageChanged)
-                            (context as? Activity)?.recreate()
-                        }
-                    },
-                    onDismissRequest = { value ->
-                        coroutineScope.launch {
-                            viewModel.handleScreenEvents(
-                                SettingsScreenEvent.OpenLanguageDialog(
-                                    value
-                                )
-                            )
-                        }
-                    })
-            }
-            SettingsScreen(modifier = modifier, openThemeDialog = { value ->
-                viewModel.handleScreenEvents(SettingsScreenEvent.OpenThemeDialog(value))
-            }, openLanguageDialog = { value ->
-                viewModel.handleScreenEvents(SettingsScreenEvent.OpenLanguageDialog(value))
-
-            }, context = context, viewModel = viewModel, showSnackBar = {
-                coroutineScope.launch {
-                    when (it) {
-                        true -> snackState.showSnackbar("Cache directory deleted successfully")
-                        false -> snackState.showSnackbar("Error deleting cache directory")
-                    }
-                }
-            })
+            SettingsScreen(
+                settingsScreenState = settingsUiState,
+                context = context,
+                onSettingsScreenEvent = viewModel::handleScreenEvents
+            )
         }
     }
 }
 
 @Composable
 fun SettingsScreen(
-    modifier: Modifier,
-    openThemeDialog: (Boolean) -> Unit,
-    openLanguageDialog: (Boolean) -> Unit,
-    showSnackBar: (Boolean) -> Unit,
+    settingsScreenState: SettingsScreenState,
     context: Context,
-    viewModel: SettingsViewModel
+    onSettingsScreenEvent: onSettingsScreenEvent,
+    modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val generalOptionList = mutableListOf(
-        MenuRow(
-            category = "General",
-            icon = WalliesIcons.DarkMode,
-            titleRes = R.string.theme_text
-        ),
-        MenuRow(
-            category = "General",
-            icon = WalliesIcons.Language,
-            titleRes = R.string.language_title_text
-        )
+    val themes = listOf(
+        ThemeValues.LIGHT_MODE.title, ThemeValues.DARK_MODE.title, ThemeValues.SYSTEM_DEFAULT.title
     )
+    val languages = listOf(LanguageValues.English.title, LanguageValues.Turkish.title)
 
-    val storageOptionList = mutableListOf(
-        MenuRow(
-            category = "Storage",
-            icon = WalliesIcons.Cache,
-            titleRes = R.string.clear_cache_title
-        )
+    var themeLocation by remember { mutableIntStateOf(0) }
+    var languageLocation by remember { mutableIntStateOf(0) }
+    var selectedLanguage by remember { mutableStateOf("") }
+
+    LaunchedEffect(key1 = settingsScreenState.getThemeValue) {
+        onSettingsScreenEvent(SettingsScreenEvent.ThemeChanged)
+        themeLocation = if (settingsScreenState.getThemeValue.isNullOrEmpty()) {
+            2
+        } else {
+            themes.indexOf(settingsScreenState.getThemeValue)
+        }
+    }
+
+    LaunchedEffect(key1 = settingsScreenState.getLanguageValue) {
+        onSettingsScreenEvent(SettingsScreenEvent.LanguageChanged)
+        languageLocation = if (settingsScreenState.getLanguageValue.isNullOrEmpty()) {
+            0
+        } else {
+            languages.indexOf(settingsScreenState.getLanguageValue)
+        }
+    }
+
+    if (settingsScreenState.openThemeDialog) {
+        SingleSelectDialog(modifier = modifier,
+            title = stringResource(id = R.string.choise_theme),
+            optionsList = themes,
+            defaultSelected = themeLocation,
+            submitButtonText = stringResource(id = R.string.ok),
+            dismissButtonText = stringResource(id = R.string.cancel),
+            onSubmitButtonClick = { id ->
+                coroutineScope.launch {
+                    onSettingsScreenEvent(SettingsScreenEvent.SetNewTheme(themes[id]))
+                    onSettingsScreenEvent(SettingsScreenEvent.ThemeChanged)
+                }
+            },
+            onDismissRequest = { value ->
+                coroutineScope.launch {
+                    onSettingsScreenEvent(SettingsScreenEvent.OpenThemeDialog(value))
+                }
+            })
+
+    }
+
+    if (settingsScreenState.openLanguageDialog) {
+        SingleSelectDialog(modifier = modifier,
+            title = stringResource(id = R.string.choise_language),
+            optionsList = languages,
+            defaultSelected = languageLocation,
+            submitButtonText = stringResource(id = R.string.ok),
+            dismissButtonText = stringResource(id = R.string.cancel),
+            onSubmitButtonClick = { id ->
+                coroutineScope.launch {
+                    selectedLanguage = languages[id]
+                    onSettingsScreenEvent(SettingsScreenEvent.SetNewLanguage(selectedLanguage))
+                    onSettingsScreenEvent(SettingsScreenEvent.LanguageChanged)
+                    (context as? Activity)?.recreate()
+                }
+            },
+            onDismissRequest = { value ->
+                coroutineScope.launch {
+                    onSettingsScreenEvent(SettingsScreenEvent.OpenLanguageDialog(value))
+                }
+            })
+    }
+
+    ListOfSettingsMenu(
+        context = context,
+        onSettingsScreenEvent = onSettingsScreenEvent,
+        coroutineScope = coroutineScope
     )
+}
 
+@Composable
+fun ListOfSettingsMenu(
+    context: Context,
+    onSettingsScreenEvent: onSettingsScreenEvent,
+    coroutineScope: CoroutineScope,
+    modifier: Modifier = Modifier
+) {
     LazyColumn(
         modifier = modifier
             .fillMaxWidth()
@@ -225,13 +203,13 @@ fun SettingsScreen(
                 when (it) {
                     0 -> {
                         coroutineScope.launch {
-                            openThemeDialog.invoke(true)
+                            onSettingsScreenEvent(SettingsScreenEvent.OpenThemeDialog(true))
                         }
                     }
 
                     1 -> {
                         coroutineScope.launch {
-                            openLanguageDialog.invoke(true)
+                            onSettingsScreenEvent(SettingsScreenEvent.OpenLanguageDialog(true))
                         }
                     }
                 }
@@ -255,10 +233,7 @@ fun SettingsScreen(
             ) {
                 when(it) {
                     0 -> {
-                        clearAppCache(context = context, viewModel = viewModel)
-                        coroutineScope.launch {
-                            showSnackBar.invoke(viewModel.settingsState.value.cache)
-                        }
+                        clearAppCache(context = context, onSettingsScreenEvent = onSettingsScreenEvent)
                     }
                 }
             }
@@ -266,17 +241,17 @@ fun SettingsScreen(
     }
 }
 
-private fun clearAppCache(context: Context, viewModel: SettingsViewModel) {
+private fun clearAppCache(context: Context, onSettingsScreenEvent: onSettingsScreenEvent) {
     val cacheDir = context.cacheDir
     when {
         cacheDir.exists() -> {
             try {
                 cacheDir.deleteRecursively()
                 Log.d("AppCache", "Cache directory deleted successfully")
-                viewModel.handleScreenEvents(SettingsScreenEvent.ClearCached(true))
+                onSettingsScreenEvent(SettingsScreenEvent.ClearCached(true))
             } catch (e: Exception) {
                 Log.e("AppCache", "Error deleting cache directory: $e")
-                viewModel.handleScreenEvents(SettingsScreenEvent.ClearCached(false))
+                onSettingsScreenEvent(SettingsScreenEvent.ClearCached(false))
             }
         }
 
