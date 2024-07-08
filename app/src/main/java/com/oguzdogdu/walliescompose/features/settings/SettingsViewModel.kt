@@ -24,15 +24,9 @@ class SettingsViewModel @Inject constructor(
 
     fun handleScreenEvents(event: SettingsScreenEvent) {
         when (event) {
-            is SettingsScreenEvent.OpenThemeDialog -> {
-                openTheme(event.open)
-            }
-
+            is SettingsScreenEvent.OpenThemeDialog -> { openTheme(event.open) }
             is SettingsScreenEvent.SetNewTheme -> setThemeValue(event.value)
-            is SettingsScreenEvent.ThemeChanged -> {
-                getThemeValue()
-            }
-
+            is SettingsScreenEvent.ThemeChanged -> { getThemeValue() }
             is SettingsScreenEvent.LanguageChanged -> getLanguageValue()
             is SettingsScreenEvent.SetNewLanguage -> setLanguageValue(event.value)
             is SettingsScreenEvent.OpenLanguageDialog -> openLanguage(event.open)
@@ -40,10 +34,10 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun statusClearCache(cleared:Boolean) {
+    private fun statusClearCache(showSnackBar:Boolean?) {
         viewModelScope.launch {
             _settingsState.update {
-                it.copy(cache= cleared)
+                it.copy(showSnackBar = showSnackBar)
             }
         }
     }

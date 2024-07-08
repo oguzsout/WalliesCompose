@@ -7,5 +7,5 @@ sealed interface SettingsScreenEvent {
     data object ThemeChanged : SettingsScreenEvent
     data class SetNewLanguage(val value: String) : SettingsScreenEvent
     data object LanguageChanged: SettingsScreenEvent
-    data class ClearCached(val isCleared:Boolean): SettingsScreenEvent
+    data class ClearCached(val isCleared:Boolean? = null): SettingsScreenEvent
 }
