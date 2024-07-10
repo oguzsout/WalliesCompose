@@ -6,8 +6,10 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.twotone.Favorite
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,7 +26,7 @@ import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 
 @Composable
 fun WalliesFavoriteButton(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     favoriteImages: FavoriteImages,
     addPhotoToFavorites: (FavoriteImages) -> Unit,
     removePhotoFromFavorites: (FavoriteImages) -> Unit
@@ -36,22 +38,21 @@ fun WalliesFavoriteButton(
 
     IconButton(onClick = {
         isFavorite = !isFavorite
-
         if (isFavorite) {
             addPhotoToFavorites.invoke(favoriteImages)
         } else {
             removePhotoFromFavorites.invoke(favoriteImages)
         }
-    }, modifier = modifier.graphicsLayer(
-        scaleX = sizeScale,
+    }, modifier = modifier.graphicsLayer {
+        scaleX = sizeScale
         scaleY = sizeScale
-    ),
-        interactionSource = interactionSource) {
-        val tintColor = if (isFavorite) Red else Gray
-
+    },
+        interactionSource = interactionSource
+    ) {
+        val tintColor = if (isFavorite) Red else MaterialTheme.colorScheme.onPrimaryContainer
         Icon(
-            modifier = modifier.size(32.dp),
-            painter = rememberVectorPainter(Icons.Default.Favorite),
+            modifier = Modifier.size(32.dp),
+            painter = rememberVectorPainter(Icons.TwoTone.Favorite),
             contentDescription = null,
             tint = tintColor
         )
