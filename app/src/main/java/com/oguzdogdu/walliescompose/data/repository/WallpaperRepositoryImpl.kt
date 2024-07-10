@@ -1,11 +1,9 @@
 package com.oguzdogdu.walliescompose.data.repository
 
-import androidx.compose.runtime.Stable
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.oguzdogdu.walliescompose.data.model.searchdto.toDomainSearch
 import com.oguzdogdu.walliescompose.cache.dao.FavoriteDao
 import com.oguzdogdu.walliescompose.cache.entity.FavoriteImage
 import com.oguzdogdu.walliescompose.cache.entity.toDomain
@@ -17,8 +15,9 @@ import com.oguzdogdu.walliescompose.data.di.WalliesDispatchers
 import com.oguzdogdu.walliescompose.data.model.collection.toCollectionDomain
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainCollectionDetailList
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelLatest
-import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelPhoto
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelPopular
+import com.oguzdogdu.walliescompose.data.model.photodetail.toDomainModelPhoto
+import com.oguzdogdu.walliescompose.data.model.searchdto.toDomainSearch
 import com.oguzdogdu.walliescompose.data.model.topics.toDomainTopicList
 import com.oguzdogdu.walliescompose.data.model.topics.toDomainTopics
 import com.oguzdogdu.walliescompose.data.pagination.CollectionByLikesPagingSource
