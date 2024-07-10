@@ -142,4 +142,10 @@
     <string name="speech_dialog_title_text">Konuşmak için lütfen butona dokunun</string>
     <string name="try_again">Tekrar dene</string>
     <string name="available_for_hire">Çalışmaya uygun</string>
+    <string name="unknown">Bilinmeyen</string>
+    <string name="camera">Kamera</string>
+    <string name="aperture">Açıklık</string>
+    <string name="focal_length">Odak Uzaklığı</string>
+    <string name="dimensions">Boyutlar</string>
+    <string name="shutter_speed">Pozlama Süresi</string>
 </resources>
