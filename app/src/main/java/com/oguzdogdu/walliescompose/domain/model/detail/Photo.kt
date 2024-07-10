@@ -1,6 +1,8 @@
 package com.oguzdogdu.walliescompose.domain.model.detail
 
 import androidx.compose.runtime.Immutable
+import com.oguzdogdu.walliescompose.data.model.maindto.Exif
+import com.oguzdogdu.walliescompose.data.model.maindto.Location
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -20,9 +22,12 @@ data class Photo(
     val bio: String?,
     val name: String?,
     val tag: List<String?>?,
-    val location: String?,
     val rawQuality: String?,
     val highQuality: String?,
     val mediumQuality: String?,
-    val lowQuality: String?
+    val lowQuality: String?,
+    val exif: Exif?,
+    val location: Location?,
+    val width: Int?,
+    val height: Int?,
 )

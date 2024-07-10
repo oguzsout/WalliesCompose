@@ -3,6 +3,7 @@ package com.oguzdogdu.walliescompose.data.service
 import com.oguzdogdu.walliescompose.data.model.collection.CollectionResponse
 import com.oguzdogdu.walliescompose.data.model.maindto.Photo
 import com.oguzdogdu.walliescompose.data.model.maindto.UnsplashResponseItem
+import com.oguzdogdu.walliescompose.data.model.photodetail.PhotoDetailResponse
 import com.oguzdogdu.walliescompose.data.model.searchdto.SearchResponseItem
 import com.oguzdogdu.walliescompose.data.model.searchdto.searchuser.SearchUsersResponse
 import com.oguzdogdu.walliescompose.data.model.topics.CoverPhoto
@@ -48,8 +49,8 @@ class UnsplashBaseApiService @Inject constructor(private val client: HttpClient)
         }.body<List<UnsplashResponseItem>>()
     }
 
-    override suspend fun getPhoto(id: String?): UnsplashResponseItem {
-        return client.get("photos/${id}").body<UnsplashResponseItem>()
+    override suspend fun getPhoto(id: String?): PhotoDetailResponse {
+        return client.get("photos/${id}").body<PhotoDetailResponse>()
     }
 
     override suspend fun searchPhotos(

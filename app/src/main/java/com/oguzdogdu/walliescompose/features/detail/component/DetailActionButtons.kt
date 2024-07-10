@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -18,35 +20,39 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
+import com.oguzdogdu.walliescompose.features.detail.DetailState
 import com.oguzdogdu.walliescompose.ui.theme.regular
 
 @Composable
-fun DetailTripleActionButtons(
-    modifier: Modifier = Modifier,
+fun DetailActionButtons(
+    state: DetailState,
     setWallpaperButtonClick: (Boolean) -> Unit,
     shareButtonClick: () -> Unit,
-    downloadButtonClick: (Boolean) -> Unit
+    downloadButtonClick: (Boolean) -> Unit,
+    onAddFavoriteClick: (FavoriteImages) -> Unit,
+    onRemoveFavoriteClick: (FavoriteImages) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val openBottomSheetOfDownload by remember { mutableStateOf(false) }
     val openBottomSheetOfSetWallpaper by remember { mutableStateOf(false) }
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 16.dp),
+            .padding(8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Button(
-            modifier = modifier.border(
+            modifier = Modifier.border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 shape = RoundedCornerShape(16.dp)
@@ -60,20 +66,35 @@ fun DetailTripleActionButtons(
                 tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 contentDescription = ""
             )
-            Spacer(modifier = modifier.padding(horizontal = 8.dp))
+            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
             Text(
                 text = stringResource(id = R.string.set_wallpaper_text),
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 fontFamily = regular,
-                fontSize = 12.sp
+                fontSize = 14.sp
             )
         }
-        Row {
-            IconButton(modifier = modifier.wrapContentSize(), onClick = { shareButtonClick.invoke() }) {
-                Icon(painter = painterResource(id = R.drawable.share) , contentDescription = "")
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+            WalliesFavoriteButton(
+                favoriteImages = FavoriteImages(
+                id = state.favorites?.id,
+                url = state.favorites?.url,
+                profileImage = state.favorites?.profileImage,
+                name = state.favorites?.name,
+                portfolioUrl = state.favorites?.portfolioUrl,
+                isChecked = state.favorites?.isChecked ?: false
+            ), addPhotoToFavorites = { favorite ->
+                onAddFavoriteClick.invoke(favorite)
+            }, removePhotoFromFavorites = { favorite ->
+                onRemoveFavoriteClick.invoke(favorite)
+            })
+            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+            IconButton(modifier = Modifier.size(32.dp), onClick = { shareButtonClick.invoke() }) {
+                Icon(painter = rememberVectorPainter(Icons.Rounded.Share), contentDescription = "")
             }
-            Spacer(modifier = modifier.padding(horizontal = 8.dp))
-            IconButton(modifier = modifier.wrapContentSize(), onClick = { downloadButtonClick.invoke(!openBottomSheetOfDownload) }) {
+            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+            IconButton(modifier = Modifier.size(32.dp),
+                onClick = { downloadButtonClick.invoke(!openBottomSheetOfDownload) }) {
                 Icon(painter = painterResource(id = R.drawable.download), contentDescription = "")
             }
         }

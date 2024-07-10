@@ -58,7 +58,7 @@ fun DetailTagsRow(modifier: Modifier = Modifier, detail: Photo?,onTagClick:(Stri
                     modifier = modifier.padding(8.dp),
                     fontFamily = regular,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontSize = 12.sp
+                    fontSize = 14.sp
                 )
             }
         }

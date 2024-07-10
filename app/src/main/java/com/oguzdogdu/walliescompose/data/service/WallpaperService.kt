@@ -3,6 +3,7 @@ package com.oguzdogdu.walliescompose.data.service
 import com.oguzdogdu.walliescompose.data.model.collection.CollectionResponse
 import com.oguzdogdu.walliescompose.data.model.maindto.Photo
 import com.oguzdogdu.walliescompose.data.model.maindto.UnsplashResponseItem
+import com.oguzdogdu.walliescompose.data.model.photodetail.PhotoDetailResponse
 import com.oguzdogdu.walliescompose.data.model.searchdto.SearchResponseItem
 import com.oguzdogdu.walliescompose.data.model.topics.CoverPhoto
 import com.oguzdogdu.walliescompose.data.model.topics.TopicsResponseItem
@@ -17,7 +18,7 @@ interface WallpaperService {
 
     suspend fun getPhoto(
         id: String?,
-    ): UnsplashResponseItem
+    ): PhotoDetailResponse
 
     suspend fun searchPhotos(
         page: Int?,

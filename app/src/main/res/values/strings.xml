@@ -142,5 +142,12 @@
     <string name="speech_dialog_title_text">Please tap the button to talk</string>
     <string name="try_again">Try again</string>
     <string name="available_for_hire">Available for hire</string>
+    <string name="unknown">Unknown</string>
+    <string name="camera">Camera</string>
+    <string name="aperture">Aperture</string>
+    <string name="focal_length">Focal Length</string>
+    <string name="dimensions">Dimensions</string>
+    <string name="shutter_speed">Shutter Speed</string>
+    <string name="iso" translatable="false">ISO</string>
 
 </resources>

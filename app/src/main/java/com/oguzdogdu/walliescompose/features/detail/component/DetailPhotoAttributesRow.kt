@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.domain.model.detail.Photo
+import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
 import com.oguzdogdu.walliescompose.util.formatDate
 import com.oguzdogdu.walliescompose.util.toFormattedString
@@ -35,13 +36,13 @@ fun DetailPhotoAttributesRow(modifier: Modifier,detail: Photo?) {
         ) {
             Text(
                 text = stringResource(id = R.string.views_text),
-                fontFamily = regular,
-                fontSize = 12.sp
+                fontFamily = medium,
+                fontSize = 14.sp
             )
             Text(
                 text = detail?.views?.toFormattedString().orEmpty(),
                 fontFamily = regular,
-                fontSize = 12.sp
+                fontSize = 14.sp
             )
         }
         Column(
@@ -51,13 +52,13 @@ fun DetailPhotoAttributesRow(modifier: Modifier,detail: Photo?) {
         ) {
             Text(
                 text = stringResource(id = R.string.download_text),
-                fontFamily = regular,
-                fontSize = 12.sp
+                fontFamily = medium,
+                fontSize = 14.sp
             )
             Text(
                 text = detail?.downloads?.toFormattedString().orEmpty(),
                 fontFamily = regular,
-                fontSize = 12.sp
+                fontSize = 14.sp
             )
         }
         Column(
@@ -67,13 +68,13 @@ fun DetailPhotoAttributesRow(modifier: Modifier,detail: Photo?) {
         ) {
             Text(
                 text = stringResource(id = R.string.created_at),
-                fontFamily = regular,
-                fontSize = 12.sp
+                fontFamily = medium,
+                fontSize = 14.sp
             )
             Text(
                 text = detail?.createdAt?.formatDate().orEmpty(),
                 fontFamily = regular,
-                fontSize = 12.sp
+                fontSize = 14.sp
             )
         }
         Column(
@@ -83,13 +84,13 @@ fun DetailPhotoAttributesRow(modifier: Modifier,detail: Photo?) {
         ) {
             Text(
                 text = stringResource(id = R.string.like_text),
-                fontFamily = regular,
-                fontSize = 12.sp
+                fontFamily = medium,
+                fontSize = 14.sp
             )
             Text(
                 text = detail?.likes?.toFormattedString().orEmpty(),
                 fontFamily = regular,
-                fontSize = 12.sp
+                fontSize = 14.sp
             )
         }
     }
