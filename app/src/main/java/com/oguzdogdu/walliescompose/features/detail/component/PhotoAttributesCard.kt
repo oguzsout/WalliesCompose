@@ -29,13 +29,13 @@ import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
 
 @Composable
-fun PhotoAttributesCard(pairsOfPhotoAttributes: List<Pair<Int, AnnotatedString>>) {
+fun PhotoAttributesCard(pairsOfPhotoAttributes: List<Pair<Int, AnnotatedString>>, modifier: Modifier = Modifier) {
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ), shape = RoundedCornerShape(
             16.dp
-        ), modifier = Modifier
+        ), modifier = modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
             .heightIn(min = 120.dp, max = 360.dp)

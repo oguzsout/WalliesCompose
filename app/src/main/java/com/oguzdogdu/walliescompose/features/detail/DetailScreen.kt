@@ -6,7 +6,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -17,9 +19,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -58,6 +60,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -66,10 +69,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
+import com.oguzdogdu.walliescompose.features.detail.component.PhotoAttributesCard
 import com.oguzdogdu.walliescompose.features.detail.component.PhotoDetailUserInfoContainer
 import com.oguzdogdu.walliescompose.features.detail.component.PhotoDetailedInformationCard
 import com.oguzdogdu.walliescompose.features.downloadimage.DownloadImageBottomSheet
-import com.oguzdogdu.walliescompose.features.detail.component.PhotoAttributesCard
 import com.oguzdogdu.walliescompose.features.setwallpaper.SetWallpaperImageBottomSheet
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
@@ -287,8 +290,7 @@ fun SharedTransitionScope.DetailScreenRoute(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalFoundationApi::class
-)
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SharedTransitionScope.DetailScreenContent(
     animatedVisibilityScope: AnimatedVisibilityScope,
@@ -323,6 +325,7 @@ fun SharedTransitionScope.DetailScreenContent(
     val coroutineScope = rememberCoroutineScope()
     val graphicsLayer = rememberGraphicsLayer()
     var bitmapForDialog by remember { mutableStateOf<Bitmap?>(null) }
+
     LaunchedEffect(state.detail) {
         photoAttributesPairList.apply {
             clear()
@@ -376,6 +379,14 @@ fun SharedTransitionScope.DetailScreenContent(
     Box(modifier = modifier
         .fillMaxSize()
         .padding(paddingValues)) {
+        val targetOffset = if (state.detail != null) 0.dp else 400.dp
+        val animatedOffset by animateDpAsState(
+            targetValue = targetOffset,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            ), label = ""
+        )
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -385,14 +396,27 @@ fun SharedTransitionScope.DetailScreenContent(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                DetailScreenMainPhoto(
-                    state = state,
+                DetailScreenMainPhoto(state = state,
                     animatedVisibilityScope = animatedVisibilityScope,
                     graphicsLayer = graphicsLayer
                 )
             }
-            item { PhotoDetailUserInfoContainer(state = state, onProfileDetailClick = onProfileDetailClick) }
-            item { PhotoAttributesCard(pairsOfPhotoAttributes = photoAttributesPairList) }
+            item {
+                PhotoDetailUserInfoContainer(state = state,
+                    onProfileDetailClick = onProfileDetailClick,
+                    modifier = Modifier.offset {
+                        IntOffset(x = animatedOffset.roundToPx(), y = 0)
+                    }
+                )
+            }
+            item {
+                PhotoAttributesCard(
+                    pairsOfPhotoAttributes = photoAttributesPairList,
+                    modifier = Modifier.offset {
+                        IntOffset(x = animatedOffset.roundToPx(), y = 0)
+                    }
+                )
+            }
             item {
                 PhotoDetailedInformationCard(state = state,
                     onSetWallpaperClick = { isOpen ->
@@ -406,7 +430,10 @@ fun SharedTransitionScope.DetailScreenContent(
                     onDownloadClick = { isOpen -> onDownloadButtonClick.invoke(isOpen) },
                     onAddFavoriteClick = { photo -> onAddFavoriteButtonClick.invoke(photo) },
                     onRemoveFavoriteClick = { photo -> onRemoveFavoriteButtonClick.invoke(photo) },
-                    onTagClick = { tag -> onTagButtonClick.invoke(tag) })
+                    onTagClick = { tag -> onTagButtonClick.invoke(tag) },
+                    modifier = Modifier.offset {
+                        IntOffset(x = animatedOffset.roundToPx(), y = 0)
+                    })
             }
         }
         DownloadImageBottomSheet(isOpen = stateOfDownloadBottomSheet,
