@@ -233,6 +233,14 @@ fun BottomSheetContent(
         1f,
         0f
     )
+    var cachedColorFilter by remember {
+        mutableStateOf(colorMatrix)
+
+    }
+    LaunchedEffect(key1 = colorMatrix) {
+        cachedColorFilter = colorMatrix
+    }
+
     val brightnessInteractionSource = remember { MutableInteractionSource() }
     val contrastInteractionSource = remember { MutableInteractionSource() }
     val saturationInteractionSource = remember { MutableInteractionSource() }
@@ -368,7 +376,7 @@ fun BottomSheetContent(
                 OutlinedButton(
                     onClick = {
                         onSetLockButtonClick.invoke()
-                        adjustColorFilter.invoke(ColorFilter.colorMatrix(ColorMatrix(colorMatrix)))
+                        adjustColorFilter.invoke(ColorFilter.colorMatrix(ColorMatrix(cachedColorFilter)))
                     },
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -398,7 +406,7 @@ fun BottomSheetContent(
                 OutlinedButton(
                     onClick = {
                         onSetHomeButtonClick.invoke()
-                        adjustColorFilter.invoke(ColorFilter.colorMatrix(ColorMatrix(colorMatrix)))
+                        adjustColorFilter.invoke(ColorFilter.colorMatrix(ColorMatrix(cachedColorFilter)))
                     },
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -428,7 +436,7 @@ fun BottomSheetContent(
                 OutlinedButton(
                     onClick = {
                         onSetHomeAndLockButtonClick.invoke()
-                        adjustColorFilter.invoke(ColorFilter.colorMatrix(ColorMatrix(colorMatrix)))
+                        adjustColorFilter.invoke(ColorFilter.colorMatrix(ColorMatrix(cachedColorFilter)))
                     },
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
