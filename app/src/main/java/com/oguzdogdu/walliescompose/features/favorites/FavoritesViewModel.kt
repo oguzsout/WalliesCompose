@@ -2,7 +2,6 @@ package com.oguzdogdu.walliescompose.features.favorites
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.onFailure
 import com.oguzdogdu.walliescompose.domain.wrapper.onLoading
@@ -11,7 +10,6 @@ import com.oguzdogdu.walliescompose.features.favorites.event.FavoriteScreenEvent
 import com.oguzdogdu.walliescompose.features.favorites.state.FavoriteScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -25,13 +23,10 @@ class FavoritesViewModel @Inject constructor(private val repository: WallpaperRe
     )
     val favoritesState: MutableStateFlow<FavoriteScreenState> get() = _favoritesState
 
-    private val _flipImageCard: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val flipImageCard = _flipImageCard.asStateFlow()
-
     fun handleUIEvent(event: FavoriteScreenEvent) {
         when (event) {
             is FavoriteScreenEvent.GetFavorites -> fetchImagesToFavorites()
-            is FavoriteScreenEvent.FlipToImage -> _flipImageCard.value = event.flip
+            is FavoriteScreenEvent.FlipToImage -> setFlipCardState(event.flip)
             is FavoriteScreenEvent.DeleteFromFavorites -> deleteWithIdFromToFavorites(event.favoriteId)
         }
     }
@@ -44,7 +39,7 @@ class FavoritesViewModel @Inject constructor(private val repository: WallpaperRe
                 }
                 status.onSuccess {list->
                     _favoritesState.update {
-                        it.copy(loading = false,favorites = list)
+                        it.copy(loading = false,favorites = list.orEmpty())
                     }
                 }
                 status.onFailure { error ->
@@ -60,7 +55,11 @@ class FavoritesViewModel @Inject constructor(private val repository: WallpaperRe
         }
     }
 
-     fun resetToFlipCardState(state:Boolean) {
-        _flipImageCard.value = state
+     private fun setFlipCardState(state:Boolean) {
+        viewModelScope.launch {
+            _favoritesState.update {
+                it.copy(flipToCard = state)
+            }
+        }
     }
 }
