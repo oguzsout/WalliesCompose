@@ -19,13 +19,17 @@ class CollectionDetailListViewModel  @Inject constructor(
 ) :
     ViewModel() {
 
-    private val _getCollectionDetail = MutableStateFlow(CollectionsListsState())
-    val getCollectionDetail = _getCollectionDetail.asStateFlow()
+    private val _getCollectionDetailList = MutableStateFlow(CollectionListState())
+    val getCollectionDetailList = _getCollectionDetailList.asStateFlow()
+
+    private val _getCollectionInformation = MutableStateFlow(CollectionConstantInfoState())
+    val getCollectionInformation = _getCollectionInformation.asStateFlow()
 
     fun handleUiEvent(event: CollectionListEvent) {
         when (event) {
             is CollectionListEvent.FetchCollectionList -> {
                 getCollectionsLists(id = event.id)
+                getCollectionInformation(id = event.id)
             }
         }
     }
@@ -34,21 +38,37 @@ class CollectionDetailListViewModel  @Inject constructor(
         viewModelScope.launch {
             repository.getCollectionsListById(id).collect { result ->
                 result.onLoading {
-                    _getCollectionDetail.update { it.copy(loading = true) }
+                    _getCollectionDetailList.update { it.copy(loading = true) }
                 }
 
                 result.onSuccess { list ->
                     list?.let {
-                        _getCollectionDetail.update {
+                        _getCollectionDetailList.update {
                             it.copy(loading = false, collectionsLists = list)
                         }
                     }
                 }
 
                 result.onFailure { error ->
-                    _getCollectionDetail.update {
+                    _getCollectionDetailList.update {
                        it.copy(errorMessage = error)
                     }
+                }
+            }
+        }
+    }
+
+    private fun getCollectionInformation(id: String?) {
+        viewModelScope.launch {
+            repository.getACollection(id = id).collect { result ->
+                result.onLoading {
+                    _getCollectionInformation.update { it.copy(loading = true) }
+                }
+                result.onSuccess { info ->
+                    _getCollectionInformation.update { it.copy(collection = info) }
+                }
+                result.onFailure { error ->
+                    _getCollectionInformation.update { it.copy(errorMessage = error) }
                 }
             }
         }
