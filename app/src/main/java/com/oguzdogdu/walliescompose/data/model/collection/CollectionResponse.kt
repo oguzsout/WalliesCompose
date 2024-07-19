@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName
 import com.oguzdogdu.walliescompose.data.model.maindto.Link
 import com.oguzdogdu.walliescompose.data.model.maindto.Photo
 import com.oguzdogdu.walliescompose.data.model.maindto.User
+import com.oguzdogdu.walliescompose.domain.model.collections.Collection
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
 import com.oguzdogdu.walliescompose.domain.model.userdetail.UserCollections
 import kotlinx.serialization.Serializable
@@ -47,4 +48,11 @@ fun CollectionResponse.toUserCollection() = UserCollections(
     photo = cover_photo?.urls?.regular,
     desc = description,
     likes = cover_photo?.likes
+)
+
+fun CollectionResponse.toACollection() = Collection(
+    id = id,
+    title = title,
+    desc = description,
+    user = user
 )

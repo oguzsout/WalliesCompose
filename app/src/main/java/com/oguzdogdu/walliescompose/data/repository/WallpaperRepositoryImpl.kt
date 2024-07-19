@@ -12,6 +12,7 @@ import com.oguzdogdu.walliescompose.data.common.Constants.PAGE_ITEM_LIMIT
 import com.oguzdogdu.walliescompose.data.common.safeApiCall
 import com.oguzdogdu.walliescompose.data.di.Dispatcher
 import com.oguzdogdu.walliescompose.data.di.WalliesDispatchers
+import com.oguzdogdu.walliescompose.data.model.collection.toACollection
 import com.oguzdogdu.walliescompose.data.model.collection.toCollectionDomain
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainCollectionDetailList
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelLatest
@@ -30,6 +31,7 @@ import com.oguzdogdu.walliescompose.data.pagination.SearchPagingSource
 import com.oguzdogdu.walliescompose.data.pagination.TopicListSource
 import com.oguzdogdu.walliescompose.data.pagination.TopicsPagingSource
 import com.oguzdogdu.walliescompose.data.service.WallpaperService
+import com.oguzdogdu.walliescompose.domain.model.collections.Collection
 import com.oguzdogdu.walliescompose.domain.model.collections.CollectionList
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
 import com.oguzdogdu.walliescompose.domain.model.detail.Photo
@@ -246,6 +248,12 @@ class WallpaperRepositoryImpl @Inject constructor(
             it.map { latest ->
                 latest.toDomainModelLatest()
             }
+        }
+    }
+
+    override suspend fun getACollection(id: String?): Flow<Resource<Collection>> {
+        return safeApiCall(ioDispatcher){
+            service.getACollection(id).toACollection()
         }
     }
 }

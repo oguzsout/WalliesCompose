@@ -92,4 +92,10 @@ class UnsplashBaseApiService @Inject constructor(private val client: HttpClient)
             parameter("page", page)
         }.body<List<CoverPhoto>>()
     }
+
+    override suspend fun getACollection(id: String?): CollectionResponse {
+        return client.get {
+            url("collections/${id}")
+        }.body<CollectionResponse>()
+    }
 }
