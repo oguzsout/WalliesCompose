@@ -148,4 +148,5 @@
     <string name="focal_length">Odak Uzaklığı</string>
     <string name="dimensions">Boyutlar</string>
     <string name="shutter_speed">Pozlama Süresi</string>
+    <string name="collection_desc">Unsplash Lisansı altında ücretsiz olarak kullanabileceğiniz güzel görsel koleksiyonları aracılığıyla dünyayı keşfedin.</string>
 </resources>

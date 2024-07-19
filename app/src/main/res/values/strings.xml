@@ -149,5 +149,6 @@
     <string name="dimensions">Dimensions</string>
     <string name="shutter_speed">Shutter Speed</string>
     <string name="iso" translatable="false">ISO</string>
+    <string name="collection_desc">Explore the world through collections of beautiful images free to use under the Unsplash License.</string>
 
 </resources>

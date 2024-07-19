@@ -3,6 +3,7 @@ package com.oguzdogdu.walliescompose.features.collections
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -47,6 +48,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -88,27 +90,44 @@ fun SharedTransitionScope.CollectionsScreenRoute(
 
     Scaffold(modifier = modifier
         .fillMaxSize(), topBar = {
-        Row(
-            modifier = modifier
-                .wrapContentWidth()
-                .padding(start = 16.dp, top = 16.dp, bottom = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(start = 12.dp, top = 16.dp, bottom = 8.dp, end = 12.dp),
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = stringResource(id = R.string.collections_title),
-                style = MaterialTheme.typography.titleMedium,
-            )
-        }
+                Row(
+                    modifier = modifier
+                        .wrapContentWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.collections_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontSize = 24.sp,
+                        fontFamily = medium,
+                    )
+                }
+            Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    text = stringResource(R.string.collection_desc),
+                    fontSize = 16.sp,
+                    fontFamily = medium,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Start
+                )
+            }
     }) {
         Column(
             modifier = modifier
                 .padding(it)
                 .fillMaxSize()
         ) {
-           ShowFilterOfCollections(modifier = modifier
-               .align(Alignment.End)
-               .padding(top = 8.dp, end = 8.dp, bottom = 8.dp),
+           ShowFilterOfCollections(modifier = Modifier
+               .align(Alignment.End),
                sheetState = stateOfFilterBottomSheet,
               onItemClick = { id ->
                   viewModel.handleUIEvent(CollectionScreenEvent.ChoisedFilterOption(id))
@@ -136,11 +155,11 @@ fun SharedTransitionScope.CollectionsScreenRoute(
 
 @Composable
 fun ShowFilterOfCollections(
-    modifier: Modifier,
     sheetState: Boolean,
     onItemClick: (Int) -> Unit,
     choisedFilter: Int,
-    dynamicSheetState: (Boolean) -> Unit
+    dynamicSheetState: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val sortTypeList = listOf(
         stringResource(R.string.text_recommended_ranking),
@@ -162,6 +181,7 @@ fun ShowFilterOfCollections(
     Card(
         modifier = modifier
             .wrapContentSize()
+            .padding(horizontal = 8.dp)
     ) {
         Row(
             modifier = Modifier

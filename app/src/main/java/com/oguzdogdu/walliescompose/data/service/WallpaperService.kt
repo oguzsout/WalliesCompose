@@ -46,4 +46,6 @@ interface WallpaperService {
         page: Int?,
         perPage: Int?,
     ): List<CoverPhoto>
+
+    suspend fun getACollection(id: String?): CollectionResponse
 }

@@ -1,6 +1,7 @@
 package com.oguzdogdu.walliescompose.domain.repository
 
 import androidx.paging.PagingData
+import com.oguzdogdu.walliescompose.domain.model.collections.Collection
 import com.oguzdogdu.walliescompose.domain.model.collections.CollectionList
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
 import com.oguzdogdu.walliescompose.domain.model.detail.Photo
@@ -32,4 +33,5 @@ interface WallpaperRepository {
     suspend fun getCollectionsListById(id: String?): Flow<Resource<List<CollectionList>?>>
     suspend fun getImagesByPopulars(): Flow<PagingData<PopularImage>>
     suspend fun getImagesByLatest(): Flow<PagingData<LatestImage>>
+    suspend fun getACollection(id: String?) : Flow<Resource<Collection>>
 }
