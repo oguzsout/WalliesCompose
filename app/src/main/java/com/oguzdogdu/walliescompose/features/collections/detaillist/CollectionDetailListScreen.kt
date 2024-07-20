@@ -81,6 +81,7 @@ fun SharedTransitionScope.CollectionDetailListScreenRoute(
     modifier: Modifier = Modifier,
     viewModel: CollectionDetailListViewModel = hiltViewModel(),
     onCollectionClick: (String) -> Unit,
+    onUserDetailClick: (String) -> Unit,
     onBackClick: () -> Unit
 ) {
 
@@ -137,7 +138,9 @@ fun SharedTransitionScope.CollectionDetailListScreenRoute(
                 onCollectionClick.invoke(id)
             }, onScrollList = { scroll ->
                 listScrollState = scroll
-            })
+            },
+            onUserDetailClick = onUserDetailClick
+        )
     }
 }
 
@@ -148,6 +151,7 @@ fun CollectionDetailListScreen(
     stateOfCollectionList: CollectionListState,
     onCollectionClick: (String) -> Unit,
     onScrollList: (Boolean) -> Unit,
+    onUserDetailClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
 
@@ -176,7 +180,8 @@ fun CollectionDetailListScreen(
     ) {
         CollectionDetailInfoCard(
             stateOfCollectionInfo = stateOfCollectionInfo,
-            visibilityOfInfoCard = visible
+            visibilityOfInfoCard = visible,
+            onUserDetailClick = onUserDetailClick
         )
         CollectionDetailListScreen(
             stateOfCollectionList = stateOfCollectionList,
@@ -190,6 +195,7 @@ fun CollectionDetailListScreen(
 fun CollectionDetailInfoCard(
     stateOfCollectionInfo: CollectionConstantInfoState,
     visibilityOfInfoCard: Boolean,
+    onUserDetailClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -241,7 +247,10 @@ fun CollectionDetailInfoCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .wrapContentHeight(),
+                        .wrapContentHeight()
+                        .clickable {
+                            onUserDetailClick(stateOfCollectionInfo.collection.user.username.orEmpty())
+                        },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
