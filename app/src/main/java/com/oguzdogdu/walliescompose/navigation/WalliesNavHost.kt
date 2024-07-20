@@ -213,7 +213,11 @@ fun WalliesNavHost(
                     transitionScope = this@SharedTransitionLayout,
                     onCollectionClick = {
                         navController.navigateToDetailScreen(photoId = it)
-                    }, onBackClick = {
+                    },
+                    onUserDetailClick = { username ->
+                        navController.navigateToProfileDetailScreen(username = username)
+                    },
+                    onBackClick = {
                         navController.navigateUp()
                     })
                 popularScreen(

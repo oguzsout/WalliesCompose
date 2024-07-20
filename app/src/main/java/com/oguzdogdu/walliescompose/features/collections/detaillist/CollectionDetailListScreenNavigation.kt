@@ -34,7 +34,8 @@ fun NavController.navigateToCollectionDetailListScreen(
 fun NavGraphBuilder.collectionDetailListScreen(
     transitionScope: SharedTransitionScope,
     onBackClick: () -> Unit,
-    onCollectionClick: (String) -> Unit
+    onCollectionClick: (String) -> Unit,
+    onUserDetailClick: (String) -> Unit
 ) {
     composable<CollectionDetailListScreenRoute> { backStackEntry ->
 
@@ -47,8 +48,12 @@ fun NavGraphBuilder.collectionDetailListScreen(
             onCollectionClick = { id ->
                 onCollectionClick.invoke(id)
             },
+            onUserDetailClick = { username ->
+                onUserDetailClick.invoke(username)
+            },
             onBackClick = {
                 onBackClick.invoke()
-            })
+            }
+        )
     }
 }
