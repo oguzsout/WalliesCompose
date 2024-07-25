@@ -40,7 +40,10 @@ fun CollectionResponse.toCollectionDomain() =
         photo = cover_photo?.urls?.regular,
         desc = description,
         likes = cover_photo?.likes,
-        updatedAt = updated_at
+        updatedAt = updated_at,
+        name = user?.name.orEmpty(),
+        profileImage = user?.profileImage?.medium.orEmpty(),
+        totalPhotos = total_photos
     )
 fun CollectionResponse.toUserCollection() = UserCollections(
     id = id,
