@@ -149,4 +149,6 @@
     <string name="dimensions">Boyutlar</string>
     <string name="shutter_speed">Pozlama Süresi</string>
     <string name="collection_desc">Unsplash Lisansı altında ücretsiz olarak kullanabileceğiniz güzel görsel koleksiyonları aracılığıyla dünyayı keşfedin.</string>
+    <string name="grid">Izgara</string>
+    <string name="vertical">Dikey</string>
 </resources>

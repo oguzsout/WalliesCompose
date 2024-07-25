@@ -1,6 +1,7 @@
 package com.oguzdogdu.walliescompose.domain.model.collections
 
 import androidx.compose.runtime.Immutable
+import com.oguzdogdu.walliescompose.data.model.topics.ProfileImage
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -12,4 +13,7 @@ data class WallpaperCollections(
     val desc: String?,
     val likes: Int?,
     val updatedAt: String?,
+    val name: String?,
+    val profileImage: String?,
+    val totalPhotos: Int?
 )

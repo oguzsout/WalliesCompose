@@ -168,7 +168,6 @@ fun WalliesNavHost(
                     }
                 )
                 collectionScreen(
-                    transitionScope = this@SharedTransitionLayout,
                     onCollectionClick = { id, title ->
                         navController.navigateToCollectionDetailListScreen(
                             collectionDetailListId = id,
