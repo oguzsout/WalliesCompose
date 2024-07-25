@@ -1,30 +1,37 @@
 package com.oguzdogdu.walliescompose.features.collections
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import androidx.paging.filter
-import androidx.paging.map
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
 import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CollectionsViewModel @Inject constructor(private val repository: WallpaperRepository) :
-    ViewModel() {
+class CollectionsViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
+    private val repository: WallpaperRepository
+) : ViewModel() {
 
-    private val _collectionPhotosState: MutableStateFlow<PagingData<WallpaperCollections>> = MutableStateFlow(value = PagingData.empty())
+    private val listType = savedStateHandle.getStateFlow("ListType", "")
+
+    private val _collectionPhotosState: MutableStateFlow<PagingData<WallpaperCollections>> =
+        MutableStateFlow(value = PagingData.empty())
     val collectionPhotosState = _collectionPhotosState.asStateFlow()
+
+    private val _collectionScreenState: MutableStateFlow<CollectionState> = MutableStateFlow(
+        CollectionState()
+    )
+    val collectionScreenState = _collectionScreenState.asStateFlow()
 
     private val _filterBottomSheetOpenStat = MutableStateFlow(false)
     val filterBottomSheetOpenStat = _filterBottomSheetOpenStat.asStateFlow()
@@ -41,7 +48,14 @@ class CollectionsViewModel @Inject constructor(private val repository: Wallpaper
             is CollectionScreenEvent.OpenFilterBottomSheet -> _filterBottomSheetOpenStat.value =
                 event.isOpen
             is CollectionScreenEvent.ChoisedFilterOption -> _choisedFilter.value = event.choised
+            is CollectionScreenEvent.ChangeListType -> changeListType(event.listType.toString())
+
+            is CollectionScreenEvent.CheckListType -> changeListType(listType.value)
         }
+    }
+
+    fun onListTypeChanged(newType: String) {
+        savedStateHandle["ListType"] = newType
     }
 
     private fun getCollectionsList() {
@@ -96,6 +110,22 @@ class CollectionsViewModel @Inject constructor(private val repository: Wallpaper
                         }
                     }
             }.await()
+        }
+    }
+
+    private fun changeListType(listType: String) {
+        viewModelScope.launch {
+            _collectionScreenState.update {
+                when(listType) {
+                    ListType.VERTICAL.name -> {
+                        it.copy(collectionsListType = ListType.VERTICAL)
+                    }
+                    ListType.GRID.name -> {
+                        it.copy(collectionsListType = ListType.GRID)
+                    }
+                    else -> it.copy()
+                }
+            }
         }
     }
 }
