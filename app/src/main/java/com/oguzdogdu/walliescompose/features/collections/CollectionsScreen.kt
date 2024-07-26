@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +32,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,11 +50,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -71,6 +75,8 @@ import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
 import com.oguzdogdu.walliescompose.ui.theme.medium
 
+typealias onCollectionsScreenEvent = (CollectionScreenEvent) -> Unit
+
 @Composable
 fun CollectionsScreenRoute(
     modifier: Modifier = Modifier,
@@ -80,9 +86,6 @@ fun CollectionsScreenRoute(
     val collectionPaginationState: LazyPagingItems<WallpaperCollections> =
         viewModel.collectionPhotosState.collectAsLazyPagingItems()
     val collectionScreenState by viewModel.collectionScreenState.collectAsStateWithLifecycle()
-    var collectionListTypeState by remember { mutableStateOf("") }
-   // val stateOfFilterBottomSheet by viewModel.filterBottomSheetOpenStat.collectAsStateWithLifecycle()
-    // val stateOfChoisedFilter by viewModel.choisedFilter.collectAsStateWithLifecycle()
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
         viewModel.handleUIEvent(CollectionScreenEvent.CheckListType)
@@ -91,7 +94,7 @@ fun CollectionsScreenRoute(
         }
     }
     LifecycleEventEffect(event = Lifecycle.Event.ON_STOP) {
-        viewModel.onListTypeChanged(collectionListTypeState)
+        viewModel.onListTypeChanged(collectionScreenState.collectionsListType.name)
     }
 
     Scaffold(modifier = modifier
@@ -132,108 +135,17 @@ fun CollectionsScreenRoute(
                 .padding(it)
                 .fillMaxSize()
         ) {
-//           ShowFilterOfCollections(modifier = Modifier
-//               .align(Alignment.End),
-//               sheetState = stateOfFilterBottomSheet,
-//              onItemClick = { id ->
-//                  viewModel.handleUIEvent(CollectionScreenEvent.ChoisedFilterOption(id))
-//                   when(id) {
-//                       0 -> viewModel.handleUIEvent(CollectionScreenEvent.FetchLatestData)
-//
-//                       1 -> viewModel.handleUIEvent(CollectionScreenEvent.SortByTitles)
-//
-//                       2 -> viewModel.handleUIEvent(CollectionScreenEvent.SortByLikes)
-//
-//                       3 -> viewModel.handleUIEvent(CollectionScreenEvent.SortByUpdatedDate)
-//                   }
-//               }, dynamicSheetState = {
-//                   viewModel.handleUIEvent(CollectionScreenEvent.OpenFilterBottomSheet(it))
-//               }, choisedFilter = stateOfChoisedFilter)
             CollectionScreen(
                 collectionState = collectionScreenState,
                 collectionLazyPagingItems = collectionPaginationState,
                 onCollectionClick = { id, title ->
-                    onCollectionClick.invoke(id,title)
+                    onCollectionClick.invoke(id, title)
                 },
-                onChangeListType = { listType ->
-                    when(listType) {
-                        true -> {
-                            viewModel.handleUIEvent(CollectionScreenEvent.ChangeListType(ListType.VERTICAL))
-                            collectionListTypeState = ListType.VERTICAL.name
-                        }
-                        false -> {
-                            viewModel.handleUIEvent(CollectionScreenEvent.ChangeListType(ListType.GRID))
-                            collectionListTypeState = ListType.GRID.name
-                        }
-                    }
-                }
+                onCollectionsScreenEvent = viewModel::handleUIEvent
             )
         }
     }
 }
-
-//@Composable
-//fun ShowFilterOfCollections(
-//    sheetState: Boolean,
-//    onItemClick: (Int) -> Unit,
-//    choisedFilter: Int,
-//    dynamicSheetState: (Boolean) -> Unit,
-//    modifier: Modifier = Modifier,
-//) {
-//    val sortTypeList = listOf(
-//        stringResource(R.string.text_recommended_ranking),
-//        stringResource(id = R.string.text_alphabetic_sort),
-//        stringResource(id = R.string.text_likes_sort),
-//        stringResource(R.string.text_updated_date)
-//    )
-//    var isContextMenuVisible by remember {
-//        mutableStateOf(sheetState)
-//    }
-//    var pressOffset by remember {
-//        mutableStateOf(DpOffset.Zero)
-//    }
-//
-//    LaunchedEffect(key1 = sheetState) {
-//        isContextMenuVisible = sheetState
-//    }
-//
-//    Card(
-//        modifier = modifier
-//            .wrapContentSize()
-//            .padding(horizontal = 8.dp)
-//    ) {
-//        Row(
-//            modifier = Modifier
-//                .wrapContentSize()
-//                .pointerInput(true) {
-//                    detectTapGestures(onPress = {
-//                        dynamicSheetState.invoke(true)
-//                        pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
-//                    })
-//                }
-//                .padding(8.dp),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Icon(painter = painterResource(id = R.drawable.ic_sort), contentDescription = "")
-//            Spacer(modifier = modifier.size(2.dp))
-//            Text(
-//                text = stringResource(id = R.string.text_sort),
-//                fontFamily = medium,
-//                color = Color.Unspecified
-//            )
-//        }
-//    }
-//    FilterDialog(
-//        modifier = modifier,
-//        typeOfFilters = sortTypeList,
-//        isOpen = isContextMenuVisible,
-//        onItemClick = {
-//            onItemClick.invoke(it)
-//            dynamicSheetState.invoke(false)
-//        }, onDismiss = {
-//            dynamicSheetState.invoke(false)
-//        }, choisedFilter = choisedFilter)
-//}
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @Composable
@@ -241,7 +153,7 @@ private fun CollectionScreen(
     collectionState: CollectionState,
     collectionLazyPagingItems: LazyPagingItems<WallpaperCollections>,
     onCollectionClick: (String, String) -> Unit,
-    onChangeListType: (Boolean) -> Unit = {},
+    onCollectionsScreenEvent: onCollectionsScreenEvent,
     modifier: Modifier = Modifier,
 ) {
     var changeListPresentation by remember { mutableStateOf(false) }
@@ -250,9 +162,22 @@ private fun CollectionScreen(
 
     LaunchedEffect(isPressed) {
         if (isPressed) {
-            onChangeListType.invoke(changeListPresentation)
+            when (changeListPresentation) {
+                true -> onCollectionsScreenEvent.invoke(
+                    CollectionScreenEvent.ChangeListType(
+                        ListType.VERTICAL
+                    )
+                )
+
+                false -> onCollectionsScreenEvent.invoke(
+                    CollectionScreenEvent.ChangeListType(
+                        ListType.GRID
+                    )
+                )
+            }
         }
     }
+
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -261,10 +186,9 @@ private fun CollectionScreen(
         Row(
             modifier = Modifier
                 .wrapContentSize()
-                .padding(horizontal = 8.dp)
                 .border(width = 1.dp, color = Color.Gray, shape = RoundedCornerShape(16.dp))
                 .align(Alignment.End)
-                .padding(8.dp)
+                .padding(vertical = 4.dp)
                 .animateContentSize(
                     spring(
                         dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -274,94 +198,95 @@ private fun CollectionScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Absolute.Center
         ) {
-                Text(
-                    text = when(collectionState.collectionsListType) {
-                        ListType.VERTICAL -> stringResource(R.string.grid)
-                        ListType.GRID -> stringResource(R.string.vertical)
-                    },
-                    textAlign = TextAlign.Center,
-                    fontFamily = medium,
-                    fontSize = 16.sp,
-                    color = Color.White,
-                    modifier = Modifier.padding(4.dp)
+            ShowFilterOfCollections(modifier = Modifier,
+                collectionState = collectionState,
+                onCollectionsScreenEvent = onCollectionsScreenEvent)
+            Text(
+                text = when(collectionState.collectionsListType) {
+                    ListType.VERTICAL -> stringResource(R.string.grid)
+                    ListType.GRID -> stringResource(R.string.vertical)
+                },
+                textAlign = TextAlign.Center,
+                fontFamily = medium,
+                fontSize = 16.sp,
+                modifier = Modifier.padding(4.dp)
+            )
+            IconButton(
+                onClick = {
+                    changeListPresentation = !changeListPresentation
+                },
+                interactionSource = interactionSource,
+                modifier = Modifier
+                    .size(32.dp),
+            ) {
+                Icon(
+                    painter = when(collectionState.collectionsListType) {
+                        ListType.VERTICAL -> painterResource(id = R.drawable.grid_4_svgrepo_com)
+                        ListType.GRID ->  painterResource(
+                            id = R.drawable.grid_2_horizontal_svgrepo_com
+                        )
+                    }, contentDescription = ""
                 )
-                IconButton(
-                    onClick = {
-                        changeListPresentation = !changeListPresentation
-                    },
-                    interactionSource = interactionSource,
-                    modifier = Modifier
-                        .size(32.dp),
-                ) {
-                    Icon(
-                        painter = when(collectionState.collectionsListType) {
-                            ListType.VERTICAL -> painterResource(id = R.drawable.grid_4_svgrepo_com)
-                            ListType.GRID ->  painterResource(
-                                id = R.drawable.grid_2_horizontal_svgrepo_com
-                            )
-                        }, contentDescription = ""
+            }
+        }
+
+        LazyVerticalGrid(
+            columns = when(collectionState.collectionsListType) {
+                ListType.VERTICAL -> GridCells.Fixed(1)
+                ListType.GRID -> GridCells.Fixed(2)
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(4.dp),
+            state = rememberLazyGridState(),
+            verticalArrangement = Arrangement.Center
+        ) {
+            items(
+                count = collectionLazyPagingItems.itemCount,
+                key = collectionLazyPagingItems.itemKey { item: WallpaperCollections -> item.id.hashCode()},
+                contentType = collectionLazyPagingItems.itemContentType { "Collections" }) { index: Int ->
+                val collections: WallpaperCollections? = collectionLazyPagingItems[index]
+                if (collections != null) {
+                    CollectionItem(
+                        collectionState = collectionState,
+                        collections = collections,
+                        onCollectionItemClick = { id, title ->
+                            onCollectionClick.invoke(id, title)
+                        }
                     )
                 }
             }
-
-            LazyVerticalGrid(
-                columns = when(collectionState.collectionsListType) {
-                    ListType.VERTICAL -> GridCells.Fixed(1)
-                    ListType.GRID -> GridCells.Fixed(2)
-                },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(4.dp),
-                state = rememberLazyGridState(),
-                verticalArrangement = Arrangement.Center
-            ) {
-                items(
-                    count = collectionLazyPagingItems.itemCount,
-                    key = collectionLazyPagingItems.itemKey { item: WallpaperCollections -> item.id.hashCode()},
-                    contentType = collectionLazyPagingItems.itemContentType { "Collections" }) { index: Int ->
-                    val collections: WallpaperCollections? = collectionLazyPagingItems[index]
-                    if (collections != null) {
-                        CollectionItem(
-                            collectionState = collectionState,
-                            collections = collections,
-                            onCollectionItemClick = { id, title ->
-                                onCollectionClick.invoke(id, title)
+            collectionLazyPagingItems.apply {
+                when {
+                    loadState.source.refresh is LoadState.Loading -> {
+                        item(span = { GridItemSpan(2) }) {
+                            Box(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
                             }
-                        )
+                        }
                     }
-                }
-                collectionLazyPagingItems.apply {
-                    when {
-                        loadState.source.refresh is LoadState.Loading -> {
-                            item(span = { GridItemSpan(2) }) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.align(Alignment.Center)
-                                    )
-                                }
-                            }
-                        }
 
-                        loadState.refresh is LoadState.Error || loadState.append is LoadState.Error -> {
-                            val errorMessage = (loadState.refresh as? LoadState.Error)?.error?.localizedMessage.orEmpty()
-                            item(span = { GridItemSpan(2) }) {
-                                Text(text = errorMessage)
-                            }
+                    loadState.refresh is LoadState.Error || loadState.append is LoadState.Error -> {
+                        val errorMessage = (loadState.refresh as? LoadState.Error)?.error?.localizedMessage.orEmpty()
+                        item(span = { GridItemSpan(2) }) {
+                            Text(text = errorMessage)
                         }
+                    }
 
-                        loadState.source.append is LoadState.Loading-> {
-                            item(span = { GridItemSpan(2) }) {
-                                Box(
-                                    modifier = Modifier
-                                        .wrapContentHeight()
-                                        .fillMaxWidth()
-                                ) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.align(Alignment.BottomCenter)
-                                    )
-                                }
+                    loadState.source.append is LoadState.Loading-> {
+                        item(span = { GridItemSpan(2) }) {
+                            Box(
+                                modifier = Modifier
+                                    .wrapContentHeight()
+                                    .fillMaxWidth()
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.align(Alignment.BottomCenter)
+                                )
                             }
                         }
                     }
@@ -369,6 +294,81 @@ private fun CollectionScreen(
             }
         }
     }
+}
+
+@Composable
+fun ShowFilterOfCollections(
+    collectionState: CollectionState,
+    onCollectionsScreenEvent: onCollectionsScreenEvent,
+    modifier: Modifier = Modifier,
+) {
+    val sortTypeList = listOf(
+        stringResource(R.string.text_recommended_ranking),
+        stringResource(id = R.string.text_alphabetic_sort),
+        stringResource(id = R.string.text_likes_sort),
+        stringResource(R.string.text_updated_date)
+    )
+    var isContextMenuVisible by remember {
+        mutableStateOf(collectionState.sheetState)
+    }
+    var pressOffset by remember {
+        mutableStateOf(DpOffset.Zero)
+    }
+
+    LaunchedEffect(key1 = collectionState.sheetState) {
+        isContextMenuVisible = collectionState.sheetState
+    }
+
+    Card(
+        modifier = modifier
+            .wrapContentSize()
+            .padding(horizontal = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .wrapContentSize()
+                .pointerInput(true) {
+                    detectTapGestures(onPress = {
+                        onCollectionsScreenEvent.invoke(
+                            CollectionScreenEvent.OpenFilterBottomSheet(
+                                true
+                            )
+                        )
+                        pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
+                    })
+                }
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(id = R.string.text_sort),
+                fontFamily = medium,
+                color = Color.Unspecified
+            )
+            Spacer(modifier = modifier.size(4.dp))
+            Icon(painter = painterResource(id = R.drawable.ic_sort), contentDescription = "")
+        }
+    }
+    FilterDialog(
+        modifier = Modifier,
+        typeOfFilters = sortTypeList,
+        isOpen = isContextMenuVisible,
+        onItemClick = { id ->
+            when(id) {
+                0 -> onCollectionsScreenEvent.invoke(CollectionScreenEvent.FetchLatestData)
+
+                1 -> onCollectionsScreenEvent.invoke(CollectionScreenEvent.SortByTitles)
+
+                2 -> onCollectionsScreenEvent.invoke(CollectionScreenEvent.SortByLikes)
+
+                3 -> onCollectionsScreenEvent.invoke(CollectionScreenEvent.SortByUpdatedDate)
+            }
+
+            onCollectionsScreenEvent.invoke(CollectionScreenEvent.OpenFilterBottomSheet(true))
+        }, onDismiss = {
+            onCollectionsScreenEvent.invoke(CollectionScreenEvent.OpenFilterBottomSheet(false))
+        }, choisedFilter = collectionState.choisedFilter)
+}
 
 @Composable
 fun CollectionItem(
@@ -395,7 +395,7 @@ fun CollectionItem(
                 )
             }
         }, label = ""
-    ) {
+    ) { listType ->
         Box(modifier = modifier
             .wrapContentSize()
             .clickable {
@@ -404,7 +404,7 @@ fun CollectionItem(
                 )
             }
             .padding(4.dp), contentAlignment = Alignment.Center) {
-            when (it) {
+            when (listType) {
                 ListType.VERTICAL -> VerticalCollectionItem(collections = collections)
                 ListType.GRID -> GridCollectionItem(collections = collections)
             }

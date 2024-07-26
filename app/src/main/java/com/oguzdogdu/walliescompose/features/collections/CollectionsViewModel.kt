@@ -33,21 +33,14 @@ class CollectionsViewModel @Inject constructor(
     )
     val collectionScreenState = _collectionScreenState.asStateFlow()
 
-    private val _filterBottomSheetOpenStat = MutableStateFlow(false)
-    val filterBottomSheetOpenStat = _filterBottomSheetOpenStat.asStateFlow()
-
-    private val _choisedFilter = MutableStateFlow(0)
-    val choisedFilter = _choisedFilter.asStateFlow()
-
     fun handleUIEvent(event: CollectionScreenEvent) {
         when (event) {
             is CollectionScreenEvent.FetchLatestData -> getCollectionsList()
             is CollectionScreenEvent.SortByTitles -> sortListByTitle()
             is CollectionScreenEvent.SortByLikes -> sortListByLikes()
             is CollectionScreenEvent.SortByUpdatedDate -> sortListByUpdatedDate()
-            is CollectionScreenEvent.OpenFilterBottomSheet -> _filterBottomSheetOpenStat.value =
-                event.isOpen
-            is CollectionScreenEvent.ChoisedFilterOption -> _choisedFilter.value = event.choised
+            is CollectionScreenEvent.OpenFilterBottomSheet -> setFilterBottomSheetState(event.isOpen)
+            is CollectionScreenEvent.ChoisedFilterOption -> setChoisedFilter(event.choised)
             is CollectionScreenEvent.ChangeListType -> changeListType(event.listType.toString())
 
             is CollectionScreenEvent.CheckListType -> changeListType(listType.value)
@@ -68,6 +61,22 @@ class CollectionsViewModel @Inject constructor(
                         }
                     }
             }.await()
+        }
+    }
+
+    private fun setFilterBottomSheetState(isOpen: Boolean) {
+        viewModelScope.launch {
+            _collectionScreenState.update {
+                it.copy(sheetState = isOpen)
+            }
+        }
+    }
+
+    private fun setChoisedFilter(choised: Int) {
+        viewModelScope.launch {
+            _collectionScreenState.update {
+                it.copy(choisedFilter = choised)
+            }
         }
     }
 
