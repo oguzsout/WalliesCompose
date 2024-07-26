@@ -1,7 +1,5 @@
 package com.oguzdogdu.walliescompose.features.collections
 
-import com.oguzdogdu.walliescompose.features.detail.DetailScreenEvent
-
 sealed class CollectionScreenEvent {
     data object FetchLatestData : CollectionScreenEvent()
     data object SortByTitles : CollectionScreenEvent()

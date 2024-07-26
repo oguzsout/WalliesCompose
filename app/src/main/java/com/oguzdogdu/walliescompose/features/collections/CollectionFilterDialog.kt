@@ -50,7 +50,7 @@ fun FilterDialog(
     choisedFilter:Int,
     onItemClick: (Int) -> Unit,
     onDismiss: () -> Unit,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
 ) {
     var openBottomSheet by remember { mutableStateOf(isOpen) }
     val bottomSheetState = rememberModalBottomSheetState()
@@ -92,11 +92,11 @@ fun FilterDialog(
 
 @Composable
 fun BottomSheetContent(
-    modifier: Modifier = Modifier,
     typeOfFilters: List<String>,
     clickedItem: (Int) -> Unit,
     onDismiss: () -> Unit,
-    choisedFilter: Int
+    choisedFilter: Int,
+    modifier: Modifier = Modifier
 ) {
     var selectedOption by rememberSaveable {
         mutableStateOf(typeOfFilters[choisedFilter])
@@ -121,14 +121,13 @@ fun BottomSheetContent(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             LazyColumn(
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .padding(vertical = 8.dp),
             ) {
                 itemsIndexed(typeOfFilters) { index, item ->
                     FilterRow(
-                        modifier = modifier,
                         title = item,
                         selected = item == selectedOption,
                         clickButton = {
@@ -145,7 +144,7 @@ fun BottomSheetContent(
                         clickedItem.invoke(indexOfFilter)
                         onDismiss.invoke()
                     },
-                    modifier = modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -167,7 +166,7 @@ fun BottomSheetContent(
 }
 
 @Composable
-fun FilterRow(modifier: Modifier, title: String, selected: Boolean, clickButton: (String) -> Unit) {
+fun FilterRow(title: String, selected: Boolean, clickButton: (String) -> Unit, modifier: Modifier = Modifier) {
     val selectedFilterTitle = rememberUpdatedState(newValue = title)
     Box(modifier = modifier.fillMaxWidth()) {
         Row(
