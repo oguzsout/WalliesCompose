@@ -77,13 +77,13 @@ fun WalliesNavHost(
             modifier = modifier
         ) {
             splashScreen(goToLoginFlow = {
-                navController.navigate(LoginScreenNavigationRoute) {
+                navController.navigate(Routes.Auth) {
                     popUpTo(SplashScreenRoute) {
                         inclusive = true
                     }
                 }
             }, goToContentScreen = {
-                navController.navigate(HomeScreenNavigationRoute) {
+                navController.navigate(Routes.Home) {
                     popUpTo(SplashScreenRoute) {
                         inclusive = true
                     }
