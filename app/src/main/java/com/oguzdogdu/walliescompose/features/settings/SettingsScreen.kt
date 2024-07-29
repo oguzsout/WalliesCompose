@@ -6,13 +6,9 @@ import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -34,12 +30,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.features.settings.components.MenuRowItems
+import com.oguzdogdu.walliescompose.features.settings.components.RowOfSettingOptions
 import com.oguzdogdu.walliescompose.features.settings.components.SingleSelectDialog
-import com.oguzdogdu.walliescompose.util.ReusableMenuRow
-import com.oguzdogdu.walliescompose.util.ReusableMenuRowLists.generalOptionList
-import com.oguzdogdu.walliescompose.util.ReusableMenuRowLists.storageOptionList
-import kotlinx.coroutines.CoroutineScope
+import com.oguzdogdu.walliescompose.util.BaseLazyColumn
+import com.oguzdogdu.walliescompose.util.ListItem
+import com.oguzdogdu.walliescompose.util.ListProperties
+import com.oguzdogdu.walliescompose.util.ReusableMenuRowLists
 import kotlinx.coroutines.launch
 
 typealias onSettingsScreenEvent = (SettingsScreenEvent) -> Unit
@@ -168,8 +164,7 @@ fun SettingsScreen(
 
     ListOfSettingsMenu(
         context = context,
-        onSettingsScreenEvent = onSettingsScreenEvent,
-        coroutineScope = coroutineScope
+        onSettingsScreenEvent = onSettingsScreenEvent
     )
 }
 
@@ -177,69 +172,52 @@ fun SettingsScreen(
 fun ListOfSettingsMenu(
     context: Context,
     onSettingsScreenEvent: onSettingsScreenEvent,
-    coroutineScope: CoroutineScope,
-    modifier: Modifier = Modifier
 ) {
-    LazyColumn(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        items(count = 1) { index: Int ->
-            Text(
-                text = stringResource(R.string.settings_general_header),
-                style = MaterialTheme.typography.titleSmall,
-            )
-            Spacer(modifier = modifier.size(8.dp))
-            ReusableMenuRow(data = generalOptionList,
-                index = index,
-                modifier = modifier.fillMaxWidth(),
-                itemContent = { menu ->
-                    MenuRowItems(
-                        modifier = modifier, menuRow = menu, arrow = true
-                    )
-                }
-            ) {
-                when (it) {
-                    0 -> {
-                        coroutineScope.launch {
-                            onSettingsScreenEvent(SettingsScreenEvent.OpenThemeDialog(true))
-                        }
+        BaseLazyColumn(
+            listProperties = ListProperties(items = ReusableMenuRowLists.newList),
+            bottomLoadingContent = { },
+            verticalArrangement = Arrangement.Center,
+            horizontalArrangement = Arrangement.Center,
+            itemContent = { listItem ->
+                when (listItem) {
+                    is ListItem.Content -> {
+                        RowOfSettingOptions(onClickToItem = { click ->
+                            when (click.description) {
+                                R.string.theme_text -> {
+                                    onSettingsScreenEvent(
+                                        SettingsScreenEvent.OpenThemeDialog(
+                                            true
+                                        )
+                                    )
+                                }
+
+                                R.string.language_title_text -> {
+                                    onSettingsScreenEvent(
+                                        SettingsScreenEvent.OpenLanguageDialog(
+                                            true
+                                        )
+                                    )
+                                }
+
+                                R.string.clear_cache_title -> {
+                                    clearAppCache(
+                                        context = context,
+                                        onSettingsScreenEvent = onSettingsScreenEvent
+                                    )
+                                }
+
+                            }
+                        }, listItem = listItem)
                     }
 
-                    1 -> {
-                        coroutineScope.launch {
-                            onSettingsScreenEvent(SettingsScreenEvent.OpenLanguageDialog(true))
-                        }
-                    }
-                }
-            }
-            Spacer(modifier = modifier.size(16.dp))
-        }
-        items(count = 1) { index: Int ->
-            Text(
-                text = stringResource(R.string.settings_storage_header),
-                style = MaterialTheme.typography.titleSmall,
-            )
-            Spacer(modifier = modifier.size(8.dp))
-            ReusableMenuRow(data = storageOptionList,
-                index = index,
-                modifier = modifier.fillMaxWidth(),
-                itemContent = { menu ->
-                    MenuRowItems(
-                        modifier = modifier, menuRow = menu, arrow = false
+                    is ListItem.Header -> Text(
+                        text = stringResource(id = listItem.titleRes ?: 0),
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.padding(12.dp)
                     )
                 }
-            ) {
-                when(it) {
-                    0 -> {
-                        clearAppCache(context = context, onSettingsScreenEvent = onSettingsScreenEvent)
-                    }
-                }
-            }
-        }
+            })
     }
-}
 
 private fun clearAppCache(context: Context, onSettingsScreenEvent: onSettingsScreenEvent) {
     val cacheDir = context.cacheDir
