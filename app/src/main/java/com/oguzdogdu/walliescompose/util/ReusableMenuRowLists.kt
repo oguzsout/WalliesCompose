@@ -4,24 +4,18 @@ import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.navigation.utils.WalliesIcons
 
 object ReusableMenuRowLists {
-    val generalOptionList = mutableListOf(
-        MenuRow(
-            category = "General",
-            icon = WalliesIcons.DarkMode,
-            titleRes = R.string.theme_text
+    val newList = listOf(
+        ListItem.Header(R.string.settings_general_header),
+        ListItem.Content(
+            0, description = R.string.theme_text, icon = WalliesIcons.DarkMode, arrow = true
         ),
-        MenuRow(
-            category = "General",
-            icon = WalliesIcons.Language,
-            titleRes = R.string.language_title_text
-        )
-    )
+        ListItem.Content(
+            1, R.string.language_title_text, icon = WalliesIcons.Language, arrow = true
 
-    val storageOptionList = mutableListOf(
-        MenuRow(
-            category = "Storage",
-            icon = WalliesIcons.Cache,
-            titleRes = R.string.clear_cache_title
-        )
+        ),
+        ListItem.Header(R.string.settings_storage_header),
+        ListItem.Content(
+            2, R.string.clear_cache_title,icon = WalliesIcons.Cache, arrow = false
+        ),
     )
 }
