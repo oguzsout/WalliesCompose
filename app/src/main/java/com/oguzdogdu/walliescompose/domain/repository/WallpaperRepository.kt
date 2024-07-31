@@ -8,6 +8,7 @@ import com.oguzdogdu.walliescompose.domain.model.detail.Photo
 import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
+import com.oguzdogdu.walliescompose.domain.model.random.RandomImage
 import com.oguzdogdu.walliescompose.domain.model.search.SearchPhoto
 import com.oguzdogdu.walliescompose.domain.model.topics.TopicDetail
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
@@ -34,4 +35,5 @@ interface WallpaperRepository {
     suspend fun getImagesByPopulars(): Flow<PagingData<PopularImage>>
     suspend fun getImagesByLatest(): Flow<PagingData<LatestImage>>
     suspend fun getACollection(id: String?) : Flow<Resource<Collection>>
+    suspend fun getRandomImages(count:Int?) : Flow<Resource<List<RandomImage>?>>
 }

@@ -3,6 +3,7 @@ package com.oguzdogdu.walliescompose.data.model.maindto
 import com.google.gson.annotations.SerializedName
 import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
+import com.oguzdogdu.walliescompose.domain.model.random.RandomImage
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -33,5 +34,19 @@ data class Tags(
     val type: String?,
     val title: String?,
 )
-fun UnsplashResponseItem.toDomainModelPopular() = PopularImage(id = id, url = urls?.regular, imageDesc = altDescription)
-fun UnsplashResponseItem.toDomainModelLatest() = LatestImage(id = id, url = urls?.regular, imageDesc = altDescription)
+
+fun UnsplashResponseItem.toDomainModelPopular() =
+    PopularImage(id = id, url = urls?.regular, imageDesc = altDescription)
+
+fun UnsplashResponseItem.toDomainModelLatest() =
+    LatestImage(id = id, url = urls?.regular, imageDesc = altDescription)
+
+fun UnsplashResponseItem.toDomainModelRandom() =
+    RandomImage(
+        id = id,
+        url = urls?.regular,
+        imageDesc = altDescription,
+        color = color,
+        username = user?.name,
+        userImage = user?.profileImage?.medium
+    )

@@ -98,4 +98,11 @@ class UnsplashBaseApiService @Inject constructor(private val client: HttpClient)
             url("collections/${id}")
         }.body<CollectionResponse>()
     }
+
+    override suspend fun getRandomPhotos(count: Int?): List<UnsplashResponseItem> {
+        return client.get {
+            url("/photos/random")
+            parameter("count", count)
+        }.body<List<UnsplashResponseItem>>()
+    }
 }
