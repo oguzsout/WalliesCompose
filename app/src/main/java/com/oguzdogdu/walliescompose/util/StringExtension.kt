@@ -100,3 +100,9 @@ fun String.adjustUrlForScreenConstraints(context: Context): String {
     val height = displayMetrics.heightPixels
     return "$this&w=$width&h=$height$FIT$AUTO"
 }
+
+fun String.capitalizeFirstLetter(): String {
+    return this.replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase() else it.toString()
+    }
+}

@@ -17,6 +17,7 @@ import com.oguzdogdu.walliescompose.data.model.collection.toCollectionDomain
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainCollectionDetailList
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelLatest
 import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelPopular
+import com.oguzdogdu.walliescompose.data.model.maindto.toDomainModelRandom
 import com.oguzdogdu.walliescompose.data.model.photodetail.toDomainModelPhoto
 import com.oguzdogdu.walliescompose.data.model.searchdto.toDomainSearch
 import com.oguzdogdu.walliescompose.data.model.topics.toDomainTopicList
@@ -38,6 +39,7 @@ import com.oguzdogdu.walliescompose.domain.model.detail.Photo
 import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
+import com.oguzdogdu.walliescompose.domain.model.random.RandomImage
 import com.oguzdogdu.walliescompose.domain.model.search.SearchPhoto
 import com.oguzdogdu.walliescompose.domain.model.topics.TopicDetail
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
@@ -254,6 +256,14 @@ class WallpaperRepositoryImpl @Inject constructor(
     override suspend fun getACollection(id: String?): Flow<Resource<Collection>> {
         return safeApiCall(ioDispatcher){
             service.getACollection(id).toACollection()
+        }
+    }
+
+    override suspend fun getRandomImages(count: Int?): Flow<Resource<List<RandomImage>?>> {
+        return safeApiCall(ioDispatcher) {
+            service.getRandomPhotos(count = count).mapNotNull {
+                it.toDomainModelRandom()
+            }
         }
     }
 }

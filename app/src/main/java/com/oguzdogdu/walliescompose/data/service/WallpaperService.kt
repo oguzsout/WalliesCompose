@@ -48,4 +48,8 @@ interface WallpaperService {
     ): List<CoverPhoto>
 
     suspend fun getACollection(id: String?): CollectionResponse
+
+    suspend fun getRandomPhotos(
+        count: Int?
+    ): List<UnsplashResponseItem>
 }
