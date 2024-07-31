@@ -2,6 +2,7 @@ package com.oguzdogdu.walliescompose.data.common
 
 
 import com.oguzdogdu.walliescompose.domain.wrapper.Resource
+import com.oguzdogdu.walliescompose.domain.wrapper.onSuccess
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -33,3 +34,12 @@ suspend fun <T> safeApiCall(
         else -> emit(Resource.Error("An unexpected error occurred"))
     }
 }.flowOn(dispatcher)
+
+ suspend fun <T> Flow<Resource<List<T>?>>.collectSuccess(action: suspend (List<T>) -> Unit) =
+    collect { result ->
+        result.onSuccess { data ->
+            if (data != null) {
+                action(data)
+            }
+        }
+    }
