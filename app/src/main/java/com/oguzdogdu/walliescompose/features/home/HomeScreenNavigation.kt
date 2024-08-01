@@ -29,6 +29,7 @@ fun NavGraphBuilder.homeScreen(
     onLatestClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     onUserPhotoClick: () -> Unit,
+    onRandomImageClick: (String?) -> Unit,
     navigateBack:() -> Unit
 ) {
     composable<HomeScreenNavigationRoute> {
@@ -56,6 +57,9 @@ fun NavGraphBuilder.homeScreen(
             },
             onUserPhotoClick = {
                 onUserPhotoClick.invoke()
+            },
+            onRandomImageClick = {
+                onRandomImageClick.invoke(it)
             }
         )
     }

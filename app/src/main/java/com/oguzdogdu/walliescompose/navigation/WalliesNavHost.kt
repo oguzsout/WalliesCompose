@@ -165,6 +165,9 @@ fun WalliesNavHost(
                     },
                     onUserPhotoClick = {
                         navController.navigateToAuthenticatedUserScreen()
+                    },
+                    onRandomImageClick = {
+                        navController.navigateToDetailScreen(photoId = it)
                     }
                 )
                 collectionScreen(
