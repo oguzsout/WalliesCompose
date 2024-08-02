@@ -1,22 +1,15 @@
 package com.oguzdogdu.walliescompose.features.collections
 
-import android.annotation.SuppressLint
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,13 +25,13 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,16 +40,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -68,11 +56,10 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
-import coil.compose.AsyncImage
-import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.domain.model.collections.WallpaperCollections
+import com.oguzdogdu.walliescompose.features.collections.components.CollectionItem
+import com.oguzdogdu.walliescompose.features.collections.components.ShowFilterOfCollections
 import com.oguzdogdu.walliescompose.ui.theme.medium
 
 typealias onCollectionsScreenEvent = (CollectionScreenEvent) -> Unit
@@ -147,7 +134,6 @@ fun CollectionsScreenRoute(
     }
 }
 
-@SuppressLint("UnusedContentLambdaTargetStateParameter")
 @Composable
 private fun CollectionScreen(
     collectionState: CollectionState,
@@ -156,28 +142,6 @@ private fun CollectionScreen(
     onCollectionsScreenEvent: onCollectionsScreenEvent,
     modifier: Modifier = Modifier,
 ) {
-    var changeListPresentation by remember { mutableStateOf(false) }
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-
-    LaunchedEffect(isPressed) {
-        if (isPressed) {
-            when (changeListPresentation) {
-                true -> onCollectionsScreenEvent.invoke(
-                    CollectionScreenEvent.ChangeListType(
-                        ListType.VERTICAL
-                    )
-                )
-
-                false -> onCollectionsScreenEvent.invoke(
-                    CollectionScreenEvent.ChangeListType(
-                        ListType.GRID
-                    )
-                )
-            }
-        }
-    }
-
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -185,7 +149,8 @@ private fun CollectionScreen(
     ) {
         Row(
             modifier = Modifier
-                .wrapContentSize()
+                .height(IntrinsicSize.Min)
+                .wrapContentWidth()
                 .border(width = 1.dp, color = Color.Gray, shape = RoundedCornerShape(16.dp))
                 .align(Alignment.End)
                 .padding(vertical = 4.dp)
@@ -196,38 +161,20 @@ private fun CollectionScreen(
                     )
                 ),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Absolute.Center
+            horizontalArrangement = Arrangement.Center
         ) {
             ShowFilterOfCollections(modifier = Modifier,
                 collectionState = collectionState,
                 onCollectionsScreenEvent = onCollectionsScreenEvent)
-            Text(
-                text = when(collectionState.collectionsListType) {
-                    ListType.VERTICAL -> stringResource(R.string.grid)
-                    ListType.GRID -> stringResource(R.string.vertical)
-                },
-                textAlign = TextAlign.Center,
-                fontFamily = medium,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(4.dp)
+            VerticalDivider(
+                modifier = Modifier.padding(8.dp),
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
-            IconButton(
-                onClick = {
-                    changeListPresentation = !changeListPresentation
-                },
-                interactionSource = interactionSource,
-                modifier = Modifier
-                    .size(32.dp),
-            ) {
-                Icon(
-                    painter = when(collectionState.collectionsListType) {
-                        ListType.VERTICAL -> painterResource(id = R.drawable.grid_4_svgrepo_com)
-                        ListType.GRID ->  painterResource(
-                            id = R.drawable.grid_2_horizontal_svgrepo_com
-                        )
-                    }, contentDescription = ""
-                )
-            }
+            ChangeListType(
+                collectionState = collectionState,
+                onCollectionsScreenEvent = onCollectionsScreenEvent
+            )
         }
 
         LazyVerticalGrid(
@@ -297,246 +244,63 @@ private fun CollectionScreen(
 }
 
 @Composable
-fun ShowFilterOfCollections(
+fun ChangeListType(
     collectionState: CollectionState,
     onCollectionsScreenEvent: onCollectionsScreenEvent,
-    modifier: Modifier = Modifier,
 ) {
-    val sortTypeList = listOf(
-        stringResource(R.string.text_recommended_ranking),
-        stringResource(id = R.string.text_alphabetic_sort),
-        stringResource(id = R.string.text_likes_sort),
-        stringResource(R.string.text_updated_date)
-    )
-    var isContextMenuVisible by remember {
-        mutableStateOf(collectionState.sheetState)
-    }
-    var pressOffset by remember {
-        mutableStateOf(DpOffset.Zero)
-    }
+    var changeListPresentation by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
 
-    LaunchedEffect(key1 = collectionState.sheetState) {
-        isContextMenuVisible = collectionState.sheetState
-    }
-
-    Card(
-        modifier = modifier
-            .wrapContentSize()
-            .padding(horizontal = 8.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .wrapContentSize()
-                .pointerInput(true) {
-                    detectTapGestures(onPress = {
-                        onCollectionsScreenEvent.invoke(
-                            CollectionScreenEvent.OpenFilterBottomSheet(
-                                true
-                            )
-                        )
-                        pressOffset = DpOffset(it.x.toDp(), it.y.toDp())
-                    })
-                }
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(id = R.string.text_sort),
-                fontFamily = medium,
-                color = Color.Unspecified
-            )
-            Spacer(modifier = modifier.size(4.dp))
-            Icon(painter = painterResource(id = R.drawable.ic_sort), contentDescription = "")
-        }
-    }
-    FilterDialog(
-        modifier = Modifier,
-        typeOfFilters = sortTypeList,
-        isOpen = isContextMenuVisible,
-        onItemClick = { id ->
-            when(id) {
-                0 -> onCollectionsScreenEvent.invoke(CollectionScreenEvent.FetchLatestData)
-
-                1 -> onCollectionsScreenEvent.invoke(CollectionScreenEvent.SortByTitles)
-
-                2 -> onCollectionsScreenEvent.invoke(CollectionScreenEvent.SortByLikes)
-
-                3 -> onCollectionsScreenEvent.invoke(CollectionScreenEvent.SortByUpdatedDate)
-            }
-
-            onCollectionsScreenEvent.invoke(CollectionScreenEvent.OpenFilterBottomSheet(true))
-        }, onDismiss = {
-            onCollectionsScreenEvent.invoke(CollectionScreenEvent.OpenFilterBottomSheet(false))
-        }, choisedFilter = collectionState.choisedFilter)
-}
-
-@Composable
-fun CollectionItem(
-    collectionState: CollectionState,
-    collections: WallpaperCollections,
-    onCollectionItemClick: (String, String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    AnimatedContent(
-        targetState = collectionState.collectionsListType, transitionSpec = {
-            when (targetState) {
-                ListType.VERTICAL -> slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Up,
-                    animationSpec = tween(500),
-                ) togetherWith fadeOut(
-                    animationSpec = tween(500)
-                )
-
-                ListType.GRID -> slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                    animationSpec = tween(500),
-                ) togetherWith fadeOut(
-                    animationSpec = tween(500)
-                )
-            }
-        }, label = ""
-    ) { listType ->
-        Box(modifier = modifier
-            .wrapContentSize()
-            .clickable {
-                onCollectionItemClick.invoke(
-                    collections.id.orEmpty(), collections.title.orEmpty()
-                )
-            }
-            .padding(4.dp), contentAlignment = Alignment.Center) {
-            when (listType) {
-                ListType.VERTICAL -> VerticalCollectionItem(collections = collections)
-                ListType.GRID -> GridCollectionItem(collections = collections)
-            }
-        }
-
-    }
-}
-
-@Composable
-fun GridCollectionItem(
-    collections: WallpaperCollections,
-    modifier: Modifier = Modifier) {
-    Box(
-        modifier =
-        modifier
-            .wrapContentSize()
-            .animateContentSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        SubcomposeAsyncImage(
-            model = collections.photo,
-            contentDescription = collections.title,
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(240.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .drawWithContent {
-                    drawContent()
-                    drawRect(
-                        color = Color.Black.copy(alpha = 0.5f),
-                        size = size,
+    LaunchedEffect(isPressed) {
+        if (isPressed) {
+            when (changeListPresentation) {
+                true -> onCollectionsScreenEvent.invoke(
+                    CollectionScreenEvent.ChangeListType(
+                        ListType.VERTICAL
                     )
-                }, loading = {
-                ImageLoadingState()
+                )
+
+                false -> onCollectionsScreenEvent.invoke(
+                    CollectionScreenEvent.ChangeListType(
+                        ListType.GRID
+                    )
+                )
             }
+        }
+    }
+    Row(
+        modifier = Modifier
+            .wrapContentSize(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = when(collectionState.collectionsListType) {
+                ListType.VERTICAL -> stringResource(R.string.grid)
+                ListType.GRID -> stringResource(R.string.vertical)
+            },
+            textAlign = TextAlign.Center,
+            fontFamily = medium,
+            fontSize = 16.sp,
+            modifier = Modifier.padding(4.dp)
         )
-        if (collections.title != null) {
-            Text(
-                text = collections.title,
-                textAlign = TextAlign.Center,
-                fontFamily = medium,
-                fontSize = 16.sp,
-                color = Color.White,
-            )
-        }
-    }
-}
-
-@Composable
-fun VerticalCollectionItem(
-    collections: WallpaperCollections,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .animateContentSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row(
+        IconButton(
+            onClick = {
+                changeListPresentation = !changeListPresentation
+            },
+            interactionSource = interactionSource,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
+                .size(32.dp),
         ) {
-            AsyncImage(
-                model = collections.profileImage,
-                contentDescription = "Profile Image",
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(16.dp))
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(
-                text = collections.name.orEmpty(),
-                fontSize = 16.sp,
-                fontFamily = medium,
-                maxLines = 1,
-                color = MaterialTheme.colorScheme.onBackground,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
-            )
-        }
-        Box {
-            SubcomposeAsyncImage(
-                model = collections.photo,
-                contentDescription = collections.title,
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(240.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .drawWithContent {
-                        drawContent()
-                        drawRect(
-                            color = Color.Black.copy(alpha = 0.3f),
-                            size = size,
-                        )
-                    }, loading = {
-                    ImageLoadingState()
-                }
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .align(Alignment.BottomStart),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.Start
-            ) {
-                if (collections.title != null) {
-                    Text(
-                        text = collections.title,
-                        textAlign = TextAlign.Center,
-                        fontFamily = medium,
-                        fontSize = 16.sp,
-                        color = Color.White,
+            Icon(
+                painter = when(collectionState.collectionsListType) {
+                    ListType.VERTICAL -> painterResource(id = R.drawable.grid_4_svgrepo_com)
+                    ListType.GRID ->  painterResource(
+                        id = R.drawable.grid_2_horizontal_svgrepo_com
                     )
-                }
-                if (collections.totalPhotos != null) {
-                    Text(
-                        text = "${collections.totalPhotos} Photos",
-                        textAlign = TextAlign.Center,
-                        fontFamily = medium,
-                        fontSize = 16.sp,
-                        color = Color.White,
-                    )
-                }
-            }
+                }, contentDescription = ""
+            )
         }
     }
 }
