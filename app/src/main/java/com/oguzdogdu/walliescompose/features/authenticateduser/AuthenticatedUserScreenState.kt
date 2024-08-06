@@ -1,15 +1,18 @@
 package com.oguzdogdu.walliescompose.features.authenticateduser
 
-sealed class AuthenticatedUserScreenState {
-    data object Loading : AuthenticatedUserScreenState()
-    data class UserInfoError(val errorMessage: String?) : AuthenticatedUserScreenState()
-    data class CheckUserAuthenticated(val isAuthenticated: Boolean) : AuthenticatedUserScreenState()
-    data class CheckUserGoogleSignIn(val isAuthenticated: Boolean) : AuthenticatedUserScreenState()
-    data class UserInfos(
-        val name: String? = null,
-        val surname: String? = null,
-        val email: String? = null,
-        val profileImage: String? = null,
-        val favorites: List<HashMap<String, String>>? = emptyList()
-    ) : AuthenticatedUserScreenState()
-}
+import android.net.Uri
+import androidx.compose.runtime.Stable
+
+@Stable
+data class UserInfoState(
+    val loading: Boolean = false,
+    val errorMessage: String? = null,
+    val name: String? = null,
+    val surname: String? = null,
+    val email: String? = null,
+    val profileImage: String? = null,
+    val isAuthenticatedWithFirebase: Boolean = false,
+    val isAuthenticatedWithGoogle: Boolean = false,
+    val favorites: List<HashMap<String, String>>? = emptyList(),
+    val photoUri: Uri? = null,
+)
