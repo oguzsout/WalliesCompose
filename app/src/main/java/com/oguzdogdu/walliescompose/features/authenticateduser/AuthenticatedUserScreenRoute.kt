@@ -4,10 +4,15 @@ import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.Image
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +20,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,16 +36,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +63,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -64,6 +74,9 @@ import coil.compose.AsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.features.authenticateduser.changeprofilephoto.ChangeProfilePhotoDialog
 import com.oguzdogdu.walliescompose.features.settings.components.MenuRowItems
+import com.oguzdogdu.walliescompose.ui.theme.Background
+import com.oguzdogdu.walliescompose.ui.theme.BackgroundDark
+import com.oguzdogdu.walliescompose.ui.theme.bold
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.util.MenuRow
 import com.oguzdogdu.walliescompose.util.ReusableMenuRow
@@ -108,11 +121,16 @@ fun SharedTransitionScope.AuthenticatedUserScreenRoute(
     LifecycleEventEffect(event = Lifecycle.Event.ON_START) {
         viewModel.handleUiEvents(AuthenticatedUserEvent.CheckUserAuth)
         viewModel.handleUiEvents(AuthenticatedUserEvent.FetchUserInfos)
-
     }
 
     BackHandler(enabled = true) {
         navigateBack.invoke()
+    }
+
+    LaunchedEffect(imageUri) {
+        if (imageUri != null) {
+            viewModel.setInstantlyProfileImageToDialog(imageUri)
+        }
     }
 
     Scaffold(modifier = modifier
@@ -154,9 +172,8 @@ fun SharedTransitionScope.AuthenticatedUserScreenRoute(
         ) {
             AuthenticatedUserScreenContent(
                 animatedVisibilityScope = animatedVisibilityScope,
-                userScreenState = userState,
+                userInfoState = userState,
                 modifier = modifier,
-                profilePhotoUri = imageUri,
                 onSignOutClick = {
                     viewModel.handleUiEvents(AuthenticatedUserEvent.SignOut)
                     navigateToLogin.invoke()
@@ -172,7 +189,11 @@ fun SharedTransitionScope.AuthenticatedUserScreenRoute(
                 }, onChangeProfilePhotoButtonClick = {
                     viewModel.handleUiEvents(AuthenticatedUserEvent.ChangeProfileImage(photoUri = imageUri))
                 } ,dismissDialog = {dialog ->
-                                   viewModel.handleUiEvents(AuthenticatedUserEvent.OpenChangeProfileBottomSheet(dialog))
+                    viewModel.handleUiEvents(
+                        AuthenticatedUserEvent.OpenChangeProfileBottomSheet(
+                            dialog
+                        )
+                    )
                 }, onChangeNameAndSurnameClick = {
                     navigateToChangeNameAndSurname.invoke()
                 }, onChangePasswordClick = {
@@ -189,9 +210,8 @@ fun SharedTransitionScope.AuthenticatedUserScreenRoute(
 @Composable
 fun SharedTransitionScope.AuthenticatedUserScreenContent(
     animatedVisibilityScope: AnimatedVisibilityScope,
-    userScreenState: AuthenticatedUserScreenState?,
+    userInfoState: UserInfoState,
     modifier: Modifier = Modifier,
-    profilePhotoUri: Uri?,
     onSignOutClick: () -> Unit,
     onChangeProfilePhotoClick: (Boolean) -> Unit,
     onProfilePhotoClick: () -> Unit,
@@ -202,218 +222,149 @@ fun SharedTransitionScope.AuthenticatedUserScreenContent(
     onChangeEmailClick: () -> Unit,
     showDialog: Boolean
 ) {
-    var isGoogleSign by remember {
-        mutableStateOf(false)
+    val isAuthenticated =
+        rememberUpdatedState(newValue = userInfoState.isAuthenticatedWithFirebase or userInfoState.isAuthenticatedWithGoogle)
+    if (!isAuthenticated.value) {
+        UserNotAuthenticatedInfo()
     }
-    when(userScreenState) {
-                is AuthenticatedUserScreenState.CheckUserAuthenticated -> {
-                    if (!userScreenState.isAuthenticated) {
-                        UserNotAuthenticatedInfo(modifier = modifier, authenticatedUserScreenState = userScreenState)
-                    }
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
+    ) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(8.dp)
+        ) {
+            AuthenticatedUserWelcomeCard(
+                animatedVisibilityScope = animatedVisibilityScope,
+                userInfoState = userInfoState,
+                onChangeProfilePhotoClick = {
+                    onChangeProfilePhotoClick.invoke(it)
                 }
-                is AuthenticatedUserScreenState.CheckUserGoogleSignIn -> {
-                    isGoogleSign = userScreenState.isAuthenticated
+            )
+            EditProfileInformationContent(
+                modifier = modifier,
+                onChangeNameAndSurnameClick = {
+                    onChangeNameAndSurnameClick.invoke()
+                },
+                onChangePasswordClick = {
+                    onChangePasswordClick.invoke()
+                },
+                onChangeEmailClick = {
+                    onChangeEmailClick.invoke()
                 }
-                AuthenticatedUserScreenState.Loading -> {
-
-                }
-                is AuthenticatedUserScreenState.UserInfoError -> {
-
-                }
-                is AuthenticatedUserScreenState.UserInfos -> {
-                    Box(modifier = modifier
-                        .fillMaxSize()
-                        .navigationBarsPadding()) {
-                        Column(
-                            modifier = modifier
-                                .fillMaxSize()
-                                .padding(8.dp)
-                        ) {
-                            AuthenticatedUserWelcomeCard(
-                                animatedVisibilityScope = animatedVisibilityScope,
-                                userInfos = userScreenState,
-                                isGoogleSignIn = isGoogleSign,
-                                onChangeProfilePhotoClick = {
-                                    onChangeProfilePhotoClick.invoke(it)
-                                }
-                            )
-                            EditProfileInformationContent(
-                                modifier = modifier,
-                                onChangeNameAndSurnameClick = {
-                                    onChangeNameAndSurnameClick.invoke()
-                                },
-                                onChangePasswordClick = {
-                                    onChangePasswordClick.invoke()
-                                },
-                                onChangeEmailClick = {
-                                    onChangeEmailClick.invoke()
-                                }
-                            )
-                        }
-                        ChangeProfilePhotoDialog(userInfos = userScreenState, modifier = modifier, profilePhotoUri = profilePhotoUri ,isOpen = showDialog, onDismiss = {
-                           dismissDialog.invoke(false)
-                        }, onProfilePhotoClick = {
-                            onProfilePhotoClick.invoke()
-                        }, onChangeProfilePhotoButtonClick = {
-                            onChangeProfilePhotoButtonClick.invoke()
-                        })
-                        Button(
-                            onClick = {
-                                      onSignOutClick.invoke()
-                            },
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                                .align(Alignment.BottomCenter)
-                            ,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer
-                            ),
-                            shape = RoundedCornerShape(16.dp),
-                            contentPadding = PaddingValues(12.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.sign_out),
-                                fontSize = 14.sp,
-                                fontFamily = medium,
-                                color = Color.White
-                            )
-                        }
-                    }
-                }
-
-                null -> {
-
-                }
-            }
+            )
+        }
+        ChangeProfilePhotoDialog(
+            userInfoState = userInfoState,
+            modifier = modifier,
+            isOpen = showDialog,
+            onDismiss = {
+                dismissDialog.invoke(false)
+            }, onProfilePhotoClick = {
+                onProfilePhotoClick.invoke()
+            }, onChangeProfilePhotoButtonClick = {
+                onChangeProfilePhotoButtonClick.invoke()
+            })
+        Button(
+            onClick = {
+                onSignOutClick.invoke()
+            },
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .align(Alignment.BottomCenter),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
+            ),
+            shape = RoundedCornerShape(16.dp),
+            contentPadding = PaddingValues(16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.sign_out),
+                fontSize = 14.sp,
+                fontFamily = medium,
+                color = Color.White
+            )
+        }
     }
+}
 
 @Composable
 fun UserNotAuthenticatedInfo(
-    modifier: Modifier,
-    authenticatedUserScreenState: AuthenticatedUserScreenState.CheckUserAuthenticated
+    modifier: Modifier = Modifier,
 ) {
-    if (!authenticatedUserScreenState.isAuthenticated) {
         Column(
             modifier = modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = stringResource(id = R.string.user_not_auth_caution),fontSize = 14.sp,
-                fontFamily = medium,)
+                fontFamily = medium)
         }
     }
-}
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun SharedTransitionScope.AuthenticatedUserWelcomeCard(
     animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier,
-    userInfos: AuthenticatedUserScreenState.UserInfos,
-    isGoogleSignIn: Boolean,
+    userInfoState: UserInfoState,
     onChangeProfilePhotoClick: (Boolean) -> Unit
 ) {
-    val openBottomSheetOfProfilePhotoChange by remember { mutableStateOf(false) }
-
-    var balloonWindow: BalloonWindow? by remember { mutableStateOf(null) }
-
-    val builder = rememberBalloonBuilder {
-        setArrowSize(10)
-        setArrowPosition(0.9f)
-        setWidth(BalloonSizeSpec.WRAP)
-        setHeight(BalloonSizeSpec.WRAP)
-        setPadding(12)
-        setMarginHorizontal(12)
-        setCornerRadius(8f)
-        setBackgroundColor(Color.DarkGray)
-        setBalloonAnimation(BalloonAnimation.NONE)
-    }
     Card(modifier = modifier
-        .clickable {
-            balloonWindow?.dismiss()
-        }
         .wrapContentHeight()
-        .fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
-        Box(modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight(), contentAlignment = Alignment.Center) {
-            Balloon(
-                    onBalloonWindowInitialized = { balloonWindow = it },
+        .fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = Color.Transparent,
+            disabledContentColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent
+        ).copy(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+
+        Column(
+            modifier = modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            AnimatedContent(
+                targetState = userInfoState.profileImage, transitionSpec = {
+                    (expandIn(tween(1000)))
+                        .togetherWith(shrinkOut(tween(1000)))
+                },
+                label = ""
+            ) { image ->
+                AsyncImage(
+                    model = image,
+                    contentScale = ContentScale.FillBounds,
+                    contentDescription = "Profile Image",
                     modifier = modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(top = 24.dp),
-                    builder = builder,
-                    balloonContent = {
-                        Text(
-                            text = stringResource(id = R.string.show_info_edit_infos),
-                            fontFamily = medium,
-                            fontSize = 12.sp,
-                            color = Color.White
-                        )
+                        .size(120.dp)
+                        .clip(RoundedCornerShape(64.dp))
+                        .clickable {
+                            onChangeProfilePhotoClick.invoke(true)
+                        },
+                )
+            }
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                buildAnnotatedString {
+                    append(stringResource(id = R.string.welcome_profile))
+                    withStyle(style = SpanStyle(fontFamily = bold)) {
+                        append(", ${userInfoState.name.orEmpty()} ${userInfoState.surname.orEmpty()} \uD83D\uDD90")
                     }
-                ) {
-                }
-
-            Row(
-                modifier = modifier
-                    .padding(16.dp)
-                    .wrapContentWidth()
-                    .align(Alignment.CenterStart),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-
-                Box(
-                    modifier = modifier
-                        .wrapContentSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AsyncImage(
-                        model = userInfos.profileImage,
-                        contentScale = ContentScale.FillBounds,
-                        contentDescription = "Profile Image",
-                        modifier = modifier
-                            .sharedBounds(
-                                sharedContentState = rememberSharedContentState(key = "profileImage"),
-                                animatedVisibilityScope = animatedVisibilityScope
-                            )
-                            .height(64.dp)
-                            .width(64.dp)
-                            .clip(RoundedCornerShape(64.dp))
-                            .clickable {
-                                onChangeProfilePhotoClick.invoke(!openBottomSheetOfProfilePhotoChange)
-                            },
-                    )
-                }
-
-                Text(
-                    buildAnnotatedString {
-                        append(stringResource(id = R.string.welcome_profile))
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(", ${userInfos.name.orEmpty()} \uD83D\uDD90 ")
-                        }
-                    },
-                    fontSize = 14.sp,
-                    fontFamily = medium,
-                    modifier = modifier
-                )
-            }
-            IconButton(
-                onClick = { balloonWindow?.showAlignBottom()},
-                modifier = modifier
-                    .wrapContentSize()
-                    .align(Alignment.CenterEnd)
-                    .padding(end = 8.dp)
-
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.info),
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = modifier.wrapContentSize()
-                )
-            }
+                },
+                fontSize = 16.sp,
+                fontFamily = medium,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground
+            )
         }
     }
 }

@@ -151,4 +151,5 @@
     <string name="collection_desc">Unsplash Lisansı altında ücretsiz olarak kullanabileceğiniz güzel görsel koleksiyonları aracılığıyla dünyayı keşfedin.</string>
     <string name="grid">Izgara</string>
     <string name="vertical">Dikey</string>
+    <string name="change_button_text">Değiştir</string>
 </resources>

@@ -1,29 +1,41 @@
 package com.oguzdogdu.walliescompose.features.authenticateduser.changeprofilephoto
 
-import android.net.Uri
-import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.EaseOutBounce
+import androidx.compose.animation.core.EaseOutQuad
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.with
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,8 +43,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ModalBottomSheetProperties
-import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -46,7 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -55,25 +65,23 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.SecureFlagPolicy
 import coil.compose.AsyncImage
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.features.authenticateduser.AuthenticatedUserScreenState
+import com.oguzdogdu.walliescompose.features.authenticateduser.UserInfoState
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChangeProfilePhotoDialog(
-    userInfos: AuthenticatedUserScreenState.UserInfos,
+    userInfoState: UserInfoState,
     modifier: Modifier,
     isOpen: Boolean,
-    profilePhotoUri:Uri?,
     onDismiss: () -> Unit,
     onProfilePhotoClick: () -> Unit,
     onChangeProfilePhotoButtonClick: () -> Unit,
 ) {
-    var openBottomSheet by remember { mutableStateOf(isOpen) }
+    var openBottomSheet by remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
@@ -122,9 +130,9 @@ fun ChangeProfilePhotoDialog(
                 modifier
                     .wrapContentHeight(),
             ) {
-                BottomSheetContent(userInfos = userInfos,
+                BottomSheetContent(
+                    userInfoState = userInfoState,
                     modifier = modifier.navigationBarsPadding(),
-                    profilePhotoUri = profilePhotoUri,
                     onProfilePhotoClick = {
                         onProfilePhotoClick.invoke()
                     },
@@ -138,22 +146,39 @@ fun ChangeProfilePhotoDialog(
 
 @Composable
 fun BottomSheetContent(
-    userInfos: AuthenticatedUserScreenState.UserInfos,
-    modifier: Modifier,
-    profilePhotoUri:Uri?,
+    userInfoState: UserInfoState,
     onProfilePhotoClick: () -> Unit,
     onChangeProfilePhotoButtonClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
-            modifier = modifier
-                .padding(8.dp)
-                .fillMaxWidth()
-                .wrapContentHeight(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+        modifier = modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        AnimatedContent(
+            targetState = userInfoState.photoUri,
+            transitionSpec = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                        stiffness = Spring.StiffnessVeryLow
+                    ),
+                ) {
+                    it
+                } togetherWith slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                    animationSpec = tween(1000, easing = EaseOutQuad)
+                )
+            },
+            label = ""
+        ) { uri ->
             AsyncImage(
-                model = profilePhotoUri ?: userInfos.profileImage,
+                model = uri ?: userInfoState.profileImage,
                 contentScale = ContentScale.FillBounds,
                 contentDescription = "Profile Image",
                 modifier = modifier
@@ -163,28 +188,28 @@ fun BottomSheetContent(
                     .clickable {
                         onProfilePhotoClick.invoke()
                     }
-
             )
+        }
 
-            Button(
-                onClick = {
-                    onChangeProfilePhotoButtonClick.invoke()
-                },
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                ),
-                shape = RoundedCornerShape(16.dp),
-                contentPadding = PaddingValues(16.dp)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.send_info),
-                    fontSize = 14.sp,
-                    fontFamily = medium,
-                    color = Color.Black
-                )
-            }
+        Button(
+            onClick = {
+                onChangeProfilePhotoButtonClick.invoke()
+            },
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
+            ),
+            shape = RoundedCornerShape(16.dp),
+            contentPadding = PaddingValues(16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.change_button_text),
+                fontSize = 14.sp,
+                fontFamily = medium,
+                color = Color.Black
+            )
         }
     }
+}
