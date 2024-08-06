@@ -152,5 +152,6 @@
     <string name="collection_desc">Explore the world through collections of beautiful images free to use under the Unsplash License.</string>
     <string name="grid">Grid</string>
     <string name="vertical">Vertical</string>
+    <string name="change_button_text">Change</string>
 
 </resources>

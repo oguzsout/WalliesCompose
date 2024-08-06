@@ -1,6 +1,7 @@
 package com.oguzdogdu.walliescompose.features.authenticateduser
 
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.storage.FirebaseStorage
@@ -11,11 +12,11 @@ import com.oguzdogdu.walliescompose.domain.wrapper.onLoading
 import com.oguzdogdu.walliescompose.domain.wrapper.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
@@ -26,11 +27,10 @@ class AuthenticatedUserViewModel @Inject constructor(
     private val authenticationRepository: UserAuthenticationRepository
 ) : ViewModel() {
 
-    private val _userState: MutableStateFlow<AuthenticatedUserScreenState?> = MutableStateFlow(null)
+    private val _userState: MutableStateFlow<UserInfoState> = MutableStateFlow(UserInfoState())
     val userState = _userState.asStateFlow()
 
     private val _userAuthState = MutableStateFlow(false)
-    val userAuthState = _userAuthState.asStateFlow()
 
     private val _changeProfilePhotoBottomSheetOpenStat = MutableStateFlow(false)
     val changeProfilePhotoBottomSheetOpenStat = _changeProfilePhotoBottomSheetOpenStat.asStateFlow()
@@ -65,19 +65,20 @@ class AuthenticatedUserViewModel @Inject constructor(
         viewModelScope.launch {
             authenticationRepository.fetchUserInfos().collectLatest { result ->
                 result.onLoading {
-                    _userState.update { AuthenticatedUserScreenState.Loading }
+                    _userState.update {
+                        it.copy(loading = true)
+                    }
                 }
                 result.onFailure { error ->
                     _userState.update {
-                        AuthenticatedUserScreenState.UserInfoError(
-                            error
-                        )
+                        it.copy(errorMessage = error)
                     }
                 }
 
                 result.onSuccess { user ->
                     _userState.update {
-                        AuthenticatedUserScreenState.UserInfos(
+                        it.copy(
+                            loading = false,
                             name = user?.name,
                             surname = user?.surname,
                             email = user?.email,
@@ -90,12 +91,21 @@ class AuthenticatedUserViewModel @Inject constructor(
         }
     }
 
+     fun setInstantlyProfileImageToDialog(uri: Uri?) {
+        viewModelScope.launch {
+            _userState.update {
+                delay(500)
+                it.copy(photoUri = uri)
+            }
+        }
+    }
+
     private fun checkSignIn(){
         viewModelScope.launch {
             authenticationRepository.isUserAuthenticatedInFirebase().collectLatest { status ->
                _userAuthState.emit(status)
                 _userState.update {
-                    AuthenticatedUserScreenState.CheckUserAuthenticated(isAuthenticated = status)
+                    it.copy(isAuthenticatedWithFirebase = status)
                 }
             }
         }
@@ -105,9 +115,7 @@ class AuthenticatedUserViewModel @Inject constructor(
         viewModelScope.launch {
             authenticationRepository.isUserAuthenticatedWithGoogle().collectLatest { result ->
                 _userState.update {
-                    AuthenticatedUserScreenState.CheckUserGoogleSignIn(
-                        isAuthenticated = result
-                    )
+                    it.copy(isAuthenticatedWithGoogle = result)
                 }
             }
         }
