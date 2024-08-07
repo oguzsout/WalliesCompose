@@ -249,7 +249,6 @@ fun WalliesNavHost(
                     navController.navigateUp()
                 })
                 authenticatedUserScreen(
-                    transitionScope = this@SharedTransitionLayout,
                     navigateBack = {
                         navController.navigateUp()
                     }, navigateToLogin = {
