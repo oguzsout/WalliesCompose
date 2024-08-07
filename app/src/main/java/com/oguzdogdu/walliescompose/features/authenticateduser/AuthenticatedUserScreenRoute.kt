@@ -5,15 +5,10 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,15 +18,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -59,11 +52,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -74,29 +65,20 @@ import coil.compose.AsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.features.authenticateduser.changeprofilephoto.ChangeProfilePhotoDialog
 import com.oguzdogdu.walliescompose.features.settings.components.MenuRowItems
-import com.oguzdogdu.walliescompose.ui.theme.Background
-import com.oguzdogdu.walliescompose.ui.theme.BackgroundDark
 import com.oguzdogdu.walliescompose.ui.theme.bold
 import com.oguzdogdu.walliescompose.ui.theme.medium
+import com.oguzdogdu.walliescompose.ui.theme.regular
 import com.oguzdogdu.walliescompose.util.MenuRow
 import com.oguzdogdu.walliescompose.util.ReusableMenuRow
-import com.skydoves.balloon.BalloonAnimation
-import com.skydoves.balloon.BalloonSizeSpec
-import com.skydoves.balloon.compose.Balloon
-import com.skydoves.balloon.compose.BalloonWindow
-import com.skydoves.balloon.compose.rememberBalloonBuilder
-import com.skydoves.balloon.compose.setBackgroundColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun SharedTransitionScope.AuthenticatedUserScreenRoute(
-    animatedVisibilityScope: AnimatedVisibilityScope,
+fun AuthenticatedUserScreenRoute(
     modifier: Modifier = Modifier,
     viewModel: AuthenticatedUserViewModel = hiltViewModel(),
-    navigateBack:() -> Unit,
+    navigateBack: () -> Unit,
     navigateToLogin: () -> Unit,
     navigateToChangeNameAndSurname: () -> Unit,
     navigateToChangePassword: () -> Unit,
@@ -171,7 +153,6 @@ fun SharedTransitionScope.AuthenticatedUserScreenRoute(
                 .fillMaxSize()
         ) {
             AuthenticatedUserScreenContent(
-                animatedVisibilityScope = animatedVisibilityScope,
                 userInfoState = userState,
                 modifier = modifier,
                 onSignOutClick = {
@@ -206,10 +187,8 @@ fun SharedTransitionScope.AuthenticatedUserScreenRoute(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun SharedTransitionScope.AuthenticatedUserScreenContent(
-    animatedVisibilityScope: AnimatedVisibilityScope,
+fun AuthenticatedUserScreenContent(
     userInfoState: UserInfoState,
     modifier: Modifier = Modifier,
     onSignOutClick: () -> Unit,
@@ -223,7 +202,11 @@ fun SharedTransitionScope.AuthenticatedUserScreenContent(
     showDialog: Boolean
 ) {
     val isAuthenticated =
-        rememberUpdatedState(newValue = userInfoState.isAuthenticatedWithFirebase or userInfoState.isAuthenticatedWithGoogle)
+        rememberUpdatedState(
+            newValue = userInfoState.isAuthenticatedWithFirebase
+                    or
+                    userInfoState.isAuthenticatedWithGoogle
+        )
     if (!isAuthenticated.value) {
         UserNotAuthenticatedInfo()
     }
@@ -238,7 +221,6 @@ fun SharedTransitionScope.AuthenticatedUserScreenContent(
                 .padding(8.dp)
         ) {
             AuthenticatedUserWelcomeCard(
-                animatedVisibilityScope = animatedVisibilityScope,
                 userInfoState = userInfoState,
                 onChangeProfilePhotoClick = {
                     onChangeProfilePhotoClick.invoke(it)
@@ -306,10 +288,8 @@ fun UserNotAuthenticatedInfo(
         }
     }
 
-@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalAnimationApi::class)
 @Composable
-fun SharedTransitionScope.AuthenticatedUserWelcomeCard(
-    animatedVisibilityScope: AnimatedVisibilityScope,
+fun AuthenticatedUserWelcomeCard(
     modifier: Modifier = Modifier,
     userInfoState: UserInfoState,
     onChangeProfilePhotoClick: (Boolean) -> Unit
@@ -325,7 +305,6 @@ fun SharedTransitionScope.AuthenticatedUserWelcomeCard(
             disabledContainerColor = Color.Transparent
         ).copy(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-
         Column(
             modifier = modifier
                 .padding(12.dp)
@@ -334,7 +313,8 @@ fun SharedTransitionScope.AuthenticatedUserWelcomeCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AnimatedContent(
-                targetState = userInfoState.profileImage, transitionSpec = {
+                targetState = userInfoState.profileImage,
+                transitionSpec = {
                     (expandIn(tween(1000)))
                         .togetherWith(shrinkOut(tween(1000)))
                 },
@@ -344,12 +324,14 @@ fun SharedTransitionScope.AuthenticatedUserWelcomeCard(
                     model = image,
                     contentScale = ContentScale.FillBounds,
                     contentDescription = "Profile Image",
-                    modifier = modifier
-                        .size(120.dp)
-                        .clip(RoundedCornerShape(64.dp))
+                    modifier = Modifier
+                        .size(96.dp)
+                        .clip(CircleShape)
                         .clickable {
-                            onChangeProfilePhotoClick.invoke(true)
-                        },
+                            if (userInfoState.isAuthenticatedWithFirebase) {
+                                onChangeProfilePhotoClick.invoke(true)
+                            }
+                        }
                 )
             }
             Spacer(modifier = Modifier.size(8.dp))
@@ -365,6 +347,16 @@ fun SharedTransitionScope.AuthenticatedUserWelcomeCard(
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onBackground
             )
+            Spacer(modifier = Modifier.size(8.dp))
+            TODO("The bios of the logged in user should appear here")
+            /*Text(
+                text = "A loyal member of the gang and deeply devoted to Dutch, Arthur also struggles with his own morals and conscience. Although he has a tough and ruthless exterior, inside he is compassionate and protective.",
+                fontSize = 14.sp,
+                fontFamily = regular,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.fillMaxWidth()
+            ) */
         }
     }
 }
