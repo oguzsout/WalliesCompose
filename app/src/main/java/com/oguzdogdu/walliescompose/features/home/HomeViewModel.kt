@@ -17,6 +17,7 @@ import com.oguzdogdu.walliescompose.domain.wrapper.onSuccess
 import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
 import com.oguzdogdu.walliescompose.features.home.state.HomeUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -76,6 +77,16 @@ class HomeViewModel @Inject constructor(
             popularsResult,
             latestResult
         ) { randomResource, topicsResource, popularsResource, latestResource ->
+
+            val isLoading = randomResource is Resource.Loading ||
+                    topicsResource is Resource.Loading ||
+                    popularsResource is Resource.Loading ||
+                    latestResource is Resource.Loading
+            if (isLoading) {
+                delay(750)
+                return@combine HomeUIState.Loading(loading = true)
+            }
+
             val randomList = randomResource.takeListOr { emptyList() }
             val topicsList = topicsResource.takeListOr { emptyList() }
             val popularList = popularsResource.takeListOr { emptyList() }
