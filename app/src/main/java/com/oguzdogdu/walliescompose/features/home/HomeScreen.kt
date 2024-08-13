@@ -31,6 +31,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -212,12 +213,13 @@ fun SharedTransitionScope.HomeScreenContent(
     onLatestClick: (String) -> Unit,
     onRandomImageClick: (String?) -> Unit
 ) {
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when (homeUiState) {
-            is HomeUIState.Loading -> {}
+            is HomeUIState.Loading -> {
+                CircularProgressIndicator()
+            }
 
             is HomeUIState.Error -> {}
-
             is HomeUIState.Success -> {
                 LazyColumn(
                     state = rememberLazyListState(),
@@ -229,7 +231,10 @@ fun SharedTransitionScope.HomeScreenContent(
                 ) {
 
                     item(key = "randomContainer") {
-                        HomeRandomPage(randomImageList = homeUiState.random, onRandomImageClick = onRandomImageClick)
+                        HomeRandomPage(
+                            randomImageList = homeUiState.random,
+                            onRandomImageClick = onRandomImageClick
+                        )
                     }
                     item(key = "topicContainer") {
                         TopicLayoutContainer(
