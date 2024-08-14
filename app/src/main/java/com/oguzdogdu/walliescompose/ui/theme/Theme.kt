@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.oguzdogdu.walliescompose.features.settings.ThemeValues
 
-private val DarkColorPalette = darkColorScheme(
+ val DarkColorPalette = darkColorScheme(
     primary = PrimaryDark,
     onPrimary = OnPrimaryDark,
     primaryContainer = PrimaryContainerDark,
@@ -41,7 +41,7 @@ private val DarkColorPalette = darkColorScheme(
     onSurfaceVariant = OnSurfaceVariantDark,
 )
 
-private val LightColorPalette = lightColorScheme(
+ val LightColorPalette = lightColorScheme(
     primary = PrimaryLight,
     onPrimary = OnPrimaryLight,
     primaryContainer = PrimaryContainerLight,

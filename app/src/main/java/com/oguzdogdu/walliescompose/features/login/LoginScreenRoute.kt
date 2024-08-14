@@ -7,6 +7,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -75,12 +77,11 @@ fun LoginScreenRoute(
         modifier = modifier.fillMaxSize()
     ) {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
         ) {
             LoginScreenContent(state = loginState,
-                modifier = modifier,
                 googleAuthUiClient = googleAuthUiClient,
                 onContinueWithoutLoginClick = {
                     onContinueWithoutLoginClick.invoke()
@@ -101,7 +102,7 @@ fun LoginScreenRoute(
 @Composable
 fun LoginScreenContent(
     state: LoginState,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     googleAuthUiClient: GoogleAuthUiClient,
     onContinueWithoutLoginClick: () -> Unit,
     onGoogleSignInButtonClicked: (String) -> Unit,
@@ -151,7 +152,7 @@ fun LoginScreenContent(
     Box(modifier = modifier.fillMaxSize()) {
 
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .align(Alignment.Center)
                 .padding(16.dp)
                 .wrapContentSize(),
@@ -164,7 +165,7 @@ fun LoginScreenContent(
                     id = R.string.app_logo
                 ),
                 tint = Color.Unspecified,
-                modifier = modifier.size(width = 72.dp, height = 72.dp)
+                modifier = Modifier.size(width = 72.dp, height = 72.dp)
             )
             Text(
                 text = stringResource(R.string.sign_in_to_wallies),
@@ -180,15 +181,16 @@ fun LoginScreenContent(
         }
 
         Column(
-            modifier = modifier
-                .align(Alignment.BottomCenter)
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(16.dp)
-                .wrapContentSize(),
+                .wrapContentHeight()
+                .align(Alignment.BottomCenter),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ButtonGoogleSignIn(
-                modifier = modifier, onGoogleSignInButtonClick = {
+                onGoogleSignInButtonClick = {
                     scope.launch {
                         val intentSender = googleAuthUiClient.signIn()
                         launcher.launch(
@@ -206,12 +208,11 @@ fun LoginScreenContent(
                 },
                 modifier = modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 16.dp)
+                    .height(44.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = colorResource(id = R.color.lush_green)
                 ),
-                shape = RoundedCornerShape(16.dp),
-                contentPadding = PaddingValues(16.dp)
             ) {
                 Text(
                     text = stringResource(R.string.continue_with_email),
@@ -221,14 +222,14 @@ fun LoginScreenContent(
                 )
             }
             Row(
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 20.dp)
                     .wrapContentHeight(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 HorizontalDivider(
-                    modifier = modifier
+                    modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(),
                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -236,14 +237,14 @@ fun LoginScreenContent(
 
                 Text(
                     text = stringResource(id = R.string.or),
-                    modifier = modifier.padding(horizontal = 12.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp),
                     fontSize = 16.sp,
                     fontFamily = bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
 
                 HorizontalDivider(
-                    modifier = modifier
+                    modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(),
                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -254,7 +255,7 @@ fun LoginScreenContent(
                 fontFamily = bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 textAlign = TextAlign.Center,
-                modifier = modifier.clickable {
+                modifier = Modifier.clickable {
                     onContinueWithoutLoginClick.invoke()
                 })
         }

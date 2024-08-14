@@ -39,7 +39,7 @@ class LoginViewModel @Inject constructor(
                     _loginState.update { LoginState.Loading(true) }
                 }
 
-                delay(1000)
+                delay(2000)
                 response.onSuccess {
                     _loginState.update {
                         LoginState.Loading(false)
