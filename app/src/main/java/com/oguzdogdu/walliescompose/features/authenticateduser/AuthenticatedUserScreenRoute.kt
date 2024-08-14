@@ -348,7 +348,6 @@ fun AuthenticatedUserWelcomeCard(
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.size(8.dp))
-            TODO("The bios of the logged in user should appear here")
             /*Text(
                 text = "A loyal member of the gang and deeply devoted to Dutch, Arthur also struggles with his own morals and conscience. Although he has a tough and ruthless exterior, inside he is compassionate and protective.",
                 fontSize = 14.sp,
