@@ -131,6 +131,15 @@ fun SearchScreenRoute(
         viewModel.handleUIEvent(SearchEvent.GetAppLanguageValue)
     }
 
+    LaunchedEffect(key1 = Unit) {
+        if (queryFromDetail.isNullOrBlank().not()) {
+            viewModel.handleUIEvent(
+                SearchEvent.EnteredSearchQuery(
+                    queryFromDetail.orEmpty(),
+                    null)
+            )
+        }
+    }
 
     Scaffold(modifier = modifier.fillMaxSize()) {
         SearchScreen(
@@ -279,6 +288,7 @@ fun SearchScreen(
                                         recordAudioLauncher.launch(Manifest.permission.RECORD_AUDIO)
                                     }
                                 }
+
                                 else -> {
                                     openSpeechDialog.invoke(it)
                                 }
