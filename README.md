@@ -1,4 +1,4 @@
-# Wallies
+
 
 <p align="center"><img src=https://user-images.githubusercontent.com/73955284/233776416-58b37197-180c-4fa3-b2e7-4da14733431e.png width="700" height="500">
 
@@ -37,3 +37,6 @@ This project uses many of the popular libraries, plugins and tools of the androi
 - [Room](https://developer.android.com/training/data-storage/room) - The room persistence library it is an abstraction layer over SQLite.
 - [Coil](https://github.com/coil-kt/coil) - Image loading for Android backed by Kotlin Coroutines.
 - [BalloonCompose](https://github.com/skydoves/Balloon) - Modernized and sophisticated tooltips, fully customizable with an arrow and animations on Android.
+
+# Contributors
+- [Muhammet Küdür](https://github.com/mskdr)
