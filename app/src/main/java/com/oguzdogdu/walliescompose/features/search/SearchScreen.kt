@@ -109,6 +109,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
+import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Local
 
 @Composable
 fun SearchScreenRoute(
@@ -126,6 +127,7 @@ fun SearchScreenRoute(
     val appLanguage by viewModel.appLanguage.collectAsStateWithLifecycle()
     val query by viewModel.query.collectAsStateWithLifecycle()
     val stateOfSearchScreen by viewModel.searchScreenState.collectAsStateWithLifecycle()
+    val currentLanguage = LocalContext.current.resources.configuration.locales[0].language
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
         viewModel.handleUIEvent(SearchEvent.GetAppLanguageValue)
@@ -136,7 +138,8 @@ fun SearchScreenRoute(
             viewModel.handleUIEvent(
                 SearchEvent.EnteredSearchQuery(
                     queryFromDetail.orEmpty(),
-                    null)
+                    currentLanguage
+                )
             )
         }
     }
