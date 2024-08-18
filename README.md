@@ -38,5 +38,5 @@ This project uses many of the popular libraries, plugins and tools of the androi
 - [Coil](https://github.com/coil-kt/coil) - Image loading for Android backed by Kotlin Coroutines.
 - [BalloonCompose](https://github.com/skydoves/Balloon) - Modernized and sophisticated tooltips, fully customizable with an arrow and animations on Android.
 
-# Contributors
-- [Muhammet Küdür](https://github.com/mskdr)
+# 👨‍🔧 👩‍🔧 Contributors
+[Muhammet Küdür](https://github.com/mskdr)
