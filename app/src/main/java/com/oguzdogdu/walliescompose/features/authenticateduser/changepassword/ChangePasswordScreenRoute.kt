@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Clear
@@ -39,20 +38,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.features.login.signinwithemail.SignInWithEmailEvents
-import com.oguzdogdu.walliescompose.features.login.signinwithemail.SignInWithEmailState
 import com.oguzdogdu.walliescompose.ui.theme.medium
 
 @Composable
@@ -232,4 +229,17 @@ fun ChangePasswordScreenContent(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ChangePasswordScreenPreview(){
+    ChangePasswordScreenContent(
+        modifier = Modifier,
+        state = ChangePasswordScreenState.PasswordChangeStatus(
+            true
+        ),
+        onPasswordChange = {},
+        onLoginButtonClick = {}
+    )
 }

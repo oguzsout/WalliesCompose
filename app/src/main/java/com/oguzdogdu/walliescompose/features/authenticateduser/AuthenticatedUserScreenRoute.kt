@@ -55,6 +55,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -67,7 +68,6 @@ import com.oguzdogdu.walliescompose.features.authenticateduser.changeprofilephot
 import com.oguzdogdu.walliescompose.features.settings.components.MenuRowItems
 import com.oguzdogdu.walliescompose.ui.theme.bold
 import com.oguzdogdu.walliescompose.ui.theme.medium
-import com.oguzdogdu.walliescompose.ui.theme.regular
 import com.oguzdogdu.walliescompose.util.MenuRow
 import com.oguzdogdu.walliescompose.util.ReusableMenuRow
 import kotlinx.coroutines.CoroutineScope
@@ -83,7 +83,7 @@ fun AuthenticatedUserScreenRoute(
     navigateToChangeNameAndSurname: () -> Unit,
     navigateToChangePassword: () -> Unit,
     navigateToChangeEmail: () -> Unit,
-    ) {
+) {
 
     val userState by viewModel.userState.collectAsStateWithLifecycle()
     val dialogState by viewModel.changeProfilePhotoBottomSheetOpenStat.collectAsStateWithLifecycle()
@@ -169,7 +169,7 @@ fun AuthenticatedUserScreenRoute(
                     galleryLauncher.launch("image/*")
                 }, onChangeProfilePhotoButtonClick = {
                     viewModel.handleUiEvents(AuthenticatedUserEvent.ChangeProfileImage(photoUri = imageUri))
-                } ,dismissDialog = {dialog ->
+                }, dismissDialog = { dialog ->
                     viewModel.handleUiEvents(
                         AuthenticatedUserEvent.OpenChangeProfileBottomSheet(
                             dialog
@@ -278,15 +278,17 @@ fun AuthenticatedUserScreenContent(
 fun UserNotAuthenticatedInfo(
     modifier: Modifier = Modifier,
 ) {
-        Column(
-            modifier = modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = stringResource(id = R.string.user_not_auth_caution),fontSize = 14.sp,
-                fontFamily = medium)
-        }
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(id = R.string.user_not_auth_caution), fontSize = 14.sp,
+            fontFamily = medium
+        )
     }
+}
 
 @Composable
 fun AuthenticatedUserWelcomeCard(
@@ -294,9 +296,10 @@ fun AuthenticatedUserWelcomeCard(
     userInfoState: UserInfoState,
     onChangeProfilePhotoClick: (Boolean) -> Unit
 ) {
-    Card(modifier = modifier
-        .wrapContentHeight()
-        .fillMaxWidth(),
+    Card(
+        modifier = modifier
+            .wrapContentHeight()
+            .fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -394,7 +397,7 @@ fun EditProfileInformationContent(
                 modifier = modifier.fillMaxWidth(),
                 itemContent = { menu ->
                     MenuRowItems(
-                        modifier = modifier, menuRow = menu,arrow = true
+                        modifier = modifier, menuRow = menu, arrow = true
                     )
                 }
             ) {
@@ -438,4 +441,27 @@ fun handleMenuItemClick(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AuthenticatedUserScreenPreview() {
+    AuthenticatedUserScreenContent(
+        userInfoState = UserInfoState(
+            name = "Muhammet",
+            surname = "Küdür",
+            email = "muhammetdeneme@gmail.com",
+            isAuthenticatedWithGoogle = true,
+            isAuthenticatedWithFirebase = false,
+        ),
+        onSignOutClick = {},
+        onChangeProfilePhotoClick = {},
+        onProfilePhotoClick = {},
+        onChangeProfilePhotoButtonClick = {},
+        dismissDialog = {} ,
+        onChangeNameAndSurnameClick = {},
+        onChangePasswordClick = {},
+        onChangeEmailClick = {},
+        showDialog = false
+    )
 }

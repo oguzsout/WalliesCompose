@@ -56,6 +56,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -66,6 +67,7 @@ import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
+import com.oguzdogdu.walliescompose.domain.model.collections.Collection
 import com.oguzdogdu.walliescompose.domain.model.collections.CollectionList
 import com.oguzdogdu.walliescompose.features.home.LoadingState
 import com.oguzdogdu.walliescompose.ui.theme.medium
@@ -242,7 +244,8 @@ fun CollectionDetailInfoCard(
             }
             if (stateOfCollectionInfo.collection?.user?.name?.isNotEmpty() == true
                 &&
-                (stateOfCollectionInfo.collection.user.profileImage?.medium?.isNotEmpty() == true)) {
+                (stateOfCollectionInfo.collection.user.profileImage?.medium?.isNotEmpty() == true)
+            ) {
                 Spacer(modifier = Modifier.size(12.dp))
                 Row(
                     modifier = Modifier
@@ -313,8 +316,12 @@ fun CollectionDetailListScreen(
                     }
                 }
             }
+
             stateOfCollectionList.loading -> LoadingState(modifier = modifier)
-            stateOfCollectionList.collectionsLists?.isEmpty() == true -> EmptyView(modifier = modifier, state = true)
+            stateOfCollectionList.collectionsLists?.isEmpty() == true -> EmptyView(
+                modifier = modifier,
+                state = true
+            )
         }
     }
 }
@@ -351,7 +358,11 @@ fun EmptyView(modifier: Modifier, state: Boolean) {
 
 
 @Composable
-private fun CollectionListImageView(modifier: Modifier, collectionDetailListItems: CollectionList, onCollectionItemClick:(String) -> Unit) {
+private fun CollectionListImageView(
+    modifier: Modifier,
+    collectionDetailListItems: CollectionList,
+    onCollectionItemClick: (String) -> Unit
+) {
     Box(
         modifier = Modifier
             .wrapContentSize()
@@ -369,4 +380,24 @@ private fun CollectionListImageView(modifier: Modifier, collectionDetailListItem
             loading = { ImageLoadingState() },
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CollectionDetailListPreview() {
+    CollectionDetailListScreen(
+        paddingValues = PaddingValues(12.dp),
+        stateOfCollectionInfo = CollectionConstantInfoState(
+            collection = Collection(
+                "123",
+                "Title",
+                desc = "lorem ipsum lorem dolor amet",
+                user = null
+            )
+        ),
+        stateOfCollectionList = CollectionListState(),
+        onCollectionClick = {},
+        onScrollList = {},
+        onUserDetailClick = {}
+    )
 }
