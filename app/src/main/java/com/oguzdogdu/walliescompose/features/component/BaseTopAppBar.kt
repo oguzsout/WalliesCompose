@@ -80,6 +80,6 @@ fun BaseCenteredToolbar(
 
 @Preview(showBackground = true)
 @Composable
-fun BaseTopBarPreview(){
+fun BaseCenteredToolbarPreview(){
     BaseCenteredToolbar(title = "Deneme 1 2 3", leftClick = {}) {}
 }
