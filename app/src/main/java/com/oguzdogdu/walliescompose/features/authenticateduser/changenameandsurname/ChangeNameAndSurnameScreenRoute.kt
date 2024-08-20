@@ -40,6 +40,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -91,9 +92,17 @@ fun ChangeNameAndSurnameScreenRoute(
                 .padding(it)
                 .fillMaxSize()
         ) {
-            ChangeEmailScreenContent(modifier = modifier, state = stateOfEmail, onChangeUserInfoButtonClick = { name, surname ->
-                viewModel.handleUIEvent(EditUsernameSurnameEvent.ChangedUserNameAndSurname(name = name,surname = surname))
-            })
+            ChangeEmailScreenContent(
+                modifier = modifier,
+                state = stateOfEmail,
+                onChangeUserInfoButtonClick = { name, surname ->
+                    viewModel.handleUIEvent(
+                        EditUsernameSurnameEvent.ChangedUserNameAndSurname(
+                            name = name,
+                            surname = surname
+                        )
+                    )
+                })
         }
     }
 }
@@ -102,7 +111,7 @@ fun ChangeNameAndSurnameScreenRoute(
 fun ChangeEmailScreenContent(
     modifier: Modifier,
     state: EditUsernameSurnameScreenState?,
-    onChangeUserInfoButtonClick: (String,String) -> Unit,
+    onChangeUserInfoButtonClick: (String, String) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -120,8 +129,10 @@ fun ChangeEmailScreenContent(
             }
 
             is EditUsernameSurnameScreenState.UserInfos -> {
-                Toast.makeText(context,
-                    context.getString(R.string.user_name_surname_update), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.user_name_surname_update), Toast.LENGTH_SHORT
+                ).show()
             }
 
             null -> {
@@ -191,7 +202,7 @@ fun ChangeEmailScreenContent(
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent,
             ), singleLine = true, trailingIcon = {
-                if (surname.isNotEmpty()){
+                if (surname.isNotEmpty()) {
                     IconButton(
                         onClick = { surname = "" }, modifier = modifier.wrapContentSize()
                     ) {
@@ -208,7 +219,7 @@ fun ChangeEmailScreenContent(
 
         Button(
             onClick = {
-                onChangeUserInfoButtonClick.invoke(name,surname)
+                onChangeUserInfoButtonClick.invoke(name, surname)
             },
             modifier = modifier
                 .fillMaxWidth()
@@ -228,4 +239,14 @@ fun ChangeEmailScreenContent(
             )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ChangeNameAndSurnamePreview() {
+    ChangeEmailScreenContent(
+        modifier = Modifier,
+        state = EditUsernameSurnameScreenState.UserInfos("Muhammet", "Küdür"),
+        onChangeUserInfoButtonClick = { _, _ -> }
+    )
 }
