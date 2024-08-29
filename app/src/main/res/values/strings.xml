@@ -153,5 +153,6 @@
     <string name="grid">Grid</string>
     <string name="vertical">Vertical</string>
     <string name="change_button_text">Change</string>
-
+    <string name="text_dimension_info">Some photos may be larger than the screen size of your device. You should check the dimensions of the photo you want to set as wallpaper.</string>
+    <string name="text_detail_color">Main Color </string>
 </resources>

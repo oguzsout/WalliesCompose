@@ -152,4 +152,6 @@
     <string name="grid">Izgara</string>
     <string name="vertical">Dikey</string>
     <string name="change_button_text">Değiştir</string>
+    <string name="text_dimension_info">Bazı fotoğraflar cihazının ekran ölçülerinden büyük olabilir. Duvar kağıdı olarak ayarlamak istediğin fotoğrafın ölçülerini kontrol etmelisin.</string>
+    <string name="text_detail_color">Ana Renk </string>
 </resources>

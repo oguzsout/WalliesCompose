@@ -11,6 +11,7 @@ data class Photo(
     val id: String?,
     val username: String?,
     val portfolio: String?,
+    val color: String?,
     val profileimage:String?,
     val createdAt: String?,
     val desc:String?,

@@ -48,6 +48,7 @@ fun PhotoDetailResponse.toDomainModelPhoto() = Photo(
     id = id,
     username = user?.username,
     portfolio = user?.portfolioUrl,
+    color = color,
     profileimage = user?.profileImage?.large,
     createdAt = createdAt,
     desc = altDescription,
