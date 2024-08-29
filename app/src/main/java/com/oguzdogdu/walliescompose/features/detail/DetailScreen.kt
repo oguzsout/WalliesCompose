@@ -1,5 +1,6 @@
 package com.oguzdogdu.walliescompose.features.detail
 
+import TooltipPopup
 import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -70,6 +71,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.features.detail.component.PhotoAttributesCard
+import com.oguzdogdu.walliescompose.features.detail.component.PhotoDetailColorsCard
 import com.oguzdogdu.walliescompose.features.detail.component.PhotoDetailUserInfoContainer
 import com.oguzdogdu.walliescompose.features.detail.component.PhotoDetailedInformationCard
 import com.oguzdogdu.walliescompose.features.downloadimage.DownloadImageBottomSheet
@@ -489,6 +491,28 @@ fun SharedTransitionScope.DetailScreenMainPhoto(
                     drawLayer(graphicsLayer)
                 }
         )
+
+            Row(
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.Center
+            ) {
+
+                TooltipPopup(
+                    triggeredView = { modifier ->
+                        Icon(
+                            modifier = modifier.size(20.dp),
+                            painter = painterResource(id = R.drawable.info),
+                            contentDescription = "TooltipPopup",
+                            tint = Color.White,
+                        )
+                    },
+                    tooltipContent = {
+                        PhotoDetailColorsCard(photoDetailState = state)
+                    }
+                )
+            }
+
         if (state.detail?.location?.country?.isNotEmpty() == true) {
             Row(
                 modifier = Modifier
