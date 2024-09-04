@@ -5,6 +5,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.oguzdogdu.walliescompose.cache.dao.FavoriteDao
+import com.oguzdogdu.walliescompose.cache.dao.UserPreferencesDao
 import com.oguzdogdu.walliescompose.cache.entity.FavoriteImage
 import com.oguzdogdu.walliescompose.cache.entity.toDomain
 import com.oguzdogdu.walliescompose.data.common.Constants
@@ -43,6 +44,7 @@ import com.oguzdogdu.walliescompose.domain.model.random.RandomImage
 import com.oguzdogdu.walliescompose.domain.model.search.SearchPhoto
 import com.oguzdogdu.walliescompose.domain.model.topics.TopicDetail
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
+import com.oguzdogdu.walliescompose.domain.model.userpreferences.UserPreferences
 import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.Resource
 import com.oguzdogdu.walliescompose.domain.wrapper.toResource
@@ -55,6 +57,7 @@ import javax.inject.Inject
 class WallpaperRepositoryImpl @Inject constructor(
     private val service: WallpaperService,
     private val favoriteDao: FavoriteDao,
+    private val userPreferencesDao: UserPreferencesDao,
     @Dispatcher(WalliesDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
 ) :
     WallpaperRepository {
@@ -265,5 +268,26 @@ class WallpaperRepositoryImpl @Inject constructor(
                 it.toDomainModelRandom()
             }
         }
+    }
+
+    override suspend fun insertRecentSearchKeysToDB(userPreferences: UserPreferences) {
+        return userPreferencesDao.addRecentSearchKeys(
+           com.oguzdogdu.walliescompose.cache.entity.UserPreferences(
+               keyword = userPreferences.keyword)
+        )
+    }
+
+    override suspend fun getRecentSearchKeysFromDB(): Flow<List<UserPreferences>?> {
+        return userPreferencesDao.getRecentSearchKeys().map { list ->
+            list.map {
+                it.toDomain()
+            }
+        }
+    }
+
+    override suspend fun deleteRecentSearchKeysFromDB(keyword: String?) {
+        return userPreferencesDao.deleteRecentSearchKeyByKeyword(
+           keyword = keyword.orEmpty()
+        )
     }
 }

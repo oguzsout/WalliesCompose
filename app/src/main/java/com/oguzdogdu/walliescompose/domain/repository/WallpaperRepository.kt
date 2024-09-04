@@ -12,6 +12,7 @@ import com.oguzdogdu.walliescompose.domain.model.random.RandomImage
 import com.oguzdogdu.walliescompose.domain.model.search.SearchPhoto
 import com.oguzdogdu.walliescompose.domain.model.topics.TopicDetail
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
+import com.oguzdogdu.walliescompose.domain.model.userpreferences.UserPreferences
 import com.oguzdogdu.walliescompose.domain.wrapper.Resource
 import kotlinx.coroutines.flow.Flow
 
@@ -36,4 +37,8 @@ interface WallpaperRepository {
     suspend fun getImagesByLatest(): Flow<PagingData<LatestImage>>
     suspend fun getACollection(id: String?) : Flow<Resource<Collection>>
     suspend fun getRandomImages(count:Int?) : Flow<Resource<List<RandomImage>?>>
+    suspend fun insertRecentSearchKeysToDB(userPreferences: UserPreferences)
+    suspend fun getRecentSearchKeysFromDB(): Flow<List<UserPreferences>?>
+    suspend fun deleteRecentSearchKeysFromDB(keyword:String?)
+
 }

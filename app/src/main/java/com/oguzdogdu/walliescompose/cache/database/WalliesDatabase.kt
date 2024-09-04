@@ -5,24 +5,27 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.oguzdogdu.walliescompose.cache.dao.FavoriteDao
+import com.oguzdogdu.walliescompose.cache.dao.UserPreferencesDao
 import com.oguzdogdu.walliescompose.cache.entity.FavoriteImage
+import com.oguzdogdu.walliescompose.cache.entity.UserPreferences
 import com.oguzdogdu.walliescompose.cache.util.Constants.DB_NAME
 
-@Database(version = 1, entities = [FavoriteImage::class])
-abstract class FavoritesDatabase : RoomDatabase() {
+@Database(version = 2, entities = [FavoriteImage::class, UserPreferences::class])
+abstract class WalliesDatabase : RoomDatabase() {
 
     abstract val favoritesDao: FavoriteDao
+    abstract val userPreferencesDao: UserPreferencesDao
 
     companion object {
         @Volatile
-        private var INSTANCE: FavoritesDatabase? = null
+        private var INSTANCE: WalliesDatabase? = null
 
-        fun getInstance(context: Context): FavoritesDatabase = INSTANCE ?: synchronized(this) {
+        fun getInstance(context: Context): WalliesDatabase = INSTANCE ?: synchronized(this) {
             INSTANCE ?: buildDatabase(context).also { INSTANCE = it }
         }
 
         private fun buildDatabase(context: Context) = Room.databaseBuilder(
-            context.applicationContext, FavoritesDatabase::class.java, DB_NAME
+            context.applicationContext, WalliesDatabase::class.java, DB_NAME
         ).build()
     }
 }
