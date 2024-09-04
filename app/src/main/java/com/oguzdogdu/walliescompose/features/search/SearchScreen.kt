@@ -6,13 +6,21 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -75,6 +83,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -95,6 +105,7 @@ import coil.compose.AsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.domain.model.search.SearchPhoto
 import com.oguzdogdu.walliescompose.domain.model.search.searchuser.SearchUser
+import com.oguzdogdu.walliescompose.features.search.components.CancelableChipList
 import com.oguzdogdu.walliescompose.features.search.components.EmptySearchUserListView
 import com.oguzdogdu.walliescompose.features.search.components.EmptyView
 import com.oguzdogdu.walliescompose.features.search.components.ErrorItem
@@ -167,7 +178,13 @@ fun SearchScreenRoute(
             searchUserClick = { userId ->
                 searchUserClick.invoke(userId)
             },
-            queryFromDetail = queryFromDetail.orEmpty()
+            queryFromDetail = queryFromDetail.orEmpty(),
+            deleteFromUserPreferences = { id ->
+                viewModel.handleUIEvent(SearchEvent.DeleteFromUserPreferences(id))
+            },
+            fetchRecentKeywords = {
+                viewModel.handleUIEvent(SearchEvent.GetRecentKeywords)
+            }
         )
     }
 }
@@ -179,6 +196,8 @@ fun SearchScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
     onQuerySearch: (String) -> Unit,
+    deleteFromUserPreferences: (String?) -> Unit,
+    fetchRecentKeywords: () -> Unit,
     searchLazyPagingItems: LazyPagingItems<SearchPhoto>,
     searchUserLazyPagingItems: LazyPagingItems<SearchUser>,
     onBackClick: () -> Unit,
@@ -187,24 +206,15 @@ fun SearchScreen(
     searchUserClick: (String) -> Unit,
     queryFromDetail: String?
 ) {
-    var photoListPosition by remember {
-        mutableIntStateOf(0)
-    }
-
-    var userListPosition by remember {
-        mutableIntStateOf(0)
-    }
-
-    var tabIndex by remember {
-        mutableIntStateOf(0)
-    }
-
-    var listPositionForVisibility by remember {
-        mutableStateOf(true)
-    }
-
+    var photoListPosition by remember { mutableIntStateOf(0) }
+    var userListPosition by remember { mutableIntStateOf(0) }
+    var tabIndex by remember { mutableIntStateOf(0) }
+    var listPositionForVisibility by remember { mutableStateOf(true) }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    var showListIfNotEmpty by remember { mutableStateOf(false) }
     var permission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -212,6 +222,10 @@ fun SearchScreen(
                 Manifest.permission.RECORD_AUDIO
             ) == PackageManager.PERMISSION_GRANTED
         )
+    }
+
+    LaunchedEffect(searchState.userPreferences) {
+        fetchRecentKeywords.invoke()
     }
 
     val recordAudioLauncher = rememberLauncherForActivityResult(
@@ -267,7 +281,7 @@ fun SearchScreen(
             )
             )
          {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .graphicsLayer {
@@ -294,8 +308,57 @@ fun SearchScreen(
                                 }
                             }
                         }
-                    }
+                    },
+                    mutableInteractionSource = interactionSource
                 )
+                if (isFocused) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .animateContentSize(),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text(
+                            text = "Recent Search (${searchState.userPreferences.size})",
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                fontFamily = regular,
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onBackground,
+                            ),
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .align(Alignment.End)
+                                .clickable {
+                                    if (searchState.userPreferences.isNotEmpty()) {
+                                        showListIfNotEmpty = !showListIfNotEmpty
+                                    }
+                                }
+                        )
+                        Spacer(modifier = Modifier.size(4.dp))
+                        AnimatedVisibility(
+                            visible = showListIfNotEmpty,
+                            enter = slideInVertically(
+                                spring(
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                    stiffness = Spring.StiffnessLow
+                                )
+                            ),
+                            exit = shrinkVertically(
+                                tween(200, easing = LinearEasing)
+                            )
+                        ) {
+                            CancelableChipList(userPreferences = searchState.userPreferences, onDeleteClick = {
+                                deleteFromUserPreferences.invoke(it)
+                            }, onSearchWithQuery = {
+                                onQuerySearch.invoke(it.orEmpty())
+                            })
+                        }
+                    }
+                }
             }
         }
 
@@ -564,10 +627,8 @@ fun SearchUserQueryList(
                         .heightIn(min = 64.dp, max = 96.dp)
                         .fillMaxWidth()
                         .background(
-                            color = MaterialTheme.colorScheme.surface,
-                            shape = mediumBackground(
-                                index = index,
-                                size = searchUserLazyPagingItems.itemCount
+                            color = MaterialTheme.colorScheme.surface, shape = mediumBackground(
+                                index = index, size = searchUserLazyPagingItems.itemCount
                             )
                         )
                 ) {
@@ -633,7 +694,8 @@ fun SearchTextField(
     onBackClick: () -> Unit,
     onQuerySearch: (String) -> Unit,
     queryFromDetail: String?,
-    openSpeechDialog: (Boolean) -> Unit
+    openSpeechDialog: (Boolean) -> Unit,
+    mutableInteractionSource: MutableInteractionSource
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     var queryString by remember {
@@ -659,7 +721,10 @@ fun SearchTextField(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = CenterVertically
     ) {
-        TextField(modifier = modifier.fillMaxWidth(),
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusable(interactionSource = mutableInteractionSource),
             value = queryString,
             onValueChange = {
                 queryString = it
@@ -680,6 +745,7 @@ fun SearchTextField(
                 onQuerySearch.invoke(queryString)
                 keyboardController?.hide()
             }),
+            interactionSource = mutableInteractionSource,
             shape = RoundedCornerShape(64.dp),
             colors = TextFieldDefaults.colors(
                 focusedTextColor = MaterialTheme.colorScheme.onBackground,
@@ -691,13 +757,14 @@ fun SearchTextField(
             singleLine = true,
             leadingIcon = {
                 IconButton(
-                    onClick = { onBackClick.invoke() }, modifier = modifier.wrapContentSize()
+                    onClick = { onBackClick.invoke() },
+                    modifier = Modifier.wrapContentSize()
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                         contentDescription = "",
                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = modifier.wrapContentSize()
+                        modifier = Modifier.wrapContentSize()
                     )
                 }
             },
@@ -716,7 +783,7 @@ fun SearchTextField(
                             painter = painterResource(id = R.drawable.round_mic_24),
                             contentDescription = "",
                             tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = modifier.wrapContentSize()
+                            modifier = Modifier.wrapContentSize()
                         )
                     }
                     if (queryString.isNotEmpty()) {
@@ -727,7 +794,7 @@ fun SearchTextField(
                                 imageVector = Icons.Rounded.Clear,
                                 contentDescription = "",
                                 tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = modifier.wrapContentSize()
+                                modifier = Modifier.wrapContentSize()
                             )
                         }
                     }
