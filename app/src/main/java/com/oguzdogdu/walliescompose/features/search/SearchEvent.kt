@@ -7,4 +7,6 @@ sealed class SearchEvent {
     ) : SearchEvent()
     data object GetAppLanguageValue : SearchEvent()
     data class OpenSpeechDialog(val isOpen: Boolean) : SearchEvent()
+    data class DeleteFromUserPreferences(val keyword:String?) : SearchEvent()
+    data object GetRecentKeywords : SearchEvent()
 }

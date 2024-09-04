@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.oguzdogdu.walliescompose.cache.dao.FavoriteDao
+import com.oguzdogdu.walliescompose.cache.dao.UserPreferencesDao
 import com.oguzdogdu.walliescompose.data.repository.AppSettingsRepositoryImpl
 import com.oguzdogdu.walliescompose.data.repository.WallpaperRepositoryImpl
 import com.oguzdogdu.walliescompose.data.di.Dispatcher
@@ -31,10 +32,11 @@ object RepositoryModule {
     @Singleton
     fun provideWallpaperRepository(
         service: WallpaperService,
-        dao: FavoriteDao,
+        favoriteDao: FavoriteDao,
+        userPreferencesDao: UserPreferencesDao,
         @Dispatcher(WalliesDispatchers.IO) ioDispatcher: CoroutineDispatcher
     ): WallpaperRepository {
-        return WallpaperRepositoryImpl(service, dao, ioDispatcher)
+        return WallpaperRepositoryImpl(service, favoriteDao, userPreferencesDao,ioDispatcher)
     }
 
     @Provides

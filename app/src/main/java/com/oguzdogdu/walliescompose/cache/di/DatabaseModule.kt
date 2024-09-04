@@ -2,7 +2,8 @@ package com.oguzdogdu.walliescompose.cache.di
 
 import android.content.Context
 import com.oguzdogdu.walliescompose.cache.dao.FavoriteDao
-import com.oguzdogdu.walliescompose.cache.database.FavoritesDatabase
+import com.oguzdogdu.walliescompose.cache.dao.UserPreferencesDao
+import com.oguzdogdu.walliescompose.cache.database.WalliesDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,13 +18,19 @@ object DatabaseModule {
     @Singleton
     fun provideAppDatabase(
         @ApplicationContext context: Context,
-    ): FavoritesDatabase {
-        return FavoritesDatabase.getInstance(context)
+    ): WalliesDatabase {
+        return WalliesDatabase.getInstance(context)
     }
 
     @Provides
     @Singleton
-    fun provideDao(database: FavoritesDatabase): FavoriteDao {
+    fun provideFavoritesDao(database: WalliesDatabase): FavoriteDao {
         return database.favoritesDao
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserPreferencesDao(database: WalliesDatabase): UserPreferencesDao {
+        return database.userPreferencesDao
     }
 }
