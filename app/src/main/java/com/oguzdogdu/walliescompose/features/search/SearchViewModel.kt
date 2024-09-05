@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -56,7 +55,7 @@ class SearchViewModel @Inject constructor(
             is SearchEvent.GetAppLanguageValue -> getLanguageValue()
             is SearchEvent.OpenSpeechDialog -> { stateOfSpeechDialog(event.isOpen) }
             is SearchEvent.DeleteFromUserPreferences -> deleteKeywordIfExists(event.keyword)
-            is SearchEvent.GetRecentKeywords -> getSearchKeysFromDB()
+            is SearchEvent.GetRecentKeywords -> getSearchKeysFromDB(onKeywordsReceived = {})
         }
     }
 
@@ -75,21 +74,29 @@ class SearchViewModel @Inject constructor(
 
     private fun addSearchKeysToDB(userPreferences: UserPreferences) {
         viewModelScope.launch {
-            wallpaperRepository.insertRecentSearchKeysToDB(userPreferences = userPreferences)
-        }
-    }
-
-    private fun getSearchKeysFromDB() {
-        viewModelScope.launch {
-            wallpaperRepository.getRecentSearchKeysFromDB().collect { keywordList ->
-                _searchScreenState.update {
-                        it.copy(userPreferences = keywordList.orEmpty())
+            getSearchKeysFromDB { list ->
+                val isKeywordExists = list.contains(userPreferences.keyword)
+                if (!isKeywordExists) {
+                    this.launch {
+                        wallpaperRepository.insertRecentSearchKeysToDB(userPreferences = userPreferences)
+                    }
                 }
             }
         }
     }
 
-    fun deleteKeywordIfExists(recentKeyword: String?) {
+    private fun getSearchKeysFromDB(onKeywordsReceived: (List<String>) -> Unit) {
+        viewModelScope.launch {
+            wallpaperRepository.getRecentSearchKeysFromDB().collect { list ->
+                _searchScreenState.update {
+                    it.copy(userPreferences = list.orEmpty())
+                }
+                onKeywordsReceived(list?.mapNotNull { it.keyword }.orEmpty())
+            }
+        }
+    }
+
+    private fun deleteKeywordIfExists(recentKeyword: String?) {
         viewModelScope.launch {
             val keyword = recentKeyword ?: return@launch
             val itemToDelete = findKeywordInDatabase(keyword)
