@@ -39,4 +39,4 @@ This project uses many of the popular libraries, plugins and tools of the androi
 - [BalloonCompose](https://github.com/skydoves/Balloon) - Modernized and sophisticated tooltips, fully customizable with an arrow and animations on Android.
 
 # 👨‍🔧 👩‍🔧 Contributors
-[Muhammet Küdür](https://github.com/mskdr)
+[Muhammet Küdür](https://github.com/muhammetkdr)
