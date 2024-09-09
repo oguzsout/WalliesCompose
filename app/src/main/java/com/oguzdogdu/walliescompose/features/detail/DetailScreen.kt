@@ -4,12 +4,17 @@ import TooltipPopup
 import android.graphics.Bitmap
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +44,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,6 +80,7 @@ import com.oguzdogdu.walliescompose.features.detail.component.PhotoAttributesCar
 import com.oguzdogdu.walliescompose.features.detail.component.PhotoDetailColorsCard
 import com.oguzdogdu.walliescompose.features.detail.component.PhotoDetailUserInfoContainer
 import com.oguzdogdu.walliescompose.features.detail.component.PhotoDetailedInformationCard
+import com.oguzdogdu.walliescompose.features.detail.component.QuickFavoriteTransitionCard
 import com.oguzdogdu.walliescompose.features.downloadimage.DownloadImageBottomSheet
 import com.oguzdogdu.walliescompose.features.setwallpaper.SetWallpaperImageBottomSheet
 import com.oguzdogdu.walliescompose.ui.theme.medium
@@ -92,7 +99,8 @@ fun SharedTransitionScope.DetailScreenRoute(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
     onProfileDetailClick: (String) -> Unit,
-    onTagClick: (String) -> Unit
+    onTagClick: (String) -> Unit,
+    onNavigateToFavorite: () -> Unit
 ) {
     val state by detailViewModel.photo.collectAsStateWithLifecycle()
     val stateOfDownloadBottomSheet by detailViewModel.downloadBottomSheetOpenStat.collectAsStateWithLifecycle()
@@ -119,6 +127,7 @@ fun SharedTransitionScope.DetailScreenRoute(
 
     LaunchedEffect(key1 = state.favorites) {
         detailViewModel.handleScreenEvents(DetailScreenEvent.GetFavoriteCheckStat)
+        detailViewModel.handleScreenEvents(DetailScreenEvent.GetFavoriteListForQuickInfo)
     }
 
     LaunchedEffect(key1 = photoQuality) {
@@ -287,7 +296,8 @@ fun SharedTransitionScope.DetailScreenRoute(
                 colorFilter = it
             },
             loadingForSetWallpaperButton = isLoadingForSetWallpaper,
-            onProfileDetailClick = onProfileDetailClick
+            onProfileDetailClick = onProfileDetailClick,
+            onNavigateToFavorite = onNavigateToFavorite
         )
     }
 }
@@ -316,6 +326,7 @@ fun SharedTransitionScope.DetailScreenContent(
     onAddFavoriteButtonClick: (FavoriteImages) -> Unit,
     onRemoveFavoriteButtonClick: (FavoriteImages) -> Unit,
     onTagButtonClick: (String) -> Unit,
+    onNavigateToFavorite: () -> Unit,
     newBitmap: (ColorFilter) -> Unit,
     loadingForSetWallpaperButton: Boolean,
     onProfileDetailClick: (String) -> Unit,
@@ -327,6 +338,7 @@ fun SharedTransitionScope.DetailScreenContent(
     val coroutineScope = rememberCoroutineScope()
     val graphicsLayer = rememberGraphicsLayer()
     var bitmapForDialog by remember { mutableStateOf<Bitmap?>(null) }
+    val favoriteListSize by rememberUpdatedState(state.favoriteImagesList.size)
 
     LaunchedEffect(state.detail) {
         photoAttributesPairList.apply {
@@ -392,7 +404,8 @@ fun SharedTransitionScope.DetailScreenContent(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(8.dp),
+                .padding(8.dp)
+                .animateContentSize(),
             state = rememberLazyListState(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -418,6 +431,25 @@ fun SharedTransitionScope.DetailScreenContent(
                         IntOffset(x = animatedOffset.roundToPx(), y = 0)
                     }
                 )
+            }
+            item {
+                AnimatedVisibility(
+                    visible = favoriteListSize > 6,
+                    enter = slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = tween(1000)
+                    ),
+                    exit = slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = tween(1000)
+                    )
+                ) {
+                    QuickFavoriteTransitionCard(
+                        favoriteImages = state.favoriteImagesList, onClickGoToFavorites = {
+                            onNavigateToFavorite.invoke()
+                        }
+                    )
+                }
             }
             item {
                 PhotoDetailedInformationCard(state = state,
@@ -493,7 +525,9 @@ fun SharedTransitionScope.DetailScreenMainPhoto(
         )
 
             Row(
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.Center
             ) {

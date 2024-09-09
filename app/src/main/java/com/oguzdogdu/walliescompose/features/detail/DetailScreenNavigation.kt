@@ -26,7 +26,8 @@ fun NavGraphBuilder.detailScreen(
     transitionScope: SharedTransitionScope,
     onBackClick: () -> Unit,
     onTagClick: (String) -> Unit,
-    onProfileDetailClick: (String) -> Unit
+    onProfileDetailClick: (String) -> Unit,
+    onNavigateToFavoriteClick: () -> Unit
 ) {
     composable<DetailScreenRoute>{
        val detailViewModel: DetailViewModel = hiltViewModel()
@@ -39,7 +40,8 @@ fun NavGraphBuilder.detailScreen(
             },
             onTagClick = { tag ->
                 onTagClick.invoke(tag)
-            }
+            },
+            onNavigateToFavorite = onNavigateToFavoriteClick
         )
     }
 }
