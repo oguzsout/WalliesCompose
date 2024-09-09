@@ -26,6 +26,7 @@ import com.oguzdogdu.walliescompose.features.collections.detaillist.navigateToCo
 import com.oguzdogdu.walliescompose.features.detail.detailScreen
 import com.oguzdogdu.walliescompose.features.detail.navigateToDetailScreen
 import com.oguzdogdu.walliescompose.features.favorites.favoritesScreen
+import com.oguzdogdu.walliescompose.features.favorites.navigateToFavoritesScreen
 import com.oguzdogdu.walliescompose.features.home.HomeScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.home.homeScreen
 import com.oguzdogdu.walliescompose.features.latest.latestScreen
@@ -199,6 +200,9 @@ fun WalliesNavHost(
                     },
                     onProfileDetailClick = {
                         navController.navigateToProfileDetailScreen(username = it)
+                    },
+                    onNavigateToFavoriteClick = {
+                        navController.navigateToFavoritesScreen()
                     }
                 )
                 topicsScreen(onBackClick = {
