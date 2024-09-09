@@ -9,6 +9,7 @@ data class DetailState(
     val loading: Boolean = false,
     val detail: Photo? = null,
     val errorMessage: String? = null,
-    val favorites:FavoriteImages? = null
+    val favorites:FavoriteImages? = null,
+    val favoriteImagesList: List<FavoriteImages> = emptyList()
 )
 
