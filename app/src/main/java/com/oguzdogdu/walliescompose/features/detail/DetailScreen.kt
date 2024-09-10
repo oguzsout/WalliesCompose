@@ -75,7 +75,6 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.features.detail.component.PhotoAttributesCard
 import com.oguzdogdu.walliescompose.features.detail.component.PhotoDetailColorsCard
 import com.oguzdogdu.walliescompose.features.detail.component.PhotoDetailUserInfoContainer
@@ -264,29 +263,12 @@ fun SharedTransitionScope.DetailScreenRoute(
             },
             onAddFavoriteButtonClick = {
                 detailViewModel.handleScreenEvents(
-                    DetailScreenEvent.AddFavorites(
-                        FavoriteImages(id = state.detail?.id,
-                            url = state.detail?.urls,
-                            profileImage = state.detail?.profileimage,
-                            name = state.detail?.name,
-                            portfolioUrl = state.detail?.portfolio,
-                            isChecked = true
-                        )
-                    )
+                    DetailScreenEvent.AddFavorites
                 )
             },
             onRemoveFavoriteButtonClick = {
                 detailViewModel.handleScreenEvents(
-                    DetailScreenEvent.DeleteFavorites(
-                        FavoriteImages(
-                            id = state.detail?.id,
-                            url = state.detail?.urls,
-                            profileImage = state.detail?.profileimage,
-                            name = state.detail?.name,
-                            portfolioUrl = state.detail?.portfolio,
-                            isChecked = false
-                        )
-                    )
+                    DetailScreenEvent.DeleteFavorites
                 )
             },
             onTagButtonClick = {tag ->
@@ -323,8 +305,8 @@ fun SharedTransitionScope.DetailScreenContent(
     onSetWallpaperButtonClick: (Boolean) -> Unit,
     onShareButtonClick: (String) -> Unit,
     onDownloadButtonClick: (Boolean) -> Unit,
-    onAddFavoriteButtonClick: (FavoriteImages) -> Unit,
-    onRemoveFavoriteButtonClick: (FavoriteImages) -> Unit,
+    onAddFavoriteButtonClick: () -> Unit,
+    onRemoveFavoriteButtonClick: () -> Unit,
     onTagButtonClick: (String) -> Unit,
     onNavigateToFavorite: () -> Unit,
     newBitmap: (ColorFilter) -> Unit,
@@ -462,8 +444,8 @@ fun SharedTransitionScope.DetailScreenContent(
                     },
                     onShareClick = { url -> onShareButtonClick.invoke(url) },
                     onDownloadClick = { isOpen -> onDownloadButtonClick.invoke(isOpen) },
-                    onAddFavoriteClick = { photo -> onAddFavoriteButtonClick.invoke(photo) },
-                    onRemoveFavoriteClick = { photo -> onRemoveFavoriteButtonClick.invoke(photo) },
+                    onAddFavoriteClick = { onAddFavoriteButtonClick.invoke() },
+                    onRemoveFavoriteClick = { onRemoveFavoriteButtonClick.invoke() },
                     onTagClick = { tag -> onTagButtonClick.invoke(tag) },
                     modifier = Modifier.offset {
                         IntOffset(x = animatedOffset.roundToPx(), y = 0)

@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.features.detail.DetailState
 
 @Composable
@@ -23,8 +22,8 @@ fun PhotoDetailedInformationCard(
     onSetWallpaperClick: (Boolean) -> Unit,
     onShareClick: (String) -> Unit,
     onDownloadClick: (Boolean) -> Unit,
-    onAddFavoriteClick: (FavoriteImages) -> Unit,
-    onRemoveFavoriteClick: (FavoriteImages) -> Unit,
+    onAddFavoriteClick: () -> Unit,
+    onRemoveFavoriteClick: () -> Unit,
     onTagClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {

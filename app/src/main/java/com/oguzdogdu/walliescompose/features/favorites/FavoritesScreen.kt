@@ -167,13 +167,13 @@ fun FavoriteList(
         columns = GridCells.Fixed(2),
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 8.dp),
+            .padding(8.dp),
         state = rememberLazyGridState(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         itemsIndexed(
-            state.favorites.orEmpty(),
+            state.favorites,
             key = { _, item -> item.url.hashCode() }) { _, item ->
             FavoritesImageView(
                 imageUrl = item.url,
@@ -204,7 +204,7 @@ private fun FavoritesImageView(
     flipCard: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    var flippableCard by remember { mutableStateOf(flipCard) }
+    var flippableCard by remember { mutableStateOf(false) }
     val favoriteId by remember { mutableStateOf(imageId) }
     val favoriteUrl by remember { mutableStateOf(imageUrl) }
 
