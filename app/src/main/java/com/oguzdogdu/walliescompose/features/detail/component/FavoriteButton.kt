@@ -38,7 +38,7 @@ fun WalliesFavoriteButton(
     IconButton(
         onClick = {
             isClicked = !isClicked
-            if (isClicked != true and (favoriteItemState.value?.isChecked == true)) {
+            if (!(isClicked and (favoriteItemState.value?.isChecked == true))) {
                 addPhotoToFavorites.invoke()
             } else {
                 removePhotoFromFavorites.invoke()

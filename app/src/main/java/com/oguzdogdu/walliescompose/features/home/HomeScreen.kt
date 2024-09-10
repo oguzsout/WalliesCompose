@@ -230,12 +230,15 @@ fun SharedTransitionScope.HomeScreenContent(
                     verticalArrangement = Arrangement.Center
                 ) {
 
-                    item(key = "randomContainer") {
-                        HomeRandomPage(
-                            randomImageList = homeUiState.random,
-                            onRandomImageClick = onRandomImageClick
-                        )
+                    if (homeUiState.random.isNotEmpty()) {
+                        item(key = "randomContainer") {
+                            HomeRandomPage(
+                                randomImageList = homeUiState.random,
+                                onRandomImageClick = onRandomImageClick
+                            )
+                        }
                     }
+
                     item(key = "topicContainer") {
                         TopicLayoutContainer(
                             modifier = modifier,

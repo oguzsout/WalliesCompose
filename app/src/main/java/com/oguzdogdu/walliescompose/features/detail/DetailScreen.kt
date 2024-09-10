@@ -9,10 +9,13 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
@@ -320,7 +323,7 @@ fun SharedTransitionScope.DetailScreenContent(
     val coroutineScope = rememberCoroutineScope()
     val graphicsLayer = rememberGraphicsLayer()
     var bitmapForDialog by remember { mutableStateOf<Bitmap?>(null) }
-    val favoriteListSize by rememberUpdatedState(state.favoriteImagesList.size)
+    val favoriteListSize = rememberUpdatedState(state.favoriteImagesList.size > 6)
 
     LaunchedEffect(state.detail) {
         photoAttributesPairList.apply {
@@ -416,23 +419,30 @@ fun SharedTransitionScope.DetailScreenContent(
             }
             item {
                 AnimatedVisibility(
-                    visible = favoriteListSize > 6,
+                    visible = favoriteListSize.value,
                     enter = slideInHorizontally(
                         initialOffsetX = { it },
-                        animationSpec = tween(1000)
+                        animationSpec = tween(600, easing = FastOutSlowInEasing)
+                    ) + expandVertically(
+                        expandFrom = Alignment.CenterVertically,
+                        animationSpec = tween(600, easing = FastOutSlowInEasing)
                     ),
                     exit = slideOutHorizontally(
                         targetOffsetX = { it },
-                        animationSpec = tween(1000)
+                        animationSpec = tween(600, easing = FastOutSlowInEasing)
+                    ) + shrinkVertically(
+                        shrinkTowards = Alignment.CenterVertically,
+                        animationSpec = tween(600, easing = FastOutSlowInEasing)
                     )
                 ) {
                     QuickFavoriteTransitionCard(
-                        favoriteImages = state.favoriteImagesList, onClickGoToFavorites = {
-                            onNavigateToFavorite.invoke()
-                        }
+                        favoriteImages = state.favoriteImagesList,
+                        onClickGoToFavorites = { onNavigateToFavorite.invoke() }
                     )
                 }
+
             }
+
             item {
                 PhotoDetailedInformationCard(state = state,
                     onSetWallpaperClick = { isOpen ->
