@@ -173,7 +173,7 @@ class WallpaperRepositoryImpl @Inject constructor(
     }
 
     override suspend fun deleteSpecificIdFavorite(favoriteId: String) {
-        favoriteDao.deleteSpecificIdFavorite(favoriteId = favoriteId)
+        favoriteDao.deleteSpecificIdFavorite(id = favoriteId)
     }
 
     override suspend fun getPhoto(id: String?): Flow<Resource<Photo?>> {

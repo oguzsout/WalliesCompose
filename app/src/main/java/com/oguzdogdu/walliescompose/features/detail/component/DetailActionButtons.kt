@@ -28,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.domain.model.favorites.FavoriteImages
 import com.oguzdogdu.walliescompose.features.detail.DetailState
 import com.oguzdogdu.walliescompose.ui.theme.regular
 
@@ -38,8 +37,8 @@ fun DetailActionButtons(
     setWallpaperButtonClick: (Boolean) -> Unit,
     shareButtonClick: () -> Unit,
     downloadButtonClick: (Boolean) -> Unit,
-    onAddFavoriteClick: (FavoriteImages) -> Unit,
-    onRemoveFavoriteClick: (FavoriteImages) -> Unit,
+    onAddFavoriteClick: () -> Unit,
+    onRemoveFavoriteClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val openBottomSheetOfDownload by remember { mutableStateOf(false) }
@@ -76,18 +75,11 @@ fun DetailActionButtons(
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
             WalliesFavoriteButton(
-                favoriteImages = FavoriteImages(
-                id = state.favorites?.id,
-                url = state.favorites?.url,
-                profileImage = state.favorites?.profileImage,
-                name = state.favorites?.name,
-                portfolioUrl = state.favorites?.portfolioUrl,
-                isChecked = state.favorites?.isChecked ?: false
-            ), addPhotoToFavorites = { favorite ->
-                onAddFavoriteClick.invoke(favorite)
-            }, removePhotoFromFavorites = { favorite ->
-                onRemoveFavoriteClick.invoke(favorite)
-            })
+                favoriteImages = state.favorites, addPhotoToFavorites = {
+                    onAddFavoriteClick.invoke()
+                }, removePhotoFromFavorites = {
+                    onRemoveFavoriteClick.invoke()
+                })
             Spacer(modifier = Modifier.padding(horizontal = 8.dp))
             IconButton(modifier = Modifier.size(32.dp), onClick = { shareButtonClick.invoke() }) {
                 Icon(painter = rememberVectorPainter(Icons.Rounded.Share), contentDescription = "")

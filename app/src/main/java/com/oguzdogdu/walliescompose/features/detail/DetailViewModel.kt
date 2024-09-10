@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -50,14 +49,26 @@ class DetailViewModel@Inject constructor(
             }
 
             is DetailScreenEvent.AddFavorites -> addOrDeleteFavoritesToAnyDatabase(
-              favoriteImage = event.favorites, process = DatabaseProcess.ADD.name
+              favoriteImage = FavoriteImages(id = _getPhoto.value.detail?.id,
+                  url = _getPhoto.value.detail?.urls,
+                  profileImage = _getPhoto.value.detail?.profileimage,
+                  name = _getPhoto.value.detail?.name,
+                  portfolioUrl = _getPhoto.value.detail?.portfolio,
+                  isChecked = true
+              ), process = DatabaseProcess.ADD.name
             )
 
             is DetailScreenEvent.DeleteFavorites -> addOrDeleteFavoritesToAnyDatabase(
-                favoriteImage = event.favorites, process = DatabaseProcess.DELETE.name
+                favoriteImage = FavoriteImages(id = _getPhoto.value.detail?.id,
+                    url = _getPhoto.value.detail?.urls,
+                    profileImage = _getPhoto.value.detail?.profileimage,
+                    name = _getPhoto.value.detail?.name,
+                    portfolioUrl = _getPhoto.value.detail?.portfolio,
+                    isChecked = false
+                ), process = DatabaseProcess.DELETE.name
             )
 
-            is DetailScreenEvent.GetFavoriteCheckStat -> getFavoritesForCheckFromRoom(id)
+            is DetailScreenEvent.GetFavoriteCheckStat -> getFavoritesForCheckFromRoom()
             is DetailScreenEvent.OpenDownloadBottomSheet -> {
                 _downloadBottomSheetOpenStat.value = event.isOpen
             }
@@ -82,15 +93,15 @@ class DetailViewModel@Inject constructor(
         viewModelScope.launch {
             repository.getPhoto(id = id).collectLatest { result ->
                 result.onLoading {
-                    _getPhoto.updateAndGet { it.copy(loading = true) }
+                    _getPhoto.update { it.copy(loading = true) }
                 }
 
                 result.onSuccess { photo ->
-                    _getPhoto.updateAndGet { it.copy(loading = false,detail = photo)}
+                    _getPhoto.update { it.copy(loading = false,detail = photo)}
                 }
 
                 result.onFailure { error ->
-                    _getPhoto.updateAndGet {
+                    _getPhoto.update {
                         it.copy(errorMessage = error)
                     }
                 }
@@ -177,18 +188,19 @@ class DetailViewModel@Inject constructor(
         }
     }
 
-    private fun getFavoritesForCheckFromRoom(id: String?) {
+    private fun getFavoritesForCheckFromRoom() {
         viewModelScope.launch {
-            repository.getFavorites().collectLatest { result ->
+            repository.getFavorites().collect { result ->
                 result.onSuccess { list ->
-                    val matchingFavorite = list?.find { it.id == id }
-                    _getPhoto.updateAndGet {
+                    val matchingFavorite = list?.find { it.id == _getPhoto.value.detail?.id }
+                    _getPhoto.update {
                         it.copy(favorites = matchingFavorite)
                     }
                 }
             }
         }
     }
+
     private fun fetchFavoriteImageListForQuickInfo() {
         viewModelScope.launch {
             repository.getFavorites().collect { result ->
