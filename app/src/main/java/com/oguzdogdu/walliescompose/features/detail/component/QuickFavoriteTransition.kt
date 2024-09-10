@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -88,12 +87,12 @@ fun QuickFavoriteTransitionCard(
 fun UnderlineTextWithAnimation(onClickGoToFavorites: () -> Unit) {
     val underlineColor = MaterialTheme.colorScheme.secondaryContainer
     val firstColorBeforeAnimated = MaterialTheme.colorScheme.onBackground
-    val textWidth = remember { mutableFloatStateOf(0f) }
-    val textString = stringResource(id = R.string.text_detail_favorite_info)
+    val textOfTransitionInfo = stringResource(id = R.string.text_detail_favorite_info)
+    var visibleChars by remember { mutableIntStateOf(0) }
     val targetWord = remember {
         derivedStateOf {
             when {
-                textString.contains("buraya") -> {
+                textOfTransitionInfo.contains("buraya") -> {
                     "buraya"
                 }
                 else -> {
@@ -102,7 +101,13 @@ fun UnderlineTextWithAnimation(onClickGoToFavorites: () -> Unit) {
             }
         }
     }
-    val startIndex = remember { mutableIntStateOf(textString.indexOf(string = targetWord.value)) }
+    LaunchedEffect(Unit) {
+        targetWord.value.forEachIndexed { index, _ ->
+            delay(750)
+            visibleChars = index + 1
+        }
+    }
+    val startIndex = remember { mutableIntStateOf(textOfTransitionInfo.indexOf(string = targetWord.value)) }
     val endIndex = remember { mutableIntStateOf(startIndex.intValue + targetWord.value.length) }
     var onDraw: DrawScope.() -> Unit by remember { mutableStateOf({}) }
     val animatableColorHighlight = remember { Animatable(firstColorBeforeAnimated) }
@@ -111,7 +116,7 @@ fun UnderlineTextWithAnimation(onClickGoToFavorites: () -> Unit) {
         animatableColorHighlight.animateTo(
             targetValue = underlineColor,
             animationSpec = tween(
-                durationMillis = 2500,
+                durationMillis = 1500,
                 easing = LinearEasing
             )
         )
@@ -123,11 +128,12 @@ fun UnderlineTextWithAnimation(onClickGoToFavorites: () -> Unit) {
             fontFamily = regular,
             color = firstColorBeforeAnimated
         )) {
-            append(textString)
+            append(textOfTransitionInfo)
         }
-            val startIndexForStyle = textString.indexOf(targetWord.value)
-            if (startIndexForStyle != -1) {
-                val endIndexForStyle = startIndexForStyle + targetWord.value.length
+
+            if (visibleChars > 0) {
+                val startIndexForStyle = textOfTransitionInfo.indexOf(targetWord.value)
+                val endIndexForStyle = startIndexForStyle + visibleChars
                 addStyle(
                     style = SpanStyle(
                         fontSize = 16.sp,
@@ -151,7 +157,7 @@ fun UnderlineTextWithAnimation(onClickGoToFavorites: () -> Unit) {
             .fillMaxWidth()
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = ripple(color = MaterialTheme.colorScheme.primary),
+                indication = ripple(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
                 onClick = {}
             )
     ) {
@@ -175,11 +181,10 @@ fun UnderlineTextWithAnimation(onClickGoToFavorites: () -> Unit) {
                 onDraw = {
                     for (bound in textBounds) {
                         val underline = bound.copy(top = bound.bottom)
-                        textWidth.floatValue = underline.bottomRight.x
                         drawLine(
                             color = animatableColorHighlight.value,
                             start = underline.topLeft,
-                            end = Offset(textWidth.floatValue, underline.top),
+                            end = Offset(underline.right, underline.top),
                             strokeWidth = 4f
                         )
                     }
