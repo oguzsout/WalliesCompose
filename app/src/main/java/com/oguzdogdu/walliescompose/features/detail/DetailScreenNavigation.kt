@@ -30,10 +30,8 @@ fun NavGraphBuilder.detailScreen(
     onNavigateToFavoriteClick: () -> Unit
 ) {
     composable<DetailScreenRoute>{
-       val detailViewModel: DetailViewModel = hiltViewModel()
         transitionScope.DetailScreenRoute(
             animatedVisibilityScope = this,
-            detailViewModel = detailViewModel,
             onBackClick = onBackClick,
             onProfileDetailClick = { username ->
                 onProfileDetailClick.invoke(username)

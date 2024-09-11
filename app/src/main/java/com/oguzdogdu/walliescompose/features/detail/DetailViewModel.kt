@@ -98,6 +98,7 @@ class DetailViewModel@Inject constructor(
 
                 result.onSuccess { photo ->
                     _getPhoto.update { it.copy(loading = false,detail = photo)}
+                    getFavoritesForCheckFromRoom()
                 }
 
                 result.onFailure { error ->
