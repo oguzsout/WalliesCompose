@@ -73,6 +73,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -97,7 +98,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SharedTransitionScope.DetailScreenRoute(
     animatedVisibilityScope: AnimatedVisibilityScope,
-    detailViewModel: DetailViewModel,
+    detailViewModel: DetailViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
     onProfileDetailClick: (String) -> Unit,
@@ -124,7 +125,6 @@ fun SharedTransitionScope.DetailScreenRoute(
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
         detailViewModel.handleScreenEvents(DetailScreenEvent.GetPhotoDetails)
-        detailViewModel.handleScreenEvents(DetailScreenEvent.GetFavoriteCheckStat)
     }
 
     LaunchedEffect(key1 = state.favorites) {
