@@ -6,10 +6,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -53,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -487,6 +490,11 @@ fun SharedTransitionScope.DetailScreenContent(
             })
     }
 }
+@OptIn(ExperimentalSharedTransitionApi::class)
+private val boundsTransform = BoundsTransform { _: Rect, _: Rect ->
+    tween(durationMillis = boundsAnimationDurationMillis, easing = LinearEasing)
+}
+private const val boundsAnimationDurationMillis = 500
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -501,9 +509,11 @@ fun SharedTransitionScope.DetailScreenMainPhoto(
             contentDescription = state.detail?.desc,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
-                .sharedBounds(
-                    sharedContentState = rememberSharedContentState(key = "popularImage-${state.detail?.id}"),
-                    animatedVisibilityScope = animatedVisibilityScope
+                .sharedElement(
+                    state = rememberSharedContentState(key = "popularImage-${state.detail?.id}"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(16.dp)),
+                    boundsTransform = boundsTransform
                 )
                 .fillMaxWidth()
                 .height(400.dp)

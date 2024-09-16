@@ -85,7 +85,7 @@ fun WalliesApp(
                     destinations = appState.topLevelDestinations,
                     onNavigateToDestination = appState::navigateToTopLevelDestination,
                     currentDestination = appState.currentDestination,
-                    modifier = modifier
+                    modifier = Modifier
                         .renderInSharedTransitionScopeOverlay()
                         .animateEnterExit(
                             enter = fadeIn() + slideInVertically {
@@ -128,7 +128,7 @@ fun WalliesApp(
     }) {
         WalliesNavHost(
             appState = appState,
-            modifier = modifier.padding(it),
+            modifier = Modifier.padding(it),
             isAuthenticated = isAuthenticated,
             googleAuthUiClient = googleAuthUiClient
         )
