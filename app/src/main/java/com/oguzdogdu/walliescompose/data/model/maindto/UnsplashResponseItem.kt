@@ -36,7 +36,14 @@ data class Tags(
 )
 
 fun UnsplashResponseItem.toDomainModelPopular() =
-    PopularImage(id = id, url = urls?.regular, imageDesc = altDescription)
+    PopularImage(
+        id = id,
+        url = urls?.regular,
+        imageDesc = altDescription,
+        highResolution = urls?.raw,
+        name = user?.name,
+        profileImage = user?.profileImage?.medium
+    )
 
 fun UnsplashResponseItem.toDomainModelLatest() =
     LatestImage(id = id, url = urls?.regular, imageDesc = altDescription)

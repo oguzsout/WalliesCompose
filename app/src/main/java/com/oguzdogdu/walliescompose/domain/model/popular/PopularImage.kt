@@ -8,5 +8,8 @@ import kotlinx.serialization.Serializable
 data class PopularImage(
     val id : String?,
     val url:String?,
-    val imageDesc: String?
+    val imageDesc: String?,
+    val highResolution: String?,
+    val name: String?,
+    val profileImage: String?
 )
