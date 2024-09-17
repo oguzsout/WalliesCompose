@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,6 +27,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -40,6 +41,7 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
 import com.oguzdogdu.walliescompose.features.home.LoadingState
+import com.oguzdogdu.walliescompose.features.popular.boundsTransform
 import com.oguzdogdu.walliescompose.ui.theme.regular
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -50,12 +52,6 @@ fun SharedTransitionScope.PopularEditDetails(
     onConfirmClick: () -> Unit
 ) {
     val context = LocalContext.current
-    val imageRequest = ImageRequest.Builder(context)
-        .data(popularImage?.highResolution)
-        .diskCachePolicy(CachePolicy.ENABLED)
-        .memoryCachePolicy(CachePolicy.ENABLED)
-        .networkCachePolicy(CachePolicy.READ_ONLY)
-        .build()
 
     AnimatedContent(
         modifier = modifier.padding(8.dp),
@@ -72,7 +68,6 @@ fun SharedTransitionScope.PopularEditDetails(
             if (popular != null) {
                 Card(
                     shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 48.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     modifier = Modifier
                         .sharedBounds(
@@ -80,8 +75,7 @@ fun SharedTransitionScope.PopularEditDetails(
                             animatedVisibilityScope = this@AnimatedContent,
                             clipInOverlayDuringTransition = OverlayClip(
                                 RoundedCornerShape(16.dp)
-                            ),
-                            resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds(),
+                            )
                         )
                         .fillMaxWidth()
                 ) {
@@ -93,7 +87,6 @@ fun SharedTransitionScope.PopularEditDetails(
                                 clipInOverlayDuringTransition = OverlayClip(
                                     RoundedCornerShape(16.dp)
                                 ),
-                                resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds(),
                             )
                             .clickable {
                                 onConfirmClick.invoke()
@@ -102,7 +95,6 @@ fun SharedTransitionScope.PopularEditDetails(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .wrapContentHeight()
                                 .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Start
@@ -127,15 +119,19 @@ fun SharedTransitionScope.PopularEditDetails(
                             )
                         }
                         SubcomposeAsyncImage(
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp)),
-                            model = imageRequest,
+                            model = ImageRequest.Builder(context)
+                                .data(popularImage?.highResolution)
+                                .diskCachePolicy(CachePolicy.ENABLED)
+                                .memoryCachePolicy(CachePolicy.ENABLED)
+                                .networkCachePolicy(CachePolicy.ENABLED)
+                                .build(),
                             contentDescription = popular.imageDesc,
                             contentScale = ContentScale.Inside,
-                            loading = {
-                                LoadingState()
-                            }
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                           loading = {
+                               LoadingState()
+                           }
                         )
                     }
                 }
