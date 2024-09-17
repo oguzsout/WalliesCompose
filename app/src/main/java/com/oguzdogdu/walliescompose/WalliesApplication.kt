@@ -1,18 +1,12 @@
 package com.oguzdogdu.walliescompose
 
 import android.app.Application
-import android.content.Context
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.disk.DiskCache
-import coil.memory.MemoryCache
 import coil.request.CachePolicy
-import coil.util.DebugLogger
-import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
-import com.oguzdogdu.walliescompose.features.settings.ThemeValues
-import com.oguzdogdu.walliescompose.util.LocaleHelper
 import dagger.hilt.android.HiltAndroidApp
 
 @Stable

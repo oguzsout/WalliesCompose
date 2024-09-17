@@ -72,7 +72,7 @@ import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-private val boundsTransform = BoundsTransform { _: Rect, _: Rect ->
+ val boundsTransform = BoundsTransform { _: Rect, _: Rect ->
     tween(durationMillis = boundsAnimationDurationMillis, easing = LinearEasing)
 }
 private const val boundsAnimationDurationMillis = 500
@@ -200,7 +200,7 @@ private fun SharedTransitionScope.PopularDetailListScreen(
                                         clipInOverlayDuringTransition = OverlayClip(
                                             RoundedCornerShape(16.dp)
                                         ),
-                                        resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds(),
+                                        boundsTransform = boundsTransform,
                                     )
                                     .clip(RoundedCornerShape(16.dp))
                             ) {
