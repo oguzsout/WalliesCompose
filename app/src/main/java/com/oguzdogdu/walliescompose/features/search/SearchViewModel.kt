@@ -55,7 +55,7 @@ class SearchViewModel @Inject constructor(
             is SearchEvent.GetAppLanguageValue -> getLanguageValue()
             is SearchEvent.OpenSpeechDialog -> { stateOfSpeechDialog(event.isOpen) }
             is SearchEvent.DeleteFromUserPreferences -> deleteKeywordIfExists(event.keyword)
-            is SearchEvent.GetRecentKeywords -> getSearchKeysFromDB(onKeywordsReceived = {})
+            is SearchEvent.GetRecentKeywords -> getSearchKeysFromDB()
         }
     }
 
@@ -74,24 +74,22 @@ class SearchViewModel @Inject constructor(
 
     private fun addSearchKeysToDB(userPreferences: UserPreferences) {
         viewModelScope.launch {
-            getSearchKeysFromDB { list ->
-                val isKeywordExists = list.contains(userPreferences.keyword)
+            getSearchKeysFromDB()
+                val isKeywordExists = _searchScreenState.value.userPreferences.contains(userPreferences)
                 if (!isKeywordExists) {
                     this.launch {
                         wallpaperRepository.insertRecentSearchKeysToDB(userPreferences = userPreferences)
-                    }
                 }
             }
         }
     }
 
-    private fun getSearchKeysFromDB(onKeywordsReceived: (List<String>) -> Unit) {
+    private fun getSearchKeysFromDB() {
         viewModelScope.launch {
             wallpaperRepository.getRecentSearchKeysFromDB().collect { list ->
                 _searchScreenState.update {
                     it.copy(userPreferences = list.orEmpty())
                 }
-                onKeywordsReceived(list?.mapNotNull { it.keyword }.orEmpty())
             }
         }
     }
