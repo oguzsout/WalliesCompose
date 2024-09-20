@@ -185,7 +185,7 @@ fun SignInWithEmailScreenContent(
                 modifier = modifier.padding(horizontal = 16.dp)
             )
 
-            EmailTextField(modifier = modifier, onChangeEmail = {
+            EmailTextField(onChangeEmail = {
                 email = it
                 onEmailChange.invoke(it)
             })
