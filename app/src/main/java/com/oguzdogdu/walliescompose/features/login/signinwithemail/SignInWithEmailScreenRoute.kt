@@ -190,7 +190,7 @@ fun SignInWithEmailScreenContent(
                 onEmailChange.invoke(it)
             })
 
-            PasswordTextField(modifier = modifier, onChangePassword = {
+            PasswordTextField(onChangePassword = {
                 password = it
                 onPasswordChange.invoke(it)
             })
