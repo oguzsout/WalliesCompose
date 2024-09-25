@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -243,16 +244,23 @@ private fun FavoritesImageView(
         when (flippableCard) {
             true -> {
                 Box(
-                    modifier = modifier
-                        .fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            rotationY = rotation
+                        },
                     contentAlignment = Alignment.Center
                 ) {
-                    Row(modifier = modifier.wrapContentSize()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         IconButton(
                             onClick = {
                                 onFavoritesScreenEvent(FavoriteScreenEvent.DeleteFromFavorites(favoriteId.orEmpty()))
                             },
-                            modifier = modifier
+                            modifier = Modifier
                                 .wrapContentSize()
                                 .graphicsLayer {
                                     alpha = animateBack
@@ -262,30 +270,24 @@ private fun FavoritesImageView(
                                 painter = painterResource(id = R.drawable.delete),
                                 contentDescription = "",
                                 tint = Color.Red,
-                                modifier = modifier
+                                modifier = Modifier
                                     .wrapContentSize()
-                                    .graphicsLayer {
-                                        alpha = animateBack
-                                    }
                             )
                         }
                         IconButton(
                             onClick = { onShareFavoriteClick.invoke(favoriteUrl.orEmpty()) },
-                            modifier = modifier
+                            modifier = Modifier
                                 .wrapContentSize()
                                 .graphicsLayer {
                                     alpha = animateBack
                                 }
                         ) {
                             Icon(
-                                painter = painterResource(id = R.drawable.share),
+                                painter = painterResource(id = R.drawable.ic_share_material),
                                 contentDescription = "",
                                 tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = modifier
+                                modifier = Modifier
                                     .wrapContentSize()
-                                    .graphicsLayer {
-                                        alpha = animateBack
-                                    }
                             )
                         }
                     }
