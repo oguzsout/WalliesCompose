@@ -41,6 +41,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -93,6 +94,9 @@ import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.ui.theme.regular
 import com.oguzdogdu.walliescompose.util.adjustUrlForScreenConstraints
 import com.oguzdogdu.walliescompose.util.downloadImageFromWeb
+import com.oguzdogdu.walliescompose.util.moveScaffoldClip
+import com.oguzdogdu.walliescompose.util.moveScaffoldOffset
+import com.oguzdogdu.walliescompose.util.moveScaffoldPadding
 import com.oguzdogdu.walliescompose.util.setWallpaperFromUrl
 import com.oguzdogdu.walliescompose.util.shareExternal
 import kotlinx.coroutines.launch
@@ -125,6 +129,7 @@ fun SharedTransitionScope.DetailScreenRoute(
     var isLoadingForSetWallpaper by remember {
         mutableStateOf(false)
     }
+    var bottomSheetButtonClicked by remember { mutableStateOf(false) }
 
     LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
         detailViewModel.handleScreenEvents(DetailScreenEvent.GetPhotoDetails)
@@ -186,107 +191,115 @@ fun SharedTransitionScope.DetailScreenRoute(
         }
     }
 
-    Scaffold(modifier = modifier.fillMaxSize(), topBar = {
-        Row(
+    Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.onSurface) {
+        Scaffold(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = { onBackClick.invoke() },
+                .moveScaffoldOffset(move = bottomSheetButtonClicked)
+                .moveScaffoldPadding(move = bottomSheetButtonClicked)
+                .moveScaffoldClip(move = bottomSheetButtonClicked), topBar = {
+            Row(
                 modifier = Modifier
-                    .wrapContentSize()
-
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.back),
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                IconButton(
+                    onClick = { onBackClick.invoke() },
                     modifier = Modifier
                         .wrapContentSize()
+
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.back),
+                        contentDescription = "",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier
+                            .wrapContentSize()
+                    )
+                }
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    text = state.detail?.desc.orEmpty(),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    fontSize = 14.sp,
+                    fontFamily = medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Start
                 )
             }
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(
-                text = state.detail?.desc.orEmpty(),
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                fontSize = 14.sp,
-                fontFamily = medium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Start
+        }) { paddingValues ->
+            DetailScreenContent(
+                animatedVisibilityScope = animatedVisibilityScope,
+                paddingValues = paddingValues,
+                state = state,
+                wallpaperPlace = wallpaperPlace,
+                stateOfDownloadBottomSheet = stateOfDownloadBottomSheet,
+                stateOfSetWallpaperBottomSheet = stateOfSetWallpaperBottomSheet,
+                onDownloadBottomSheetDismiss = { isOpen ->
+                    detailViewModel.handleScreenEvents(DetailScreenEvent.OpenDownloadBottomSheet(isOpen = isOpen))
+                    bottomSheetButtonClicked = isOpen
+                },
+                onSetWallpaperBottomSheetDismiss = {isOpen ->
+                    detailViewModel.handleScreenEvents(
+                        DetailScreenEvent.OpenSetWallpaperBottomSheet(
+                            isOpen = isOpen
+                        )
+                    )
+                    bottomSheetButtonClicked = false
+                },
+                onRawButtonClick = {
+                    detailViewModel.handleScreenEvents(DetailScreenEvent.PhotoQualityType(type = it))
+                },
+                onFullButtonClick = {
+                    detailViewModel.handleScreenEvents(DetailScreenEvent.PhotoQualityType(type = it))
+                },
+                onMediumButtonClick = {
+                    detailViewModel.handleScreenEvents(DetailScreenEvent.PhotoQualityType(type = it))
+                },
+                onLowButtonClick = {
+                    detailViewModel.handleScreenEvents(DetailScreenEvent.PhotoQualityType(type = it))
+                },
+                onSetHomeButtonClick = {
+                    detailViewModel.handleScreenEvents(DetailScreenEvent.SetWallpaperPlace(it))
+                },
+                onSetLockButtonClick = {
+                    detailViewModel.handleScreenEvents(DetailScreenEvent.SetWallpaperPlace(it))
+                },
+                onSetHomeAndLockButtonClick = {
+                    detailViewModel.handleScreenEvents(DetailScreenEvent.SetWallpaperPlace(it))
+                },
+                onSetWallpaperButtonClick = {isOpen ->
+                    detailViewModel.handleScreenEvents(DetailScreenEvent.OpenSetWallpaperBottomSheet(isOpen = isOpen))
+                    bottomSheetButtonClicked = true
+                },
+                onShareButtonClick = {url ->
+                    launcherOfShare.launch(url.shareExternal())
+                },
+                onDownloadButtonClick = {isOpen ->
+                    detailViewModel.handleScreenEvents(DetailScreenEvent.OpenDownloadBottomSheet(isOpen = isOpen))
+                },
+                onAddFavoriteButtonClick = {
+                    detailViewModel.handleScreenEvents(
+                        DetailScreenEvent.AddFavorites
+                    )
+                },
+                onRemoveFavoriteButtonClick = {
+                    detailViewModel.handleScreenEvents(
+                        DetailScreenEvent.DeleteFavorites
+                    )
+                },
+                onTagButtonClick = {tag ->
+                    onTagClick.invoke(tag)
+                },
+                newBitmap = {
+                    colorFilter = it
+                },
+                loadingForSetWallpaperButton = isLoadingForSetWallpaper,
+                onProfileDetailClick = onProfileDetailClick,
+                onNavigateToFavorite = onNavigateToFavorite
             )
         }
-    }) { paddingValues ->
-        DetailScreenContent(
-            animatedVisibilityScope = animatedVisibilityScope,
-            paddingValues = paddingValues,
-            state = state,
-            wallpaperPlace = wallpaperPlace,
-            stateOfDownloadBottomSheet = stateOfDownloadBottomSheet,
-            stateOfSetWallpaperBottomSheet = stateOfSetWallpaperBottomSheet,
-            onDownloadBottomSheetDismiss = { isOpen ->
-                detailViewModel.handleScreenEvents(DetailScreenEvent.OpenDownloadBottomSheet(isOpen = isOpen))
-            },
-            onSetWallpaperBottomSheetDismiss = {isOpen ->
-                detailViewModel.handleScreenEvents(
-                    DetailScreenEvent.OpenSetWallpaperBottomSheet(
-                        isOpen = isOpen
-                    )
-                )
-            },
-            onRawButtonClick = {
-                detailViewModel.handleScreenEvents(DetailScreenEvent.PhotoQualityType(type = it))
-            },
-            onFullButtonClick = {
-                detailViewModel.handleScreenEvents(DetailScreenEvent.PhotoQualityType(type = it))
-            },
-            onMediumButtonClick = {
-                detailViewModel.handleScreenEvents(DetailScreenEvent.PhotoQualityType(type = it))
-            },
-            onLowButtonClick = {
-                detailViewModel.handleScreenEvents(DetailScreenEvent.PhotoQualityType(type = it))
-            },
-            onSetHomeButtonClick = {
-                detailViewModel.handleScreenEvents(DetailScreenEvent.SetWallpaperPlace(it))
-            },
-            onSetLockButtonClick = {
-                detailViewModel.handleScreenEvents(DetailScreenEvent.SetWallpaperPlace(it))
-            },
-            onSetHomeAndLockButtonClick = {
-                detailViewModel.handleScreenEvents(DetailScreenEvent.SetWallpaperPlace(it))
-            },
-            onSetWallpaperButtonClick = {isOpen ->
-                detailViewModel.handleScreenEvents(DetailScreenEvent.OpenSetWallpaperBottomSheet(isOpen = isOpen))
-
-            },
-            onShareButtonClick = {url ->
-                launcherOfShare.launch(url.shareExternal())
-            },
-            onDownloadButtonClick = {isOpen ->
-                detailViewModel.handleScreenEvents(DetailScreenEvent.OpenDownloadBottomSheet(isOpen = isOpen))
-            },
-            onAddFavoriteButtonClick = {
-                detailViewModel.handleScreenEvents(
-                    DetailScreenEvent.AddFavorites
-                )
-            },
-            onRemoveFavoriteButtonClick = {
-                detailViewModel.handleScreenEvents(
-                    DetailScreenEvent.DeleteFavorites
-                )
-            },
-            onTagButtonClick = {tag ->
-                onTagClick.invoke(tag)
-            },
-            newBitmap = {
-                colorFilter = it
-            },
-            loadingForSetWallpaperButton = isLoadingForSetWallpaper,
-            onProfileDetailClick = onProfileDetailClick,
-            onNavigateToFavorite = onNavigateToFavorite
-        )
     }
 }
 
