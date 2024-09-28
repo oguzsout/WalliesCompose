@@ -74,15 +74,11 @@ class MainActivity : ComponentActivity() {
                 WalliesComposeTheme(
                     appTheme = application.theme.value
                 ) {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
-                    ) {
-                        WalliesApp(
-                            isAuthenticated = mainState.userAuth,
-                            networkMonitor = networkMonitor,
-                            googleAuthUiClient = googleAuthUiClient
-                        )
-                    }
+                    WalliesApp(
+                        isAuthenticated = mainState.userAuth,
+                        networkMonitor = networkMonitor,
+                        googleAuthUiClient = googleAuthUiClient
+                    )
                 }
             }
         }

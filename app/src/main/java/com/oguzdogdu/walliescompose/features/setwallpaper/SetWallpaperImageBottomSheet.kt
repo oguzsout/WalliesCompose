@@ -2,6 +2,9 @@ package com.oguzdogdu.walliescompose.features.setwallpaper
 
 import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
@@ -21,7 +24,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -83,7 +85,7 @@ fun SetWallpaperImageBottomSheet(
     modifier: Modifier = Modifier,
 ) {
     var openBottomSheet by remember { mutableStateOf(isOpen) }
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = isOpen) {
@@ -91,13 +93,14 @@ fun SetWallpaperImageBottomSheet(
     }
 
     if (openBottomSheet) {
-
         ModalBottomSheet(
-            modifier = modifier
-                .wrapContentHeight(),
+            modifier = modifier,
             sheetState = bottomSheetState,
+            scrimColor = Color.Black.copy(alpha = 0.5f),
             onDismissRequest = {
-                scope.launch { bottomSheetState.hide() }
+                scope.launch {
+                    bottomSheetState.hide()
+                }
                     .invokeOnCompletion { openBottomSheet = false }
                 onDismiss.invoke()
             },
@@ -240,7 +243,24 @@ fun BottomSheetContent(
     LaunchedEffect(key1 = colorMatrix) {
         cachedColorFilter = colorMatrix
     }
-
+    val progressOffsetScale = remember { Animatable(0f) }
+    LaunchedEffect(bottomSheetState.hasExpandedState) {
+        when(bottomSheetState.hasExpandedState) {
+            true -> {
+                progressOffsetScale.snapTo(0f)
+                progressOffsetScale.animateTo(
+                    targetValue = 0.87f,
+                    animationSpec = tween(200, easing = LinearEasing)
+                )
+            }
+            false -> {
+                progressOffsetScale.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(300, easing = LinearOutSlowInEasing)
+                )
+            }
+        }
+    }
     val brightnessInteractionSource = remember { MutableInteractionSource() }
     val contrastInteractionSource = remember { MutableInteractionSource() }
     val saturationInteractionSource = remember { MutableInteractionSource() }
@@ -255,7 +275,7 @@ fun BottomSheetContent(
     )
     Column(
         modifier = Modifier
-            .fillMaxHeight(0.87f)
+            .fillMaxHeight(progressOffsetScale.value)
             .padding(horizontal = 16.dp)
             .verticalScroll(state = rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
