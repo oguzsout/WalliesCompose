@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oguzdogdu.walliescompose.WalliesApplication
 import com.oguzdogdu.walliescompose.data.common.takeListOr
-import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
 import com.oguzdogdu.walliescompose.domain.model.random.RandomImage
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
@@ -17,7 +16,6 @@ import com.oguzdogdu.walliescompose.domain.wrapper.onSuccess
 import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
 import com.oguzdogdu.walliescompose.features.home.state.HomeUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -52,13 +50,13 @@ class HomeViewModel @Inject constructor(
            }
         }
     }
+
     private fun fetchHomeScreenData() {
         viewModelScope.launch {
             combineResults(
                 repository.getRandomImages(count = 8),
                 repository.getHomeTopicsImages(),
                 repository.getHomeImagesByPopulars(),
-                repository.getHomeImagesByLatest()
             ).collect { homeUIState ->
                 updateHomeListState(homeUIState)
             }
@@ -68,35 +66,29 @@ class HomeViewModel @Inject constructor(
     private fun combineResults(
         randomResult: Flow<Resource<List<RandomImage>?>>,
         topicsResult: Flow<Resource<List<Topics>?>>,
-        popularsResult: Flow<Resource<List<PopularImage>?>>,
-        latestResult: Flow<Resource<List<LatestImage>?>>
+        popularsResult: Flow<Resource<List<PopularImage>?>>
     ): Flow<HomeUIState> {
         return combine(
             randomResult,
             topicsResult,
-            popularsResult,
-            latestResult
-        ) { randomResource, topicsResource, popularsResource, latestResource ->
-
+            popularsResult
+        ) { randomResource, topicsResource, popularsResource ->
             val isLoading = randomResource is Resource.Loading ||
                     topicsResource is Resource.Loading ||
-                    popularsResource is Resource.Loading ||
-                    latestResource is Resource.Loading
+                    popularsResource is Resource.Loading
+
             if (isLoading) {
-                delay(750)
                 return@combine HomeUIState.Loading(loading = true)
             }
 
             val randomList = randomResource.takeListOr { emptyList() }
             val topicsList = topicsResource.takeListOr { emptyList() }
             val popularList = popularsResource.takeListOr { emptyList() }
-            val latestList = latestResource.takeListOr { emptyList() }
 
             val combinedData = HomeUIState.Success(
                 random = randomList,
                 topics = topicsList,
                 popular = popularList,
-                latest = latestList
             )
 
             getImageListForGlanceList(popularList)

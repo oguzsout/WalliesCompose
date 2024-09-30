@@ -2,7 +2,6 @@ package com.oguzdogdu.walliescompose.features.home
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
@@ -23,39 +22,27 @@ fun NavGraphBuilder.homeScreen(
     transitionScope: SharedTransitionScope,
     onTopicSeeAllClick: () -> Unit,
     onPopularSeeAllClick: () -> Unit,
-    onLatestSeeAllClick: () -> Unit,
     onTopicDetailListClick: (String?) -> Unit,
     onPopularClick: (String) -> Unit,
-    onLatestClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     onUserPhotoClick: () -> Unit,
     onRandomImageClick: (String?) -> Unit,
-    navigateBack:() -> Unit
 ) {
     composable<HomeScreenNavigationRoute> {
-        val viewModel : HomeViewModel = hiltViewModel()
         transitionScope.HomeScreenRoute(
             animatedVisibilityScope = this,
             onTopicSeeAllClick = {
             onTopicSeeAllClick.invoke()
         },
-            viewModel = viewModel,
-            onTopicDetailListClick = {
-                onTopicDetailListClick.invoke(it)
-            }, onPopularClick = {
-                onPopularClick.invoke(it)
-            }, onLatestClick = {
-                onLatestClick.invoke(it)
-            }, onSearchClick = { onSearchClick.invoke() },
             onPopularSeeAllClick = {
                 onPopularSeeAllClick.invoke()
+            }, onTopicDetailListClick = {
+                onTopicDetailListClick.invoke(it)
             },
-            onLatestSeeAllClick = {
-                onLatestSeeAllClick.invoke()
-            }, navigateBack = {
-                navigateBack.invoke()
+            onPopularClick = {
+                onPopularClick.invoke(it)
             },
-            onUserPhotoClick = {
+            onSearchClick = { onSearchClick.invoke() }, onUserPhotoClick = {
                 onUserPhotoClick.invoke()
             },
             onRandomImageClick = {
