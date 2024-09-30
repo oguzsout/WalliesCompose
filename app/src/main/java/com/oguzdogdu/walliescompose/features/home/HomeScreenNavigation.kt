@@ -2,7 +2,6 @@ package com.oguzdogdu.walliescompose.features.home
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
@@ -33,29 +32,24 @@ fun NavGraphBuilder.homeScreen(
     navigateBack:() -> Unit
 ) {
     composable<HomeScreenNavigationRoute> {
-        val viewModel : HomeViewModel = hiltViewModel()
         transitionScope.HomeScreenRoute(
             animatedVisibilityScope = this,
             onTopicSeeAllClick = {
             onTopicSeeAllClick.invoke()
         },
-            viewModel = viewModel,
-            onTopicDetailListClick = {
-                onTopicDetailListClick.invoke(it)
-            }, onPopularClick = {
-                onPopularClick.invoke(it)
-            }, onLatestClick = {
-                onLatestClick.invoke(it)
-            }, onSearchClick = { onSearchClick.invoke() },
             onPopularSeeAllClick = {
                 onPopularSeeAllClick.invoke()
-            },
-            onLatestSeeAllClick = {
+            }, onLatestSeeAllClick = {
                 onLatestSeeAllClick.invoke()
-            }, navigateBack = {
-                navigateBack.invoke()
+            }, onTopicDetailListClick = {
+                onTopicDetailListClick.invoke(it)
+            }, onLatestClick = {
+                onLatestClick.invoke(it)
             },
-            onUserPhotoClick = {
+            onPopularClick = {
+                onPopularClick.invoke(it)
+            },
+            onSearchClick = { onSearchClick.invoke() }, onUserPhotoClick = {
                 onUserPhotoClick.invoke()
             },
             onRandomImageClick = {

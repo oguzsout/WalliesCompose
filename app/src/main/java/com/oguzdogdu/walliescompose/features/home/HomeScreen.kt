@@ -6,28 +6,27 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,13 +39,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -54,9 +52,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
@@ -77,7 +73,6 @@ import kotlinx.coroutines.delay
 fun SharedTransitionScope.HomeScreenRoute(
     modifier: Modifier = Modifier,
     animatedVisibilityScope: AnimatedVisibilityScope,
-    viewModel: HomeViewModel,
     onTopicSeeAllClick: () -> Unit,
     onPopularSeeAllClick: () -> Unit,
     onLatestSeeAllClick: () -> Unit,
@@ -87,28 +82,25 @@ fun SharedTransitionScope.HomeScreenRoute(
     onSearchClick: () -> Unit,
     onUserPhotoClick: () -> Unit,
     onRandomImageClick: (String?) -> Unit,
-    navigateBack:() -> Unit
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val lifecycleOwner = LocalLifecycleOwner.current
     val homeUiState by viewModel.homeListState.collectAsStateWithLifecycle()
     val authUserProfileImage by viewModel.userProfileImage.collectAsStateWithLifecycle()
     val appName = stringResource(id = R.string.app_name)
-    var visibleChars by remember { mutableStateOf(0) }
+    var visibleChars by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
+        viewModel.handleScreenEvents(HomeScreenEvent.FetchMainScreenUserData)
+        viewModel.handleScreenEvents(HomeScreenEvent.FetchHomeScreenLists)
         appName.forEachIndexed { index, _ ->
             delay(300)
             visibleChars = index + 1
         }
     }
-    LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE, lifecycleOwner = lifecycleOwner){
-        viewModel.handleScreenEvents(HomeScreenEvent.FetchMainScreenUserData)
-        viewModel.handleScreenEvents(HomeScreenEvent.FetchHomeScreenLists)
-    }
 
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(8.dp),
@@ -117,7 +109,7 @@ fun SharedTransitionScope.HomeScreenRoute(
         ) {
             IconButton(
                 onClick = { onUserPhotoClick.invoke() },
-                modifier = modifier
+                modifier = Modifier
                     .wrapContentSize()
                     .weight(1f)
             ) {
@@ -125,7 +117,7 @@ fun SharedTransitionScope.HomeScreenRoute(
                     model = if (authUserProfileImage?.isNotEmpty() == true) authUserProfileImage else WalliesIcons.DefaultAvatar,
                     contentScale = ContentScale.FillBounds,
                     contentDescription = "Profile Image",
-                    modifier = modifier
+                    modifier = Modifier
                         .size(32.dp)
                         .clip(RoundedCornerShape(64.dp))
                         .border(1.dp, Color.DarkGray, shape = RoundedCornerShape(64.dp))
@@ -158,7 +150,7 @@ fun SharedTransitionScope.HomeScreenRoute(
 
             IconButton(
                 onClick = { onSearchClick.invoke() },
-                modifier = modifier
+                modifier = Modifier
                     .wrapContentSize()
                     .weight(1f)
             ) {
@@ -170,7 +162,7 @@ fun SharedTransitionScope.HomeScreenRoute(
             }
         }
     }) {paddingValues ->
-            Column(modifier = modifier
+            Column(modifier = Modifier
                 .padding(paddingValues = paddingValues)
                 .fillMaxSize()) {
                 HomeScreenContent(
@@ -215,10 +207,7 @@ fun SharedTransitionScope.HomeScreenContent(
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when (homeUiState) {
-            is HomeUIState.Loading -> {
-                CircularProgressIndicator()
-            }
-
+            is HomeUIState.Loading -> CircularProgressIndicator()
             is HomeUIState.Error -> {}
             is HomeUIState.Success -> {
                 LazyColumn(
@@ -308,23 +297,39 @@ private fun TopicLayoutContainer(
                     }
             )
         }
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = modifier.requiredHeightIn(max = 280.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .requiredHeightIn(max = 280.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            itemsIndexed(topicsList, key = { index: Int, item: Topics ->
-                item.id.hashCode()
-            }) { index, item ->
-                TopicTitleView(imageUrl = item.titleBackground, title = item.title, imageName = item.title, onTopicDetailListClick = {
-                    onTopicDetailListClick.invoke(it)
-                })
+            val chunkedList = topicsList.chunked(2)
+
+            chunkedList.forEach { rowItems ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    rowItems.forEach { item ->
+                        TopicTitleView(
+                            imageUrl = item.titleBackground,
+                            title = item.title,
+                            imageName = item.title,
+                            onTopicDetailListClick = {
+                                onTopicDetailListClick.invoke(it)
+                            },
+                            modifier = Modifier
+                                .weight(1f),
+                        )
+                    }
+                    if (rowItems.size < 2) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
             }
         }
-    }
 
+    }
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -365,23 +370,24 @@ private fun SharedTransitionScope.PopularLayoutContainer(
             )
         }
 
-        LazyRow(modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
-            items(popularList, key = {
-                it.url.hashCode()
-            }) { popularImage ->
-                PopularImageView(
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .horizontalScroll(state = rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            popularList.forEach { popularImage ->
+                HomeListImage (
                     animatedVisibilityScope = animatedVisibilityScope,
                     id = popularImage.id,
                     imageUrl = popularImage.url,
                     imageName = popularImage.imageDesc,
-                    onPopularClick = {
+                    onImageClick = {
                         onPopularClick.invoke(it)
                     })
             }
-        })
-
+        }
     }
 }
 
@@ -423,54 +429,59 @@ private fun SharedTransitionScope.LatestLayoutContainer(
             )
         }
 
-        LazyRow(modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),horizontalArrangement = Arrangement.spacedBy(8.dp), content = {
-            items(latestList, key = {
-                it.url.hashCode()
-            }) { latestImage ->
-                LatestImageView(
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .horizontalScroll(state = rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            latestList.forEach { latestImage ->
+                HomeListImage(
                     animatedVisibilityScope = animatedVisibilityScope,
                     id = latestImage.id,
                     imageUrl = latestImage.url,
                     imageName = latestImage.imageDesc,
-                    onLatestClick = {
+                    onImageClick = {
                         onLatestClick.invoke(it)
                     })
             }
-        })
-
+        }
     }
 }
 
 @Composable
-private fun TopicTitleView(imageUrl: String?, title: String?, imageName:String?,onTopicDetailListClick: (String?) -> Unit) {
+private fun TopicTitleView(
+    imageUrl: String?,
+    title: String?,
+    imageName: String?,
+    onTopicDetailListClick: (String?) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Box(
-        modifier = Modifier
-            .wrapContentSize()
-            .clickable {
-                onTopicDetailListClick.invoke(title)
-            }
+        modifier = modifier
+            .height(88.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onTopicDetailListClick.invoke(title) }
     ) {
-
         SubcomposeAsyncImage(
             model = imageUrl,
             contentDescription = imageName,
             contentScale = ContentScale.FillBounds,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(88.dp)
-                .clip(CircleShape.copy(all = CornerSize(16.dp)))
-                .drawWithContent {
-                    drawContent()
-                    drawRect(
-                        color = Color.Black.copy(alpha = 0.5f),
-                        size = size,
-                    )
-                },
             loading = { ImageLoadingState() },
+            error = {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Text("Image not available", Modifier.align(Alignment.Center))
+                }
+            },
+            modifier = Modifier.align(Alignment.Center)
         )
 
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color.Black.copy(alpha = 0.5f))
+        )
         Text(
             text = title.orEmpty(),
             style = MaterialTheme.typography.labelSmall,
@@ -483,53 +494,30 @@ private fun TopicTitleView(imageUrl: String?, title: String?, imageName:String?,
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun SharedTransitionScope.PopularImageView(
-    animatedVisibilityScope: AnimatedVisibilityScope,
+private fun SharedTransitionScope.HomeListImage(
     id: String?,
     imageUrl: String?,
     imageName: String?,
-    onPopularClick: (String) -> Unit
+    onImageClick: (String) -> Unit,
+    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
-    SubcomposeAsyncImage(
+    val sharedContentState = rememberSharedContentState(key = "mainImage-${id}")
+
+    with(animatedVisibilityScope) {
+        SubcomposeAsyncImage(
             model = imageUrl,
             contentDescription = imageName,
-            contentScale = ContentScale.FillBounds,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .sharedBounds(
-                    sharedContentState = rememberSharedContentState(key = "popularImage-${id}"),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize
+                    sharedContentState = sharedContentState,
+                    animatedVisibilityScope = this
                 )
-                .width(160.dp)
                 .height(240.dp)
+                .aspectRatio(ratio = 2 / 3f)
                 .clip(CircleShape.copy(all = CornerSize(16.dp)))
-                .clickable { onPopularClick.invoke(id.orEmpty()) },
+                .clickable { onImageClick.invoke(id.orEmpty()) },
             loading = { ImageLoadingState() },
         )
-}
-
-@OptIn(ExperimentalSharedTransitionApi::class)
-@Composable
-private fun SharedTransitionScope.LatestImageView(
-    animatedVisibilityScope: AnimatedVisibilityScope,
-    id: String?,
-    imageUrl: String?,
-    imageName: String?,
-    onLatestClick: (String) -> Unit
-) {
-    SubcomposeAsyncImage(
-        model = imageUrl,
-        contentDescription = imageName,
-        contentScale = ContentScale.FillBounds,
-        modifier = Modifier
-            .sharedBounds(
-                sharedContentState = rememberSharedContentState(key = "popularImage-${id}"),
-                animatedVisibilityScope = animatedVisibilityScope,
-            )
-            .width(160.dp)
-            .height(240.dp)
-            .clip(CircleShape.copy(all = CornerSize(16.dp)))
-            .clickable { onLatestClick.invoke(id.orEmpty()) },
-        loading = { ImageLoadingState() },
-    )
+    }
 }

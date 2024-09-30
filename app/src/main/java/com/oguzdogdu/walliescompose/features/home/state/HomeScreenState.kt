@@ -7,15 +7,15 @@ import com.oguzdogdu.walliescompose.domain.model.random.RandomImage
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
 
 @Stable
-sealed interface HomeUIState {
-    data class Loading(val loading: Boolean = false) : HomeUIState
-    data class Error(val errorMessage: String = "") : HomeUIState
+sealed class HomeUIState {
+    data class Loading(val loading: Boolean = false) : HomeUIState()
+    data class Error(val errorMessage: String = "") : HomeUIState()
     data class Success(
         val random: List<RandomImage> = emptyList(),
         val topics: List<Topics> = emptyList(),
         val popular: List<PopularImage> = emptyList(),
         val latest: List<LatestImage> = emptyList()
-    ) : HomeUIState {
+    ) : HomeUIState() {
         fun isEmpty(): Boolean = topics.isEmpty() and popular.isEmpty() and latest.isEmpty()
     }
 }

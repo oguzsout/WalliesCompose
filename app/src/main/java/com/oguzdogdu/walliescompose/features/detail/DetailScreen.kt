@@ -510,7 +510,7 @@ fun SharedTransitionScope.DetailScreenMainPhoto(
             contentScale = ContentScale.FillBounds,
             modifier = Modifier
                 .sharedElement(
-                    state = rememberSharedContentState(key = "popularImage-${state.detail?.id}"),
+                    state = rememberSharedContentState(key = "mainImage-${state.detail?.id}"),
                     animatedVisibilityScope = animatedVisibilityScope,
                     clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(16.dp)),
                     boundsTransform = boundsTransform
