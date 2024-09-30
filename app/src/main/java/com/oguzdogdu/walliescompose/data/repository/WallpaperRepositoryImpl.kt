@@ -70,15 +70,6 @@ class WallpaperRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getHomeImagesByLatest(): Flow<Resource<List<LatestImage>?>> {
-        return safeApiCall(ioDispatcher) {
-            service.getImagesByOrders(perPage = 10, page = 1, order = Constants.LATEST)
-                .mapNotNull {
-                    it.toDomainModelLatest()
-                }
-        }
-    }
-
     override suspend fun getHomeTopicsImages(): Flow<Resource<List<Topics>?>> {
         return safeApiCall(ioDispatcher) {
             service.getTopics(perPage = 6, page = 1).mapNotNull {

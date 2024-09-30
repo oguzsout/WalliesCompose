@@ -22,14 +22,11 @@ fun NavGraphBuilder.homeScreen(
     transitionScope: SharedTransitionScope,
     onTopicSeeAllClick: () -> Unit,
     onPopularSeeAllClick: () -> Unit,
-    onLatestSeeAllClick: () -> Unit,
     onTopicDetailListClick: (String?) -> Unit,
     onPopularClick: (String) -> Unit,
-    onLatestClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     onUserPhotoClick: () -> Unit,
     onRandomImageClick: (String?) -> Unit,
-    navigateBack:() -> Unit
 ) {
     composable<HomeScreenNavigationRoute> {
         transitionScope.HomeScreenRoute(
@@ -39,12 +36,8 @@ fun NavGraphBuilder.homeScreen(
         },
             onPopularSeeAllClick = {
                 onPopularSeeAllClick.invoke()
-            }, onLatestSeeAllClick = {
-                onLatestSeeAllClick.invoke()
             }, onTopicDetailListClick = {
                 onTopicDetailListClick.invoke(it)
-            }, onLatestClick = {
-                onLatestClick.invoke(it)
             },
             onPopularClick = {
                 onPopularClick.invoke(it)

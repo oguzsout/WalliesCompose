@@ -143,9 +143,6 @@ fun WalliesNavHost(
                     onTopicDetailListClick = {
                         navController.navigateToTopicDetailListScreen(topicId = it)
                     },
-                    onLatestClick = {
-                        navController.navigateToDetailScreen(photoId = it)
-                    },
                     onPopularClick = {
                         navController.navigateToDetailScreen(photoId = it)
                     },
@@ -157,12 +154,6 @@ fun WalliesNavHost(
                     },
                     onPopularSeeAllClick = {
                         navController.navigateToPopularScreen()
-                    },
-                    onLatestSeeAllClick = {
-                        navController.navigateToLatestScreen()
-                    },
-                    navigateBack = {
-                        navController.navigateUp()
                     },
                     onUserPhotoClick = {
                         navController.navigateToAuthenticatedUserScreen()

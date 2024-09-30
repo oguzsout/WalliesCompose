@@ -75,9 +75,7 @@ fun SharedTransitionScope.HomeScreenRoute(
     animatedVisibilityScope: AnimatedVisibilityScope,
     onTopicSeeAllClick: () -> Unit,
     onPopularSeeAllClick: () -> Unit,
-    onLatestSeeAllClick: () -> Unit,
     onTopicDetailListClick: (String?) -> Unit,
-    onLatestClick: (String) -> Unit,
     onPopularClick: (String) -> Unit,
     onSearchClick: () -> Unit,
     onUserPhotoClick: () -> Unit,
@@ -178,12 +176,8 @@ fun SharedTransitionScope.HomeScreenRoute(
                     onPopularClick = { id ->
                         onPopularClick.invoke(id)
                     },
-                    onLatestClick = { id -> onLatestClick.invoke(id) },
                     onPopularSeeAllClick = {
                         onPopularSeeAllClick.invoke()
-                    },
-                    onLatestSeeAllClick = {
-                        onLatestSeeAllClick.invoke()
                     },
                     onRandomImageClick = onRandomImageClick
                 )
@@ -199,10 +193,8 @@ fun SharedTransitionScope.HomeScreenContent(
     modifier: Modifier = Modifier,
     onTopicSeeAllClick: () -> Unit,
     onPopularSeeAllClick: () -> Unit,
-    onLatestSeeAllClick: () -> Unit,
     onTopicDetailListClick: (String?) -> Unit,
     onPopularClick: (String) -> Unit,
-    onLatestClick: (String) -> Unit,
     onRandomImageClick: (String?) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -248,14 +240,6 @@ fun SharedTransitionScope.HomeScreenContent(
                             onPopularSeeAllClick = {
                                 onPopularSeeAllClick.invoke()
                             })
-                    }
-
-                    item(key = "latestContainer") {
-                        LatestLayoutContainer(animatedVisibilityScope = animatedVisibilityScope,
-                            latestList = homeUiState.latest,
-                            onLatestClick = { id -> onLatestClick.invoke(id) },
-                            onLatestSeeAllClick = { onLatestSeeAllClick.invoke() })
-
                     }
                 }
             }
@@ -385,65 +369,6 @@ private fun SharedTransitionScope.PopularLayoutContainer(
                     imageName = popularImage.imageDesc,
                     onImageClick = {
                         onPopularClick.invoke(it)
-                    })
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalSharedTransitionApi::class)
-@Composable
-private fun SharedTransitionScope.LatestLayoutContainer(
-    animatedVisibilityScope: AnimatedVisibilityScope,
-    modifier: Modifier = Modifier,
-    latestList: List<LatestImage>,
-    onLatestClick: (String) -> Unit,
-    onLatestSeeAllClick: () -> Unit
-) {
-    Column(
-        modifier = modifier
-            .wrapContentSize(),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Row(
-            modifier = modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(id = R.string.latest_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = modifier.padding(start = 4.dp, top = 16.dp, bottom = 8.dp)
-            )
-
-            Text(
-                text = stringResource(id = R.string.show_all),
-                fontFamily = medium,
-                fontSize = 12.sp,
-                color = Color.Unspecified,
-                modifier = modifier
-                    .padding(end = 8.dp, top = 16.dp, bottom = 8.dp)
-                    .clickable {
-                        onLatestSeeAllClick.invoke()
-                    }
-            )
-        }
-
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .horizontalScroll(state = rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            latestList.forEach { latestImage ->
-                HomeListImage(
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    id = latestImage.id,
-                    imageUrl = latestImage.url,
-                    imageName = latestImage.imageDesc,
-                    onImageClick = {
-                        onLatestClick.invoke(it)
                     })
             }
         }
