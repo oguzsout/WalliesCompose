@@ -75,7 +75,6 @@ class MainActivity : ComponentActivity() {
                     appTheme = application.theme.value
                 ) {
                     WalliesApp(
-                        isAuthenticated = mainState.userAuth,
                         networkMonitor = networkMonitor,
                         googleAuthUiClient = googleAuthUiClient
                     )

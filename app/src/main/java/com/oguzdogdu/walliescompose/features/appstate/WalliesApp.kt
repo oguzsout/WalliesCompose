@@ -62,7 +62,6 @@ fun WalliesApp(
         coroutineScope = coroutineScope,
         networkMonitor = networkMonitor
     ),
-    isAuthenticated: Boolean,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val isOffline by appState.isOffline.collectAsStateWithLifecycle()
@@ -76,14 +75,14 @@ fun WalliesApp(
             )
         }
     }
-    Scaffold(modifier = modifier.fillMaxSize(), bottomBar = {
-        SharedTransitionLayout {
+    SharedTransitionLayout {
+        Scaffold(modifier = modifier.fillMaxSize(), bottomBar = {
             AnimatedVisibility(
                 visible = appState.shouldShowBottomBar
             ) {
                 AppNavBar(
                     destinations = appState.topLevelDestinations,
-                    onNavigateToDestination = appState::navigateToTopLevelDestination,
+                    onNavigateToDestination = { appState.navigateToTopLevelDestination(it) },
                     currentDestination = appState.currentDestination,
                     modifier = Modifier
                         .renderInSharedTransitionScopeOverlay()
@@ -97,41 +96,40 @@ fun WalliesApp(
                         )
                 )
             }
-        }
-    }, snackbarHost = {
-        SnackbarHost(snackbarHostState) {
-            Snackbar(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .wrapContentSize(),
-                containerColor = MaterialTheme.colorScheme.background
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+        }, snackbarHost = {
+            SnackbarHost(snackbarHostState) {
+                Snackbar(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .wrapContentSize(),
+                    containerColor = MaterialTheme.colorScheme.background
                 ) {
-                    Icon(
-                        Icons.Filled.Warning,
-                        "",
-                        Modifier.padding(horizontal = 8.dp),
-                        tint = Yellow
-                    )
-                    Text(
-                        it.visuals.message,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        fontFamily = medium, fontSize = 12.sp, maxLines = 2,
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            Icons.Filled.Warning,
+                            "",
+                            Modifier.padding(horizontal = 8.dp),
+                            tint = Yellow
+                        )
+                        Text(
+                            it.visuals.message,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontFamily = medium, fontSize = 12.sp, maxLines = 2,
+                        )
+                    }
                 }
             }
+        }) {
+            WalliesNavHost(
+                appState = appState,
+                modifier = Modifier.padding(it),
+                googleAuthUiClient = googleAuthUiClient
+            )
         }
-    }) {
-        WalliesNavHost(
-            appState = appState,
-            modifier = Modifier.padding(it),
-            isAuthenticated = isAuthenticated,
-            googleAuthUiClient = googleAuthUiClient
-        )
     }
 }
 
@@ -151,7 +149,11 @@ internal fun AppNavBar(
                 colors = NavigationBarItemDefaults.colors(
                     indicatorColor = MaterialTheme.colorScheme.onPrimary
                 ),
-                onClick = { onNavigateToDestination(destination) },
+                onClick = {
+                    if (!selected) {
+                        onNavigateToDestination(destination)
+                    }
+                },
                 icon = {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = destination.icon),
