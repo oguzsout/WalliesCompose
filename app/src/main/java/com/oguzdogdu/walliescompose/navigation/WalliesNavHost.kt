@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.oguzdogdu.walliescompose.features.appstate.MainAppState
 import com.oguzdogdu.walliescompose.features.authenticateduser.authenticatedUserScreen
@@ -20,6 +21,7 @@ import com.oguzdogdu.walliescompose.features.authenticateduser.changenameandsurn
 import com.oguzdogdu.walliescompose.features.authenticateduser.changepassword.changePasswordScreen
 import com.oguzdogdu.walliescompose.features.authenticateduser.changepassword.navigateToChangePasswordScreen
 import com.oguzdogdu.walliescompose.features.authenticateduser.navigateToAuthenticatedUserScreen
+import com.oguzdogdu.walliescompose.features.collections.CollectionScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.collections.collectionScreen
 import com.oguzdogdu.walliescompose.features.collections.detaillist.collectionDetailListScreen
 import com.oguzdogdu.walliescompose.features.collections.detaillist.navigateToCollectionDetailListScreen
@@ -60,17 +62,10 @@ import com.oguzdogdu.walliescompose.navigation.utils.Routes
 fun WalliesNavHost(
     appState: MainAppState,
     modifier: Modifier = Modifier,
-    isAuthenticated:Boolean,
     googleAuthUiClient: GoogleAuthUiClient
 ) {
-
     val navController = appState.navController
-    var authState by remember {
-        mutableStateOf(false)
-    }
-    LaunchedEffect(key1 = isAuthenticated) {
-        authState = isAuthenticated
-    }
+
     SharedTransitionLayout {
         NavHost(
             navController = navController,
