@@ -16,13 +16,14 @@ import com.oguzdogdu.walliescompose.cache.util.Constants.DB_NAME
 @Database(
     version = LATEST_VERSION,
     entities = [FavoriteImage::class, UserPreferences::class],
+    exportSchema = true,
     autoMigrations = [
         AutoMigration(
             from = 1,
             to = LATEST_VERSION,
             NameToFirstnameAutoMigrationSpec::class
         )
-    ]
+    ],
 )
 abstract class WalliesDatabase : RoomDatabase() {
 
