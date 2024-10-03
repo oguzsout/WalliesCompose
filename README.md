@@ -7,8 +7,13 @@
 
 In this application consisting of multiple screens, you can review popular and recently added photos and set the wallpaper for your phone's background on the detail screen. In the detail screen, you can view the high resolution image by swiping or zooming the relevant photo, you can download it to your phone if you want, and you can share the photo with your friends. On the Collections screen, you can review the photos in the collections created by users on the unsplash site and save the photo you like. If you don't want to be content with these, search and review the photo you want on the search screen. This repo is a version of the project in the [WalliesHD](https://github.com/oguzsout/Wallies) repo, rewritten with Jetpack Compose.
 
-You can switch to the `develop` branch to get the latest changes build.
-
+# 🛠️ Setup
+- You must create a developer account at [https://unsplash.com/developers](https://unsplash.com/developers)
+- You have to create your application and get the access key
+- You have to add the access key in `local.properties`
+```
+DEBUG_API_KEY=""
+```
 
 ## 📸 Screenshots
 ![Group 1](https://github.com/oguzsout/WalliesCompose/assets/73955284/f5b53358-f147-483f-8ab7-ea8d5189cde3)
