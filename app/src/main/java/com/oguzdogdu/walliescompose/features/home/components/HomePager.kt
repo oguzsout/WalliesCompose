@@ -1,6 +1,7 @@
 package com.oguzdogdu.walliescompose.features.home.components
 
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.Animatable as composeAnimatable
+import androidx.compose.animation.core.Animatable as coreAnimatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,7 +34,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -66,9 +70,8 @@ fun HomeRandomPage(
     onRandomImageClick: (String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val pagerState = rememberPagerState(pageCount = {
-        randomImageList.size
-    })
+    val pagerState = rememberPagerState(pageCount = { randomImageList.size })
+    var previousPage by remember { mutableIntStateOf(0) }
 
     val isDraggedState = pagerState.interactionSource.collectIsDraggedAsState()
     LaunchedEffect(isDraggedState) {
@@ -78,13 +81,18 @@ fun HomeRandomPage(
                     while (true) {
                         delay(2500)
                         runCatching {
-                            pagerState.animateScrollToPage(page = pagerState.currentPage.inc() % pagerState.pageCount,
+                            pagerState.animateScrollToPage(
+                                page = pagerState.currentPage.inc() % pagerState.pageCount,
                                 animationSpec = tween(1000, easing = LinearOutSlowInEasing)
                             )
                         }
                     }
                 }
             }
+    }
+
+    LaunchedEffect(isDraggedState.value) {
+        previousPage = pagerState.currentPage.minus(1)
     }
 
     Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -114,16 +122,75 @@ fun HomeRandomPage(
             horizontalArrangement = Arrangement.Center
         ) {
             repeat(pagerState.pageCount) { iteration ->
-                val color =
-                    if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.secondaryContainer else Color.LightGray
+                val mainColor = MaterialTheme.colorScheme.secondaryContainer
+                val color = remember { composeAnimatable(Color.LightGray) }
+                val animatedWidth = remember { coreAnimatable(0f) }
+
+                LaunchedEffect(pagerState.currentPage) {
+                    if (pagerState.currentPage == iteration) {
+                        launch {
+                            animatedWidth.animateTo(
+                                targetValue = 1f,
+                                animationSpec = tween(durationMillis = 1000)
+                            )
+                        }
+                        launch {
+                            color.animateTo(
+                                targetValue = mainColor,
+                                animationSpec = tween(durationMillis = 1000)
+                            )
+                        }
+                    } else {
+                        launch {
+                            animatedWidth.animateTo(
+                                targetValue = 0f,
+                                animationSpec = tween(durationMillis = 1000)
+                            )
+                        }
+                        launch {
+                            color.animateTo(
+                                targetValue = Color.LightGray,
+                                animationSpec = tween(durationMillis = 1000)
+                            )
+                        }
+                    }
+                }
+
+                val leftSwipe by remember {
+                    derivedStateOf {
+                        if (pagerState.currentPage == iteration) Alignment.CenterEnd else Alignment.CenterStart
+                    }
+                }
+                val rightSwipe by remember {
+                    derivedStateOf {
+                        if (pagerState.currentPage == iteration) Alignment.CenterStart else Alignment.CenterEnd
+                    }
+                }
+                val align by remember {
+                    derivedStateOf {
+                        if (pagerState.currentPage != previousPage) {
+                            rightSwipe
+                        } else {
+                            leftSwipe
+                        }
+                    }
+                }
+
                 Box(
                     modifier = Modifier
                         .padding(2.dp)
                         .clip(CircleShape)
-                        .background(color)
                         .size(8.dp)
-                        .animateContentSize()
-                )
+                        .background(Color.LightGray)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(animatedWidth.value)
+                            .background(color.value)
+                            .align(align)
+                    )
+                }
             }
         }
     }
