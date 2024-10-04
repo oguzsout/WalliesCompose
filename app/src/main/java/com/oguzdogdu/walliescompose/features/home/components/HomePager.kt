@@ -34,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -70,8 +71,7 @@ fun HomeRandomPage(
     modifier: Modifier = Modifier
 ) {
     val pagerState = rememberPagerState(pageCount = { randomImageList.size })
-    var previousPage by remember { mutableIntStateOf(pagerState.currentPage) }
-    var isSwipeRight by remember { mutableStateOf(false) }
+    var previousPage by remember { mutableIntStateOf(0) }
 
     val isDraggedState = pagerState.interactionSource.collectIsDraggedAsState()
     LaunchedEffect(isDraggedState) {
@@ -91,9 +91,8 @@ fun HomeRandomPage(
             }
     }
 
-    LaunchedEffect(pagerState.currentPage) {
-        isSwipeRight = pagerState.currentPage > previousPage
-        previousPage = pagerState.currentPage
+    LaunchedEffect(isDraggedState.value) {
+        previousPage = pagerState.currentPage.minus(1)
     }
 
     Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -157,13 +156,26 @@ fun HomeRandomPage(
                     }
                 }
 
-                val leftSwipe = if (pagerState.currentPage == iteration) Alignment.CenterEnd else Alignment.CenterStart
-                val rightSwipe = if (pagerState.currentPage == iteration) Alignment.CenterStart else Alignment.CenterEnd
-                val align = if (isSwipeRight) {
-                    rightSwipe
-                } else {
-                    leftSwipe
+                val leftSwipe by remember {
+                    derivedStateOf {
+                        if (pagerState.currentPage == iteration) Alignment.CenterEnd else Alignment.CenterStart
+                    }
                 }
+                val rightSwipe by remember {
+                    derivedStateOf {
+                        if (pagerState.currentPage == iteration) Alignment.CenterStart else Alignment.CenterEnd
+                    }
+                }
+                val align by remember {
+                    derivedStateOf {
+                        if (pagerState.currentPage != previousPage) {
+                            rightSwipe
+                        } else {
+                            leftSwipe
+                        }
+                    }
+                }
+
                 Box(
                     modifier = Modifier
                         .padding(2.dp)
