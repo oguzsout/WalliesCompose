@@ -156,4 +156,7 @@
     <string name="text_dimension_info">Some photos may be larger than the screen size of your device. You should check the dimensions of the photo you want to set as wallpaper.</string>
     <string name="text_detail_color">Main Color </string>
     <string name="text_detail_favorite_info">You have favourite more than one photo. If you want, you can quickly browse and edit them here.</string>
+    <string name="explore_images">Don\'t forget to explore extra content and different genres by viewing images %1$s or %2$s. More content in different orientations is waiting for you!</string>
+    <string name="portrait">portrait </string>
+    <string name="landscape">landscape </string>
 </resources>
