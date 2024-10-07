@@ -1,11 +1,24 @@
 package com.oguzdogdu.walliescompose.features.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.EaseInBounce
+import androidx.compose.animation.core.EaseInCubic
+import androidx.compose.animation.core.EaseInElastic
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.EaseOutBounce
+import androidx.compose.animation.core.EaseOutCubic
+import androidx.compose.animation.core.EaseOutElastic
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +26,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -38,8 +52,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -61,7 +77,9 @@ import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
+import com.oguzdogdu.walliescompose.features.home.components.AnimatedImageRotationCard
 import com.oguzdogdu.walliescompose.features.home.components.HomeRandomPage
+import com.oguzdogdu.walliescompose.features.home.components.PhotoByOrientationCard
 import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
 import com.oguzdogdu.walliescompose.features.home.state.HomeUIState
 import com.oguzdogdu.walliescompose.navigation.utils.WalliesIcons
@@ -86,6 +104,9 @@ fun SharedTransitionScope.HomeScreenRoute(
     val authUserProfileImage by viewModel.userProfileImage.collectAsStateWithLifecycle()
     val appName = stringResource(id = R.string.app_name)
     var visibleChars by remember { mutableIntStateOf(0) }
+    var animatedImageRotateCardVisibility by remember {
+        mutableStateOf(false)
+    }
 
     LaunchedEffect(Unit) {
         viewModel.handleScreenEvents(HomeScreenEvent.FetchMainScreenUserData)
@@ -94,6 +115,17 @@ fun SharedTransitionScope.HomeScreenRoute(
             delay(300)
             visibleChars = index + 1
         }
+    }
+
+    LaunchedEffect(homeUiState) {
+        delay(2000)
+        animatedImageRotateCardVisibility = when(homeUiState) {
+            is HomeUIState.Error -> false
+            is HomeUIState.Loading -> false
+            is HomeUIState.Success -> true
+        }
+        delay(10000)
+        animatedImageRotateCardVisibility = false
     }
 
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {
@@ -163,6 +195,7 @@ fun SharedTransitionScope.HomeScreenRoute(
             Column(modifier = Modifier
                 .padding(paddingValues = paddingValues)
                 .fillMaxSize()) {
+                AnimatedImageRotationCard(visible = animatedImageRotateCardVisibility)
                 HomeScreenContent(
                     animatedVisibilityScope = animatedVisibilityScope,
                     homeUiState = homeUiState,
