@@ -459,7 +459,7 @@ private fun SharedTransitionScope.HomeListImage(
     onImageClick: (String) -> Unit,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
-    val sharedContentState = rememberSharedContentState(key = "mainImage-${id}")
+    val sharedContentState = rememberSharedContentState(key = "$SharedTransitionKey$id")
 
     with(animatedVisibilityScope) {
         SubcomposeAsyncImage(
@@ -479,3 +479,5 @@ private fun SharedTransitionScope.HomeListImage(
         )
     }
 }
+
+const val SharedTransitionKey = "mainImage-"
