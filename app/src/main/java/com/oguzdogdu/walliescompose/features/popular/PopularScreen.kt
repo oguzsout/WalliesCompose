@@ -66,6 +66,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
+import com.oguzdogdu.walliescompose.features.home.SharedTransitionKey
 import com.oguzdogdu.walliescompose.features.popular.components.PopularEditDetails
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import kotlinx.coroutines.launch
@@ -269,7 +270,7 @@ fun SharedTransitionScope.PopularListItem(
         SubcomposeAsyncImage(
             modifier = modifier
                 .sharedElement(
-                    state = rememberSharedContentState(key = "popularImage-${popularImage.id}"),
+                    state = rememberSharedContentState(key = "$SharedTransitionKey${popularImage.id}"),
                     animatedVisibilityScope = animatedVisibilityScope,
                     clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(16.dp)),
                     boundsTransform = boundsTransform
