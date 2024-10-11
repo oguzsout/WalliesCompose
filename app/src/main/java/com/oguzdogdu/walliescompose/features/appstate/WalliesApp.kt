@@ -7,37 +7,27 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color.Companion.Yellow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
@@ -63,18 +53,21 @@ fun WalliesApp(
         networkMonitor = networkMonitor
     ),
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
     val isOffline by appState.isOffline.collectAsStateWithLifecycle()
     val notConnectedMessage = stringResource(R.string.internet_error)
+    var snackbarModel by remember { mutableStateOf<SnackbarModel?>(null) }
 
     LaunchedEffect(isOffline) {
         if (isOffline) {
-            snackbarHostState.showSnackbar(
+            snackbarModel = SnackbarModel(
+                type = MessageType.ERROR,
+                drawableRes = R.drawable.ic_cancel,
                 message = notConnectedMessage,
-                duration = SnackbarDuration.Indefinite,
+                duration = SnackbarDuration.Long
             )
         }
     }
+
     SharedTransitionLayout {
         Scaffold(modifier = modifier.fillMaxSize(), bottomBar = {
             AnimatedVisibility(
@@ -97,32 +90,7 @@ fun WalliesApp(
                 )
             }
         }, snackbarHost = {
-            SnackbarHost(snackbarHostState) {
-                Snackbar(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .wrapContentSize(),
-                    containerColor = MaterialTheme.colorScheme.background
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            Icons.Filled.Warning,
-                            "",
-                            Modifier.padding(horizontal = 8.dp),
-                            tint = Yellow
-                        )
-                        Text(
-                            it.visuals.message,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            fontFamily = medium, fontSize = 12.sp, maxLines = 2,
-                        )
-                    }
-                }
-            }
+            CustomSnackbar(snackbarModel = snackbarModel)
         }) {
             WalliesNavHost(
                 appState = appState,
