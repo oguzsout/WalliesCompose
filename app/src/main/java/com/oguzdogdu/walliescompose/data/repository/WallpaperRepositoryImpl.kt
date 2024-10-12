@@ -130,12 +130,12 @@ class WallpaperRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getFavorites():  Flow<Resource<List<FavoriteImages>?>> {
+    override suspend fun getFavorites():  Flow<List<FavoriteImages>?> {
         return favoriteDao.getFavorites().map { list ->
             list.map {
                 it.toDomain()
             }
-        }.toResource()
+        }
     }
     override suspend fun insertImageToFavorites(favorite: FavoriteImages) {
         return favoriteDao.addFavorites(
