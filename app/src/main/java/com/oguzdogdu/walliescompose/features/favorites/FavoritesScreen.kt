@@ -39,10 +39,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.traceEventStart
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,11 +61,17 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.core.ViewEffect
 import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
+import com.oguzdogdu.walliescompose.features.appstate.CustomSnackbar
+import com.oguzdogdu.walliescompose.features.appstate.SnackbarModel
+import com.oguzdogdu.walliescompose.features.favorites.effect.FavoriteScreenEffect
 import com.oguzdogdu.walliescompose.features.favorites.event.FavoriteScreenEvent
 import com.oguzdogdu.walliescompose.features.favorites.state.FavoriteScreenState
 import com.oguzdogdu.walliescompose.ui.theme.regular
 import com.oguzdogdu.walliescompose.util.shareExternal
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 
 typealias onFavoritesScreenEvent = (FavoriteScreenEvent) -> Unit
 @Composable
@@ -72,17 +80,26 @@ fun FavoritesScreenRoute(
     viewModel: FavoritesViewModel = hiltViewModel(),
     onFavoriteClick: (String?) -> Unit
 ) {
-    val state by viewModel.favoritesState.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
     var shareEnabled by remember { mutableStateOf(false) }
     val launcherOfShare =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             shareEnabled = true
         }
+    var snackbarModel by remember { mutableStateOf<SnackbarModel?>(null) }
     LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
-        viewModel.handleUIEvent(
-            FavoriteScreenEvent.GetFavorites
-        )
+        viewModel.sendEvent(FavoriteScreenEvent.GetFavorites)
+        viewModel.collectEvents()
     }
+    LaunchedEffect(viewModel.effect) {
+        viewModel.effect.collect {
+            when (it) {
+                is FavoriteScreenEffect.ShowSnackbar -> snackbarModel = it.snackbarModel
+            }
+        }
+    }
+
     Scaffold(modifier = modifier
         .fillMaxSize()
         .background(Color.Magenta), topBar = {
@@ -98,6 +115,8 @@ fun FavoritesScreenRoute(
                 style = MaterialTheme.typography.titleMedium,
             )
         }
+    }, snackbarHost = {
+        CustomSnackbar(snackbarModel = snackbarModel)
     }) { it ->
         Column(
             modifier = Modifier
@@ -106,7 +125,7 @@ fun FavoritesScreenRoute(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            AnimatedContent(targetState = state.favorites.isEmpty(), label = "", transitionSpec = {
+            AnimatedContent(targetState = state.favorites, label = "", transitionSpec = {
                 slideInVertically(
                     tween(1000),
                     initialOffsetY = {
@@ -119,12 +138,15 @@ fun FavoritesScreenRoute(
                     }
                 )
             }) { target ->
-                when(target) {
-                    true -> EmptyFavoriteList()
-                    false -> FavoriteList(
+                when {
+                    target?.isEmpty() == true -> EmptyFavoriteList()
+                    target?.isNotEmpty() == true -> FavoriteList(
                         state = state,
                         onFavoriteClick = onFavoriteClick::invoke,
-                        onFavoritesScreenEvent = viewModel::handleUIEvent,
+                        onFavoritesScreenEvent = {
+                            viewModel.sendEvent(it)
+                            viewModel.collectEvents()
+                        },
                         onShareFavoriteClick = { url ->
                             launcherOfShare.launch(url.shareExternal())
                         }
@@ -174,7 +196,7 @@ fun FavoriteList(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         itemsIndexed(
-            state.favorites,
+            state.favorites.orEmpty(),
             key = { _, item -> item.url.hashCode() }) { _, item ->
             FavoritesImageView(
                 imageUrl = item.url,
@@ -252,7 +274,9 @@ private fun FavoritesImageView(
                     contentAlignment = Alignment.Center
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {

@@ -192,11 +192,9 @@ class DetailViewModel@Inject constructor(
     private fun getFavoritesForCheckFromRoom() {
         viewModelScope.launch {
             repository.getFavorites().collect { result ->
-                result.onSuccess { list ->
-                    val matchingFavorite = list?.find { it.id == _getPhoto.value.detail?.id }
-                    _getPhoto.update {
-                        it.copy(favorites = matchingFavorite)
-                    }
+                val matchingFavorite = result?.find { it.id == _getPhoto.value.detail?.id }
+                _getPhoto.update {
+                    it.copy(favorites = matchingFavorite)
                 }
             }
         }
@@ -205,10 +203,8 @@ class DetailViewModel@Inject constructor(
     private fun fetchFavoriteImageListForQuickInfo() {
         viewModelScope.launch {
             repository.getFavorites().collect { result ->
-                result.onSuccess { list ->
-                    _getPhoto.update {
-                        it.copy(favoriteImagesList = list.orEmpty())
-                    }
+                _getPhoto.update {
+                    it.copy(favoriteImagesList = result.orEmpty())
                 }
             }
         }
