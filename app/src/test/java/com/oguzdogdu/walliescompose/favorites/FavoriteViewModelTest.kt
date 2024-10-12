@@ -53,14 +53,14 @@ class FavoritesViewModelTest {
     @Test
     fun `fetchImagesToFavorites success`() = runTest {
         val favoriteList = listOf(FavoriteImages(id = "0", url = null, profileImage = null, name = "Helloo"))
-        val flow = flowOf(Resource.Success(favoriteList))
+        val flow = flowOf(favoriteList)
         `when`(repository.getFavorites()).thenReturn(flow)
 
-        viewModel.handleUIEvent(FavoriteScreenEvent.GetFavorites)
+        viewModel.sendEvent(FavoriteScreenEvent.GetFavorites)
 
         advanceUntilIdle()
 
-        val state = viewModel.favoritesState.value
+        val state = viewModel.state.value
         assert(state.favorites == favoriteList)
         assert(!state.loading)
         assert(state.error == "")
@@ -69,37 +69,37 @@ class FavoritesViewModelTest {
     @Test
     fun `fetchImagesToFavorites loading`() = runTest {
         val flow = flow {
-            emit(Resource.Loading)
+            emit(viewModel.state.value.favorites)
         }
         `when`(repository.getFavorites()).thenReturn(flow)
 
-        viewModel.handleUIEvent(FavoriteScreenEvent.GetFavorites)
+        viewModel.sendEvent(FavoriteScreenEvent.GetFavorites)
 
         advanceUntilIdle()
 
-        assert(viewModel.favoritesState.value.loading)
+        assert(viewModel.state.value.loading)
     }
 
     @Test
     fun `fetchImagesToFavorites failure`() = runTest {
         val error = Throwable("Error fetching favorites")
         val flow = flow {
-            emit(Resource.Error(error.message.orEmpty()))
+            emit(viewModel.state.value.favorites)
         }
         `when`(repository.getFavorites()).thenReturn(flow)
 
-        viewModel.handleUIEvent(FavoriteScreenEvent.GetFavorites)
+        viewModel.sendEvent(FavoriteScreenEvent.GetFavorites)
 
         advanceUntilIdle()
 
-        assert(viewModel.favoritesState.value.error == error.message)
+        assert(viewModel.state.value.error == error.message)
     }
 
     @Test
     fun `deleteWithIdFromFavorites calls repository`() = runTest {
         val favoriteId = "some_id"
 
-        viewModel.handleUIEvent(FavoriteScreenEvent.DeleteFromFavorites(favoriteId))
+        viewModel.sendEvent(FavoriteScreenEvent.DeleteFromFavorites(favoriteId))
 
         advanceUntilIdle()
 
@@ -108,10 +108,10 @@ class FavoritesViewModelTest {
 
     @Test
     fun `resetToFlipCardState changes state`() {
-        viewModel.resetToFlipCardState(true)
-        assert(viewModel.flipImageCard.value)
+        viewModel.setFlipCardState(true)
+        assert(viewModel.state.value.flipToCard)
 
-        viewModel.resetToFlipCardState(false)
-        assert(!viewModel.flipImageCard.value)
+        viewModel.setFlipCardState(false)
+        assert(!viewModel.state.value.flipToCard)
     }
 }
