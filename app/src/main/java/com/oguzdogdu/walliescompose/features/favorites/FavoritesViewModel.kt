@@ -1,29 +1,24 @@
 package com.oguzdogdu.walliescompose.features.favorites
 
-import androidx.lifecycle.ViewModel
+import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.viewModelScope
+import com.oguzdogdu.walliescompose.R
+import com.oguzdogdu.walliescompose.core.BaseViewModel
 import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
-import com.oguzdogdu.walliescompose.domain.wrapper.onFailure
-import com.oguzdogdu.walliescompose.domain.wrapper.onLoading
-import com.oguzdogdu.walliescompose.domain.wrapper.onSuccess
+import com.oguzdogdu.walliescompose.features.appstate.MessageType
+import com.oguzdogdu.walliescompose.features.appstate.SnackbarModel
+import com.oguzdogdu.walliescompose.features.favorites.effect.FavoriteScreenEffect
 import com.oguzdogdu.walliescompose.features.favorites.event.FavoriteScreenEvent
 import com.oguzdogdu.walliescompose.features.favorites.state.FavoriteScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class FavoritesViewModel @Inject constructor(private val repository: WallpaperRepository): ViewModel() {
+class FavoritesViewModel @Inject constructor(private val repository: WallpaperRepository):
+    BaseViewModel<FavoriteScreenState, FavoriteScreenEvent, FavoriteScreenEffect>(initialState = FavoriteScreenState()) {
 
-    private val _favoritesState: MutableStateFlow<FavoriteScreenState> = MutableStateFlow(
-        FavoriteScreenState()
-    )
-    val favoritesState: MutableStateFlow<FavoriteScreenState> get() = _favoritesState
-
-    fun handleUIEvent(event: FavoriteScreenEvent) {
+    override fun handleEvents(event: FavoriteScreenEvent) {
         when (event) {
             is FavoriteScreenEvent.GetFavorites -> fetchImagesToFavorites()
             is FavoriteScreenEvent.FlipToImage -> setFlipCardState(event.flip)
@@ -31,22 +26,21 @@ class FavoritesViewModel @Inject constructor(private val repository: WallpaperRe
         }
     }
 
-    private fun fetchImagesToFavorites() {
-        viewModelScope.launch {
-            repository.getFavorites().collectLatest { status ->
-                status.onLoading {
-                    _favoritesState.update { it.copy(loading = true) }
-                }
-                status.onSuccess {list->
-                    _favoritesState.update {
-                        it.copy(loading = false,favorites = list.orEmpty())
-                    }
-                }
-                status.onFailure { error ->
-                    _favoritesState.update { it.copy(error = error) }
-                }
-            }
-        }
+    private fun fetchImagesToFavorites()  {
+        sendApiCall(
+            request = { repository.getFavorites() },
+            onLoading = { loading -> setState(currentState.copy(loading = loading)) },
+            onSuccess = { list-> setState(currentState.copy(favorites = list)) },
+            onError = { error ->
+                sendEffect(FavoriteScreenEffect.ShowSnackbar(SnackbarModel(
+                    type = MessageType.ERROR,
+                    drawableRes = R.drawable.ic_cancel,
+                    message = error.message,
+                    duration = SnackbarDuration.Long
+                )))
+            },
+            onComplete = {}
+        )
     }
 
     private fun deleteWithIdFromToFavorites(favoriteId:String) {
@@ -55,11 +49,9 @@ class FavoritesViewModel @Inject constructor(private val repository: WallpaperRe
         }
     }
 
-     private fun setFlipCardState(state:Boolean) {
+      fun setFlipCardState(state:Boolean) {
         viewModelScope.launch {
-            _favoritesState.update {
-                it.copy(flipToCard = state)
-            }
+            setState(currentState.copy(flipToCard = state))
         }
     }
 }
