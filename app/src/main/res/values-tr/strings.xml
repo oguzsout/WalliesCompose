@@ -158,4 +158,6 @@
     <string name="explore_images">Ekstra içerikleri ve farklı türleri keşfetmek için resimleri %1$s veya %2$s yönünde görüntülemeyi unutmayın. Farklı yönlerde daha fazla içerik sizi bekliyor!</string>
     <string name="portrait">dikey </string>
     <string name="landscape">yatay </string>
+    <string name="add_favorites">Resim favorilere eklendi </string>
+    <string name="delete_favorites">Resim favorilerden silindi </string>
 </resources>

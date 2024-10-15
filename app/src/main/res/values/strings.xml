@@ -159,4 +159,6 @@
     <string name="explore_images">Don\'t forget to explore extra content and different genres by viewing images %1$s or %2$s. More content in different orientations is waiting for you!</string>
     <string name="portrait">portrait </string>
     <string name="landscape">landscape </string>
+    <string name="add_favorites">Image added to favorites </string>
+    <string name="delete_favorites">Image removed from favorites </string>
 </resources>
