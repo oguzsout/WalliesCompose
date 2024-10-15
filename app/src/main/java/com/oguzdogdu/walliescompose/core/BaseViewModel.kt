@@ -3,12 +3,10 @@ package com.oguzdogdu.walliescompose.core
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.onSuccess
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
@@ -25,9 +23,8 @@ abstract class BaseViewModel<State : ViewState, Event : ViewEvent, Effect : View
     private val _state: MutableStateFlow<State> = MutableStateFlow(initialState)
     val state = _state.asStateFlow()
 
-    private val _effect: MutableSharedFlow<Effect> =
-        MutableSharedFlow(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val effect = _effect.asSharedFlow()
+    private val _effect: Channel<Effect> = Channel(Channel.BUFFERED)
+    val effect = _effect.receiveAsFlow()
 
     private val _eventChannel: Channel<Event> = Channel(Channel.BUFFERED)
     val eventChannel = _eventChannel.receiveAsFlow()
@@ -68,7 +65,7 @@ abstract class BaseViewModel<State : ViewState, Event : ViewEvent, Effect : View
         }
     }
 
-    fun setState(state: State) {
+     fun setState(state: State) {
         viewModelScope.launch {
             _state.update {
                 state
@@ -76,21 +73,26 @@ abstract class BaseViewModel<State : ViewState, Event : ViewEvent, Effect : View
         }
     }
 
-    protected open fun sendEffect(effect: Effect) {
+    fun sendEffect(effect: Effect) {
         viewModelScope.launch {
-            _effect.tryEmit(effect)
+            _effect.trySend(effect)
         }
     }
 
     fun sendEvent(event: Event) {
         viewModelScope.launch {
-            _eventChannel.send(event)
+            _eventChannel
+                .trySend(event)
+                .onSuccess {
+                 collectEvents()
+            }
         }
     }
 
-     fun collectEvents() {
+     private fun collectEvents() {
         viewModelScope.launch {
-            eventChannel.collect { event ->
+            eventChannel
+                .collectLatest { event ->
                 handleEvents(event)
             }
         }
