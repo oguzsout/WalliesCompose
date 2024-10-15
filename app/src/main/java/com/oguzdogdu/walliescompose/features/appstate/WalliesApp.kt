@@ -15,7 +15,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +39,7 @@ import com.oguzdogdu.walliescompose.navigation.WalliesNavHost
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.util.NetworkMonitor
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -54,7 +54,6 @@ fun WalliesApp(
     ),
 ) {
     val isOffline by appState.isOffline.collectAsStateWithLifecycle()
-    val notConnectedMessage = stringResource(R.string.internet_error)
     var snackbarModel by remember { mutableStateOf<SnackbarModel?>(null) }
 
     LaunchedEffect(isOffline) {
@@ -62,8 +61,8 @@ fun WalliesApp(
             snackbarModel = SnackbarModel(
                 type = MessageType.ERROR,
                 drawableRes = R.drawable.ic_cancel,
-                message = notConnectedMessage,
-                duration = SnackbarDuration.Long
+                message = MessageContent.ResourceString(R.string.internet_error),
+                duration = Duration.SHORT
             )
         }
     }
@@ -90,7 +89,11 @@ fun WalliesApp(
                 )
             }
         }, snackbarHost = {
-            CustomSnackbar(snackbarModel = snackbarModel)
+            CustomSnackbar(snackbarModel = snackbarModel, onDismiss = {
+                coroutineScope.launch {
+                    snackbarModel = null
+                }
+            })
         }) {
             WalliesNavHost(
                 appState = appState,

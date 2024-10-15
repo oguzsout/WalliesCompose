@@ -2,13 +2,9 @@ package com.oguzdogdu.walliescompose.features.favorites
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.EaseOutElastic
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -43,8 +39,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.traceEventStart
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,7 +57,6 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.core.ViewEffect
 import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
 import com.oguzdogdu.walliescompose.features.appstate.CustomSnackbar
 import com.oguzdogdu.walliescompose.features.appstate.SnackbarModel
@@ -70,8 +65,7 @@ import com.oguzdogdu.walliescompose.features.favorites.event.FavoriteScreenEvent
 import com.oguzdogdu.walliescompose.features.favorites.state.FavoriteScreenState
 import com.oguzdogdu.walliescompose.ui.theme.regular
 import com.oguzdogdu.walliescompose.util.shareExternal
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 typealias onFavoritesScreenEvent = (FavoriteScreenEvent) -> Unit
 @Composable
@@ -81,17 +75,18 @@ fun FavoritesScreenRoute(
     onFavoriteClick: (String?) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-
+    val coroutineScope = rememberCoroutineScope()
     var shareEnabled by remember { mutableStateOf(false) }
     val launcherOfShare =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             shareEnabled = true
         }
     var snackbarModel by remember { mutableStateOf<SnackbarModel?>(null) }
+
     LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
         viewModel.sendEvent(FavoriteScreenEvent.GetFavorites)
-        viewModel.collectEvents()
     }
+
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.collect {
             when (it) {
@@ -116,36 +111,24 @@ fun FavoritesScreenRoute(
             )
         }
     }, snackbarHost = {
-        CustomSnackbar(snackbarModel = snackbarModel)
-    }) { it ->
+        CustomSnackbar(snackbarModel = snackbarModel, onDismiss = {
+            coroutineScope.launch { snackbarModel = null }
+        })
+    }) { paddingValues ->
         Column(
             modifier = Modifier
-                .padding(it)
+                .padding(paddingValues)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            AnimatedContent(targetState = state.favorites, label = "", transitionSpec = {
-                slideInVertically(
-                    tween(1000),
-                    initialOffsetY = {
-                        it
-                    }) togetherWith slideOutVertically(
-                    tween(
-                        1000
-                    ), targetOffsetY = {
-                        it
-                    }
-                )
-            }) { target ->
                 when {
-                    target?.isEmpty() == true -> EmptyFavoriteList()
-                    target?.isNotEmpty() == true -> FavoriteList(
+                    state.favorites?.isEmpty() == true -> EmptyFavoriteList()
+                    state.favorites?.isNotEmpty() == true -> FavoriteList(
                         state = state,
                         onFavoriteClick = onFavoriteClick::invoke,
                         onFavoritesScreenEvent = {
                             viewModel.sendEvent(it)
-                            viewModel.collectEvents()
                         },
                         onShareFavoriteClick = { url ->
                             launcherOfShare.launch(url.shareExternal())
@@ -155,7 +138,6 @@ fun FavoritesScreenRoute(
             }
         }
     }
-}
 
 
 @Composable
