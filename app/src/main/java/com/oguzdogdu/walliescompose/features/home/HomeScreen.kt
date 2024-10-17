@@ -84,6 +84,7 @@ import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
 import com.oguzdogdu.walliescompose.features.home.state.HomeUIState
 import com.oguzdogdu.walliescompose.navigation.utils.WalliesIcons
 import com.oguzdogdu.walliescompose.ui.theme.medium
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -101,6 +102,7 @@ fun SharedTransitionScope.HomeScreenRoute(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val homeUiState by viewModel.homeListState.collectAsStateWithLifecycle()
+    val homeRotateImageCardVisibility by viewModel.homeRotateCardVisibilty.collectAsStateWithLifecycle()
     val authUserProfileImage by viewModel.userProfileImage.collectAsStateWithLifecycle()
     val appName = stringResource(id = R.string.app_name)
     var visibleChars by remember { mutableIntStateOf(0) }
@@ -117,15 +119,18 @@ fun SharedTransitionScope.HomeScreenRoute(
         }
     }
 
-    LaunchedEffect(homeUiState) {
-        delay(2000)
-        animatedImageRotateCardVisibility = when(homeUiState) {
-            is HomeUIState.Error -> false
-            is HomeUIState.Loading -> false
-            is HomeUIState.Success -> true
+    LaunchedEffect(homeRotateImageCardVisibility) {
+        if (homeRotateImageCardVisibility) {
+            delay(2000)
+            coroutineScope {
+                animatedImageRotateCardVisibility = true
+                delay(10000)
+            }
+            animatedImageRotateCardVisibility = false
+            viewModel.setHomeCardInfo(false)
+        } else {
+            animatedImageRotateCardVisibility = false
         }
-        delay(10000)
-        animatedImageRotateCardVisibility = false
     }
 
     Scaffold(modifier = modifier.fillMaxSize(), topBar = {

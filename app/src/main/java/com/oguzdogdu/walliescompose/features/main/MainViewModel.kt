@@ -3,6 +3,8 @@ package com.oguzdogdu.walliescompose.features.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oguzdogdu.walliescompose.WalliesApplication
+import com.oguzdogdu.walliescompose.data.repository.AppSettingsRepositoryImpl.Companion.LANGUAGE_KEY
+import com.oguzdogdu.walliescompose.data.repository.AppSettingsRepositoryImpl.Companion.THEME_KEY
 import com.oguzdogdu.walliescompose.domain.repository.AppSettingsRepository
 import com.oguzdogdu.walliescompose.domain.repository.UserAuthenticationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,7 +43,7 @@ class MainViewModel @Inject constructor(
 
      private fun getThemeValue() {
         viewModelScope.launch {
-            val value = dataStore.getThemeStrings(key = "theme").first()
+            val value = dataStore.getThemeStrings(key = THEME_KEY).first()
             _appPreferencesState.update {
                 it.copy(themeValues = value)
             }
@@ -50,7 +52,7 @@ class MainViewModel @Inject constructor(
     }
     private fun getLanguageValue() {
         viewModelScope.launch {
-            dataStore.getLanguageStrings(key = "language").collect { value ->
+            dataStore.getLanguageStrings(key = LANGUAGE_KEY).collect { value ->
                 if (value != null) {
                     application.language.value = value
                 }
