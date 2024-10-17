@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.oguzdogdu.walliescompose.data.repository.AppSettingsRepositoryImpl.Companion.LANGUAGE_KEY
 import com.oguzdogdu.walliescompose.domain.model.search.SearchPhoto
 import com.oguzdogdu.walliescompose.domain.model.search.searchuser.SearchUser
 import com.oguzdogdu.walliescompose.domain.model.userpreferences.UserPreferences
@@ -132,7 +133,7 @@ class SearchViewModel @Inject constructor(
     }
     private fun getLanguageValue() {
         viewModelScope.launch {
-            val language = appRepository.getLanguageStrings(key = "language").single()
+            val language = appRepository.getLanguageStrings(key = LANGUAGE_KEY).single()
             appLanguage.value = language ?: "en"
         }
     }

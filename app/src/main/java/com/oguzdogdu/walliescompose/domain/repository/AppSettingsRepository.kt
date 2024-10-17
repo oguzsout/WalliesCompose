@@ -8,4 +8,6 @@ interface AppSettingsRepository {
     suspend fun getThemeStrings(key: String): Flow<String?>
     suspend fun putLanguageStrings(key:String, value:String)
     suspend fun getLanguageStrings(key: String):Flow<String?>
+    suspend fun putHomeRotateCardVisibility(key: String, value: Boolean?)
+     fun getHomeRotateCardVisibility(key: String) : Flow<Boolean>
 }

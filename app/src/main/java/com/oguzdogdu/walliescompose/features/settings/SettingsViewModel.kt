@@ -3,6 +3,8 @@ package com.oguzdogdu.walliescompose.features.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oguzdogdu.walliescompose.WalliesApplication
+import com.oguzdogdu.walliescompose.data.repository.AppSettingsRepositoryImpl.Companion.LANGUAGE_KEY
+import com.oguzdogdu.walliescompose.data.repository.AppSettingsRepositoryImpl.Companion.THEME_KEY
 import com.oguzdogdu.walliescompose.domain.repository.AppSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,12 +57,12 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun setThemeValue(value: String) = runBlocking {
-        dataStore.putThemeStrings(key = "theme", value = value)
+        dataStore.putThemeStrings(key = THEME_KEY, value = value)
     }
 
     private fun getThemeValue() {
         viewModelScope.launch {
-            dataStore.getThemeStrings(key = "theme").collect { value ->
+            dataStore.getThemeStrings(key = THEME_KEY).collect { value ->
                 _settingsState.updateAndGet {
                     it.copy(getThemeValue = value)
                 }
@@ -72,12 +74,12 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun setLanguageValue(value: String) = runBlocking {
-        dataStore.putLanguageStrings(key = "language", value = value)
+        dataStore.putLanguageStrings(key = LANGUAGE_KEY, value = value)
     }
 
     private fun getLanguageValue() {
         viewModelScope.launch {
-            dataStore.getLanguageStrings(key = "language").collect { value ->
+            dataStore.getLanguageStrings(key = LANGUAGE_KEY).collect { value ->
                 _settingsState.update {
                     it.copy(getLanguageValue = value)
                 }
