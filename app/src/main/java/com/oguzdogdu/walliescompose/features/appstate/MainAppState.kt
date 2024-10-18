@@ -51,10 +51,10 @@ class MainAppState(
     private val currentTopLevelDestination: TopLevelDestination?
         @Composable get() {
             return when {
-                currentDestination?.hasRoute<HomeScreenNavigationRoute>() == true -> TopLevelDestination.WALLPAPERS
-                currentDestination?.hasRoute<CollectionScreenNavigationRoute>() == true -> TopLevelDestination.COLLECTIONS
-                currentDestination?.hasRoute<FavoritesScreenNavigationRoute>() == true -> TopLevelDestination.FAVORITES
-                currentDestination?.hasRoute<SettingsScreenNavigationRoute>() == true -> TopLevelDestination.SETTINGS
+                currentDestination?.hasRoute(HomeScreenNavigationRoute::class) == true -> TopLevelDestination.WALLPAPERS
+                currentDestination?.hasRoute(CollectionScreenNavigationRoute::class) == true -> TopLevelDestination.COLLECTIONS
+                currentDestination?.hasRoute(FavoritesScreenNavigationRoute::class) == true -> TopLevelDestination.FAVORITES
+                currentDestination?.hasRoute(SettingsScreenNavigationRoute::class) == true -> TopLevelDestination.SETTINGS
                 else -> null
             }
         }
