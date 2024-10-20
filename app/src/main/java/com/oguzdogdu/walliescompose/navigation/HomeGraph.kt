@@ -20,22 +20,18 @@ import com.oguzdogdu.walliescompose.features.detail.detailScreen
 import com.oguzdogdu.walliescompose.features.detail.navigateToDetailScreen
 import com.oguzdogdu.walliescompose.features.favorites.favoritesScreen
 import com.oguzdogdu.walliescompose.features.favorites.navigateToFavoritesScreen
-import com.oguzdogdu.walliescompose.features.home.HomeScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.home.homeScreen
 import com.oguzdogdu.walliescompose.features.latest.latestScreen
-import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
 import com.oguzdogdu.walliescompose.features.popular.navigateToPopularScreen
 import com.oguzdogdu.walliescompose.features.popular.popularScreen
 import com.oguzdogdu.walliescompose.features.profiledetail.navigation.navigateToProfileDetailScreen
 import com.oguzdogdu.walliescompose.features.profiledetail.navigation.profileDetailScreen
 import com.oguzdogdu.walliescompose.features.search.navigateToSearchScreen
 import com.oguzdogdu.walliescompose.features.search.searchScreen
-import com.oguzdogdu.walliescompose.features.settings.settingsScreen
 import com.oguzdogdu.walliescompose.features.topics.navigateToTopicsScreen
 import com.oguzdogdu.walliescompose.features.topics.topicdetaillist.navigateToTopicDetailListScreen
 import com.oguzdogdu.walliescompose.features.topics.topicdetaillist.topicDetailListScreen
 import com.oguzdogdu.walliescompose.features.topics.topicsScreen
-import com.oguzdogdu.walliescompose.navigation.utils.Routes
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -46,7 +42,7 @@ fun NavGraphBuilder.navigationHomeGraph(
     navHostController: NavHostController,
     sharedTransitionScope: SharedTransitionScope
 ) {
-    navigation<HomeGraph>(startDestination = HomeScreenNavigationRoute) {
+    navigation<HomeGraph>(startDestination = Screens.HomeScreenNavigationRoute) {
         homeScreen(
             transitionScope = sharedTransitionScope,
             onTopicDetailListClick = {
@@ -71,17 +67,7 @@ fun NavGraphBuilder.navigationHomeGraph(
                 navHostController.navigateToDetailScreen(photoId = it)
             }
         )
-        collectionScreen(
-            onCollectionClick = { id, title ->
-                navHostController.navigateToCollectionDetailListScreen(
-                    collectionDetailListId = id,
-                    collectionDetailListTitle = title
-                )
-            })
-        favoritesScreen(onFavoriteClick = {
-            navHostController.navigateToDetailScreen(photoId = it)
-        })
-        settingsScreen()
+
         searchScreen(onBackClick = {
             navHostController.navigateUp()
         }, searchPhotoClick = {
