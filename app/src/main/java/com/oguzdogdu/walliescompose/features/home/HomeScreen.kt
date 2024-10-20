@@ -1,24 +1,11 @@
 package com.oguzdogdu.walliescompose.features.home
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.EaseInBounce
-import androidx.compose.animation.core.EaseInCubic
-import androidx.compose.animation.core.EaseInElastic
-import androidx.compose.animation.core.EaseInOut
-import androidx.compose.animation.core.EaseOutBounce
-import androidx.compose.animation.core.EaseOutCubic
-import androidx.compose.animation.core.EaseOutElastic
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,7 +13,6 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -52,7 +38,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -68,18 +53,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
-import com.oguzdogdu.walliescompose.domain.model.latest.LatestImage
 import com.oguzdogdu.walliescompose.domain.model.popular.PopularImage
 import com.oguzdogdu.walliescompose.domain.model.topics.Topics
 import com.oguzdogdu.walliescompose.features.home.components.AnimatedImageRotationCard
 import com.oguzdogdu.walliescompose.features.home.components.HomeRandomPage
-import com.oguzdogdu.walliescompose.features.home.components.PhotoByOrientationCard
 import com.oguzdogdu.walliescompose.features.home.event.HomeScreenEvent
 import com.oguzdogdu.walliescompose.features.home.state.HomeUIState
 import com.oguzdogdu.walliescompose.navigation.utils.WalliesIcons
@@ -90,7 +72,8 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SharedTransitionScope.HomeScreenRoute(
-    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel,
+    homeUiState: HomeUIState,
     animatedVisibilityScope: AnimatedVisibilityScope,
     onTopicSeeAllClick: () -> Unit,
     onPopularSeeAllClick: () -> Unit,
@@ -99,9 +82,8 @@ fun SharedTransitionScope.HomeScreenRoute(
     onSearchClick: () -> Unit,
     onUserPhotoClick: () -> Unit,
     onRandomImageClick: (String?) -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    modifier: Modifier = Modifier
 ) {
-    val homeUiState by viewModel.homeListState.collectAsStateWithLifecycle()
     val homeRotateImageCardVisibility by viewModel.homeRotateCardVisibilty.collectAsStateWithLifecycle()
     val authUserProfileImage by viewModel.userProfileImage.collectAsStateWithLifecycle()
     val appName = stringResource(id = R.string.app_name)
@@ -236,10 +218,9 @@ fun SharedTransitionScope.HomeScreenContent(
     onRandomImageClick: (String?) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        when (homeUiState) {
-            is HomeUIState.Loading -> CircularProgressIndicator()
-            is HomeUIState.Error -> {}
-            is HomeUIState.Success -> {
+        when  {
+            homeUiState.isEmpty() -> CircularProgressIndicator()
+            !homeUiState.isEmpty() -> {
                 LazyColumn(
                     state = rememberLazyListState(),
                     modifier = modifier
@@ -270,7 +251,8 @@ fun SharedTransitionScope.HomeScreenContent(
                             })
                     }
                     item(key = "popularContainer") {
-                        PopularLayoutContainer(animatedVisibilityScope = animatedVisibilityScope,
+                        PopularLayoutContainer(
+                            animatedVisibilityScope = animatedVisibilityScope,
                             popularList = homeUiState.popular,
                             onPopularClick = { id ->
                                 onPopularClick.invoke(id)
