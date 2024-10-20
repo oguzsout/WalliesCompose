@@ -40,7 +40,7 @@ class HomeViewModel @Inject constructor(
     private val appSettingsRepository: AppSettingsRepository
 ) : ViewModel() {
 
-    private val _homeListState = MutableStateFlow<HomeUIState>(HomeUIState.Loading())
+    private val _homeListState = MutableStateFlow<HomeUIState>(HomeUIState())
     val homeListState = _homeListState.asStateFlow()
 
     private val _userProfileImage = MutableStateFlow<String?>("")
@@ -67,9 +67,7 @@ class HomeViewModel @Inject constructor(
                 repository.getRandomImages(count = 8),
                 repository.getHomeTopicsImages(),
                 repository.getHomeImagesByPopulars(),
-            ).collect { homeUIState ->
-                updateHomeListState(homeUIState)
-            }
+            )
         }
     }
 
@@ -77,42 +75,34 @@ class HomeViewModel @Inject constructor(
         randomResult: Flow<Resource<List<RandomImage>?>>,
         topicsResult: Flow<Resource<List<Topics>?>>,
         popularsResult: Flow<Resource<List<PopularImage>?>>
-    ): Flow<HomeUIState> {
-        return combine(
-            randomResult,
-            topicsResult,
-            popularsResult
-        ) { randomResource, topicsResource, popularsResource ->
-            val isLoading = randomResource is Resource.Loading ||
-                    topicsResource is Resource.Loading ||
-                    popularsResource is Resource.Loading
+    ){
+        viewModelScope.launch {
+            combine(
+                randomResult,
+                topicsResult,
+                popularsResult
+            ) { randomResource, topicsResource, popularsResource ->
+                val isLoading = randomResource is Resource.Loading ||
+                        topicsResource is Resource.Loading ||
+                        popularsResource is Resource.Loading
 
-            if (isLoading) {
-                return@combine HomeUIState.Loading(loading = true)
-            }
+                if (isLoading) {
+                    _homeListState.update {
+                        it.copy(loading = true)
+                    }
+                }
 
-            val randomList = randomResource.takeListOr { emptyList() }
-            val topicsList = topicsResource.takeListOr { emptyList() }
-            val popularList = popularsResource.takeListOr { emptyList() }
-
-            val combinedData = HomeUIState.Success(
-                random = randomList,
-                topics = topicsList,
-                popular = popularList,
-            )
-
-            getImageListForGlanceList(popularList)
-
-            if (combinedData.isEmpty()) {
-                HomeUIState.Error("No data found")
-            } else {
-                combinedData
-            }
+                val randomList = randomResource.takeListOr { emptyList() }
+                val topicsList = topicsResource.takeListOr { emptyList() }
+                val popularList = popularsResource.takeListOr { emptyList() }
+                if (randomList.isNotEmpty() and topicsList.isNotEmpty() and popularList.isNotEmpty()) {
+                    _homeListState.update {
+                        it.copy(loading = false, random = randomList, topics = topicsList, popular = popularList)
+                    }
+                    getImageListForGlanceList(popularList)
+                }
+            }.collect()
         }
-    }
-
-    private fun updateHomeListState(homeUIState: HomeUIState) {
-        _homeListState.update { homeUIState }
     }
 
     private fun getImageListForGlanceList(popularList: List<PopularImage>) {

@@ -4,15 +4,12 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import kotlinx.serialization.Serializable
-
-@Serializable
-data object ChangeNameAndSurnameScreenRoute
+import com.oguzdogdu.walliescompose.navigation.Screens
 
 fun NavController.navigateToChangeNameAndASurnameScreen(
     navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    navigate(route = ChangeNameAndSurnameScreenRoute) {
+    navigate(route = Screens.ChangeNameAndSurnameScreenRoute) {
         navOptions()
     }
 }
@@ -20,7 +17,7 @@ fun NavController.navigateToChangeNameAndASurnameScreen(
 fun NavGraphBuilder.changeNameAndSurnameScreen(
     navigateBack: () -> Unit,
 ) {
-    composable<ChangeNameAndSurnameScreenRoute> {
+    composable<Screens.ChangeNameAndSurnameScreenRoute> {
         ChangeNameAndSurnameScreenRoute(navigateBack = {
             navigateBack.invoke()
         })

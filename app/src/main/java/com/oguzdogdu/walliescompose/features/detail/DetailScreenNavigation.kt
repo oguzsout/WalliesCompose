@@ -2,23 +2,17 @@ package com.oguzdogdu.walliescompose.features.detail
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class DetailScreenRoute(val photoId: String? = null)
+import com.oguzdogdu.walliescompose.navigation.Screens
 
 fun NavController.navigateToDetailScreen(
     photoId: String?,
-    navOptions: NavOptionsBuilder.() -> Unit = {}
+
 ) {
-    navigate(route = DetailScreenRoute(photoId)) {
-        navOptions()
-    }
+    navigate(route = Screens.DetailScreenRoute(photoId))
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -29,7 +23,7 @@ fun NavGraphBuilder.detailScreen(
     onProfileDetailClick: (String) -> Unit,
     onNavigateToFavoriteClick: () -> Unit
 ) {
-    composable<DetailScreenRoute>{
+    composable<Screens.DetailScreenRoute>{
         transitionScope.DetailScreenRoute(
             animatedVisibilityScope = this,
             onBackClick = onBackClick,

@@ -4,19 +4,14 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.auth.api.identity.Identity
 import com.oguzdogdu.walliescompose.WalliesApplication
 import com.oguzdogdu.walliescompose.features.appstate.WalliesApp
@@ -48,7 +43,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val mainState by viewModel.appPreferencesState.collectAsStateWithLifecycle()
             LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
                 viewModel.handleScreenEvents(MainScreenEvent.CheckUserAuthState)
                 viewModel.handleScreenEvents(MainScreenEvent.ThemeChanged)
@@ -59,9 +53,7 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(application.theme.value) {
                 viewModel.handleScreenEvents(MainScreenEvent.ThemeChanged)
             }
-            val localApplication = staticCompositionLocalOf {
-                WalliesApplication()
-            }
+
             LaunchedEffect(application.language.value) {
                 viewModel.handleScreenEvents(MainScreenEvent.LanguageChanged)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -70,15 +62,19 @@ class MainActivity : ComponentActivity() {
                     LocaleHelper(context = this@MainActivity).updateResources(application.language.value)
                 }
             }
-            CompositionLocalProvider(localApplication provides application) {
+
                 WalliesComposeTheme(
                     appTheme = application.theme.value
                 ) {
-                    WalliesApp(
-                        networkMonitor = networkMonitor,
-                        googleAuthUiClient = googleAuthUiClient
-                    )
-                }
+                    Surface(
+                        color = MaterialTheme.colorScheme.background,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        WalliesApp(
+                            networkMonitor = networkMonitor,
+                            googleAuthUiClient = googleAuthUiClient
+                        )
+                    }
             }
         }
     }

@@ -7,13 +7,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import kotlinx.serialization.Serializable
+import com.oguzdogdu.walliescompose.navigation.Screens
 
-@Serializable
-data class CollectionDetailListScreenRoute(
-    val collectionDetailListId: String? = null,
-    val collectionDetailListTitle: String? = null,
-)
 
 fun NavController.navigateToCollectionDetailListScreen(
     collectionDetailListId: String?,
@@ -21,7 +16,7 @@ fun NavController.navigateToCollectionDetailListScreen(
     navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
     navigate(
-        route = CollectionDetailListScreenRoute(
+        route = Screens.CollectionDetailListScreenRoute(
             collectionDetailListId,
             collectionDetailListTitle
         )
@@ -37,9 +32,9 @@ fun NavGraphBuilder.collectionDetailListScreen(
     onCollectionClick: (String) -> Unit,
     onUserDetailClick: (String) -> Unit
 ) {
-    composable<CollectionDetailListScreenRoute> { backStackEntry ->
+    composable<Screens.CollectionDetailListScreenRoute> { backStackEntry ->
 
-        val collectionDetailListArgs = backStackEntry.toRoute<CollectionDetailListScreenRoute>()
+        val collectionDetailListArgs = backStackEntry.toRoute<Screens.CollectionDetailListScreenRoute>()
 
         transitionScope.CollectionDetailListScreenRoute(
             animatedVisibilityScope = this,

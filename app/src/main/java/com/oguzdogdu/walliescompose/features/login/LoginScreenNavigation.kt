@@ -5,15 +5,12 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
-import kotlinx.serialization.Serializable
-
-@Serializable
-data object LoginScreenNavigationRoute
+import com.oguzdogdu.walliescompose.navigation.Screens
 
 fun NavController.navigateToLoginScreen(
     navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    navigate(route = LoginScreenNavigationRoute) {
+    navigate(route = Screens.LoginScreenNavigationRoute) {
         navOptions()
     }
 }
@@ -25,7 +22,7 @@ fun NavGraphBuilder.loginScreen(
     onContinueWithoutLoginClick: () -> Unit,
     navigateBack: () -> Unit
 ) {
-    composable<LoginScreenNavigationRoute> {
+    composable<Screens.LoginScreenNavigationRoute> {
        LoginScreenRoute(googleAuthUiClient = googleAuthUiClient,navigateToHome = {
            navigateToHome.invoke()
        },

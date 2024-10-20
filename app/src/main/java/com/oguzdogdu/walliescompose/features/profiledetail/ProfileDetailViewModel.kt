@@ -8,11 +8,11 @@ import com.oguzdogdu.walliescompose.domain.repository.UnsplashUserRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.onFailure
 import com.oguzdogdu.walliescompose.domain.wrapper.onSuccess
 import com.oguzdogdu.walliescompose.features.profiledetail.event.ProfileDetailEvent
-import com.oguzdogdu.walliescompose.features.profiledetail.navigation.ProfileDetailScreenNavigationRoute
 import com.oguzdogdu.walliescompose.features.profiledetail.state.ProfileDetailState
 import com.oguzdogdu.walliescompose.features.profiledetail.state.ProfileDetailUIState
 import com.oguzdogdu.walliescompose.features.profiledetail.state.UserCollectionState
 import com.oguzdogdu.walliescompose.features.profiledetail.state.UserPhotosState
+import com.oguzdogdu.walliescompose.navigation.Screens
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -30,7 +30,7 @@ class ProfileDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    val username: String = checkNotNull(savedStateHandle.toRoute<ProfileDetailScreenNavigationRoute>().username)
+    val username: String = checkNotNull(savedStateHandle.toRoute<Screens.ProfileDetailScreenNavigationRoute>().username)
 
     private val _getProfileDetailState = MutableStateFlow<ProfileDetailUIState?>(null)
     val getProfileDetailState = _getProfileDetailState.asStateFlow()

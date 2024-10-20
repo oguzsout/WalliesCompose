@@ -4,15 +4,12 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import kotlinx.serialization.Serializable
-
-@Serializable
-data object ForgotPasswordScreenNavigationRoute
+import com.oguzdogdu.walliescompose.navigation.Screens
 
 fun NavController.navigateToForgotPasswordScreen(
     navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    navigate(route = ForgotPasswordScreenNavigationRoute) {
+    navigate(route = Screens.ForgotPasswordScreenNavigationRoute) {
         navOptions()
     }
 }
@@ -21,7 +18,7 @@ fun NavGraphBuilder.forgotPasswordScreen(
     navigateToHome: () -> Unit,
     navigateBack: () -> Unit
 ) {
-    composable<ForgotPasswordScreenNavigationRoute> {
+    composable<Screens.ForgotPasswordScreenNavigationRoute> {
         ForgotPasswordScreenRoute(
             navigateToHome = { navigateToHome.invoke() },
             navigateBack = { navigateBack.invoke() })

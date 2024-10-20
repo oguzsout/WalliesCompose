@@ -5,24 +5,21 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class TopicDetailListScreenNavigationRoute(val topicId: String? = null)
+import com.oguzdogdu.walliescompose.navigation.Screens
 
 fun NavController.navigateToTopicDetailListScreen(
     topicId: String?,
     navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    navigate(route = TopicDetailListScreenNavigationRoute(topicId)) {
+    navigate(route = Screens.TopicDetailListScreenNavigationRoute(topicId)) {
         navOptions()
     }
 }
 
 fun NavGraphBuilder.topicDetailListScreen(onTopicClick: (String) -> Unit, onBackClick: () -> Unit) {
-    composable<TopicDetailListScreenNavigationRoute> { backStackEntry ->
+    composable<Screens.TopicDetailListScreenNavigationRoute> { backStackEntry ->
         val topicDetailListScreenNavArgs =
-            backStackEntry.toRoute<TopicDetailListScreenNavigationRoute>()
+            backStackEntry.toRoute<Screens.TopicDetailListScreenNavigationRoute>()
         TopicDetailListRoute(topicId = topicDetailListScreenNavArgs.topicId, onTopicClick = { id ->
             onTopicClick.invoke(id)
         }, onBackClick = { onBackClick.invoke() })

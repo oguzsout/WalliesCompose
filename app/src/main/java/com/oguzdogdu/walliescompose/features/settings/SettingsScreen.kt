@@ -42,23 +42,23 @@ typealias onSettingsScreenEvent = (SettingsScreenEvent) -> Unit
 
 @Composable
 fun SettingsScreenRoute(
-    modifier: Modifier = Modifier, viewModel: SettingsViewModel = hiltViewModel()
+    state: SettingsScreenState,
+    onSettingsScreenEvent: onSettingsScreenEvent
 ) {
-    val settingsUiState by viewModel.settingsState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackState = remember { SnackbarHostState() }
 
-    LaunchedEffect(key1 = settingsUiState.showSnackBar) {
-        when(settingsUiState.showSnackBar) {
+    LaunchedEffect(key1 = state.showSnackBar) {
+        when(state.showSnackBar) {
             true -> snackState.showSnackbar("Cache directory deleted successfully")
             false -> snackState.showSnackbar("Error deleting cache directory")
             null -> return@LaunchedEffect
         }
     }
 
-    Scaffold(modifier = modifier.fillMaxSize(), topBar = {
+    Column (modifier = Modifier.fillMaxSize()){
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .wrapContentWidth()
                 .padding(start = 16.dp, top = 16.dp, bottom = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -69,20 +69,15 @@ fun SettingsScreenRoute(
                 style = MaterialTheme.typography.titleMedium,
             )
         }
-    }, snackbarHost = {
-        SnackbarHost(
-            hostState = snackState
-        )
-    }) {
-        Column(modifier = modifier.padding(it)) {
-            SettingsScreen(
-                settingsScreenState = settingsUiState,
-                context = context,
-                onSettingsScreenEvent = viewModel::handleScreenEvents
-            )
-        }
+           Column {
+               SettingsScreen(
+                   settingsScreenState = state,
+                   context = context,
+                  onSettingsScreenEvent = onSettingsScreenEvent
+               )
+           }
+       }
     }
-}
 
 @Composable
 fun SettingsScreen(

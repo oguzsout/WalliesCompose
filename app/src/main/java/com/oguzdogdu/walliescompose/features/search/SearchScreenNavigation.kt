@@ -5,16 +5,13 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class SearchScreenNavigationRoute(val queryFromDetail:String? = null)
+import com.oguzdogdu.walliescompose.navigation.Screens
 
 fun NavController.navigateToSearchScreen(
     queryFromDetail:String? = null,
     navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    navigate(route = SearchScreenNavigationRoute(queryFromDetail)) {
+    navigate(route = Screens.SearchScreenNavigationRoute(queryFromDetail)) {
         navOptions()
     }
 }
@@ -24,8 +21,8 @@ fun NavGraphBuilder.searchScreen(
     searchPhotoClick: (String) -> Unit,
     searchUserClick: (String) -> Unit
 ) {
-    composable<SearchScreenNavigationRoute>{backStackEntry ->
-        val searchScreenArgs = backStackEntry.toRoute<SearchScreenNavigationRoute>()
+    composable<Screens.SearchScreenNavigationRoute>{ backStackEntry ->
+        val searchScreenArgs = backStackEntry.toRoute<Screens.SearchScreenNavigationRoute>()
         SearchScreenRoute(onBackClick = {
             onBackClick.invoke()
         }, searchPhotoClick = {id ->
