@@ -3,10 +3,14 @@ package com.oguzdogdu.walliescompose.features.appstate
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -29,31 +33,43 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.get
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.features.login.googlesignin.GoogleAuthUiClient
+import com.oguzdogdu.walliescompose.navigation.NavigationBarGraph
 import com.oguzdogdu.walliescompose.navigation.TopLevelDestination
 import com.oguzdogdu.walliescompose.navigation.WalliesNavHost
 import com.oguzdogdu.walliescompose.ui.theme.medium
+import com.oguzdogdu.walliescompose.util.NavigationScreenRouteClassNames
 import com.oguzdogdu.walliescompose.util.NetworkMonitor
+import com.oguzdogdu.walliescompose.util.currentRouteClassName
+import com.oguzdogdu.walliescompose.util.routeClassName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun WalliesApp(
-    modifier: Modifier = Modifier,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     networkMonitor: NetworkMonitor,
     googleAuthUiClient: GoogleAuthUiClient,
     appState: MainAppState = rememberMainAppState(
         coroutineScope = coroutineScope,
         networkMonitor = networkMonitor
-    ),
+    )
 ) {
+    val topLevelDestination = listOf(
+        TopLevelDestination.HomeScreenNavigationRoute,
+        TopLevelDestination.CollectionScreenNavigationRoute,
+        TopLevelDestination.FavoritesScreenNavigationRoute,
+        TopLevelDestination.SettingsScreenNavigationRoute
+    )
+    val navController = rememberNavController()
+
     val isOffline by appState.isOffline.collectAsStateWithLifecycle()
+
     var snackbarModel by remember { mutableStateOf<SnackbarModel?>(null) }
 
     LaunchedEffect(isOffline) {
@@ -66,86 +82,84 @@ fun WalliesApp(
             )
         }
     }
-
     SharedTransitionLayout {
-        Scaffold(modifier = modifier.fillMaxSize(), bottomBar = {
-            AnimatedVisibility(
-                visible = appState.shouldShowBottomBar
-            ) {
-                AppNavBar(
-                    destinations = appState.topLevelDestinations,
-                    onNavigateToDestination = { appState.navigateToTopLevelDestination(it) },
-                    currentDestination = appState.currentDestination,
-                    modifier = Modifier
-                        .renderInSharedTransitionScopeOverlay()
-                        .animateEnterExit(
-                            enter = fadeIn() + slideInVertically {
-                                it
-                            },
-                            exit = fadeOut() + slideOutVertically {
-                                it
-                            }
-                        )
+        Scaffold(
+            modifier = Modifier.fillMaxSize().skipToLookaheadSize(),
+            bottomBar = {
+                WalliesBottomAppBar(
+                    navController = navController,
+                    bottomBarItems = topLevelDestination
+                )
+            },
+            snackbarHost = {
+                CustomSnackbar(snackbarModel = snackbarModel, onDismiss = {
+                    coroutineScope.launch {
+                        snackbarModel = null
+                    }
+                })
+            }
+        ) { paddingValues ->
+            Box(modifier = Modifier.padding(paddingValues)) {
+                WalliesNavHost(
+                    navController = navController,
+                    googleAuthUiClient = googleAuthUiClient
                 )
             }
-        }, snackbarHost = {
-            CustomSnackbar(snackbarModel = snackbarModel, onDismiss = {
-                coroutineScope.launch {
-                    snackbarModel = null
-                }
-            })
-        }) {
-            WalliesNavHost(
-                appState = appState,
-                modifier = Modifier.padding(it),
-                googleAuthUiClient = googleAuthUiClient
-            )
         }
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-internal fun AppNavBar(
-    destinations: List<TopLevelDestination>,
-    onNavigateToDestination: (TopLevelDestination) -> Unit,
-    currentDestination: NavDestination?,
+fun SharedTransitionScope.WalliesBottomAppBar(
+    navController: NavController,
+    bottomBarItems: List<TopLevelDestination>,
     modifier: Modifier = Modifier
 ) {
-    NavigationBar(modifier = modifier) {
-        destinations.forEach { destination ->
-            val selected = currentDestination.isTopLevelDestinationInHierarchy(destination)
-            NavigationBarItem(
-                alwaysShowLabel = true,
-                selected = selected,
-                colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                onClick = {
-                    if (!selected) {
-                        onNavigateToDestination(destination)
-                    }
-                },
-                icon = {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = destination.icon),
-                        contentDescription = "",
-                        tint = MaterialTheme.colorScheme.onBackground
-                    )
-                },
-                label = {
-                    Text(
-                        text = stringResource(id = destination.iconTextId),
-                        fontSize = 11.sp,
-                        fontFamily = medium,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
+    AnimatedVisibility(
+        visible = navController.currentRouteClassName in NavigationScreenRouteClassNames
+    ) {
+        NavigationBar(modifier = modifier
+            .renderInSharedTransitionScopeOverlay(
+                zIndexInOverlay = 1f,
             )
+            .animateEnterExit(
+                enter = fadeIn() + slideInHorizontally(),
+                exit = fadeOut() + slideOutHorizontally()
+            )) {
+            bottomBarItems.forEach { destination ->
+                NavigationBarItem(
+                    selected = navController.currentRouteClassName == destination.routeClassName,
+                    onClick = {
+                        navController.navigate(destination.route) {
+                            popUpTo(navController.graph.get(NavigationBarGraph).id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = destination.icon),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = stringResource(id = destination.iconTextId),
+                            fontSize = 11.sp,
+                            fontFamily = medium,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        indicatorColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                )
+            }
         }
     }
 }
-
-private fun NavDestination?.isTopLevelDestinationInHierarchy(destination: TopLevelDestination) =
-    this?.hierarchy?.any {
-        it.hasRoute(destination.route)
-    } ?: false
