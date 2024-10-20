@@ -1,35 +1,32 @@
 package com.oguzdogdu.walliescompose.navigation
 
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.features.collections.CollectionScreenNavigationRoute
-import com.oguzdogdu.walliescompose.features.favorites.FavoritesScreenNavigationRoute
-import com.oguzdogdu.walliescompose.features.home.HomeScreenNavigationRoute
-import com.oguzdogdu.walliescompose.features.settings.SettingsScreenNavigationRoute
-import kotlin.reflect.KClass
+import kotlinx.serialization.Serializable
 
+@Serializable
 enum class TopLevelDestination(
+    val route: Screens,
     val icon: Int,
     val iconTextId: Int,
-    val route: KClass<*>,
 ) {
-    WALLPAPERS( 
+    HomeScreenNavigationRoute(
+        route = Screens.HomeScreenNavigationRoute,
         icon = R.drawable.wallpaper,
         iconTextId = R.string.wallpapers_title,
-        route = HomeScreenNavigationRoute::class
     ),
-    COLLECTIONS(
+    CollectionScreenNavigationRoute(
+        route = Screens.CollectionScreenNavigationRoute,
         icon = R.drawable.collections,
         iconTextId = R.string.collections_title,
-        route = CollectionScreenNavigationRoute::class
     ),
-    FAVORITES(
+    FavoritesScreenNavigationRoute(
+        route = Screens.FavoritesScreenNavigationRoute,
         icon = R.drawable.favorite,
         iconTextId = R.string.favorites_title,
-        route = FavoritesScreenNavigationRoute::class
     ),
-    SETTINGS(
+    SettingsScreenNavigationRoute(
+        route = Screens.SettingsScreenNavigationRoute,
         icon = R.drawable.settings,
         iconTextId = R.string.settings_title,
-        route = SettingsScreenNavigationRoute::class
     ),
 }
