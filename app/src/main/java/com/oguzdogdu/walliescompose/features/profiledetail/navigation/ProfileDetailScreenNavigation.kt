@@ -5,16 +5,13 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import com.oguzdogdu.walliescompose.features.profiledetail.ProfileDetailScreenRoute
-import kotlinx.serialization.Serializable
-
-@Serializable
-data class ProfileDetailScreenNavigationRoute(val username: String? = null)
+import com.oguzdogdu.walliescompose.navigation.Screens
 
 fun NavController.navigateToProfileDetailScreen(
     username: String?,
     navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    navigate(route = ProfileDetailScreenNavigationRoute(username)) {
+    navigate(route = Screens.ProfileDetailScreenNavigationRoute(username)) {
         navOptions()
     }
 }
@@ -24,7 +21,7 @@ fun NavGraphBuilder.profileDetailScreen(
     onCollectionItemClick: (String, String) -> Unit,
     onBackClick: () -> Unit
 ) {
-    composable<ProfileDetailScreenNavigationRoute> {
+    composable<Screens.ProfileDetailScreenNavigationRoute> {
         ProfileDetailScreenRoute(onUserPhotoListClick = { id ->
             onUserPhotoListClick.invoke(id) },
             onCollectionItemClick = { id, title ->

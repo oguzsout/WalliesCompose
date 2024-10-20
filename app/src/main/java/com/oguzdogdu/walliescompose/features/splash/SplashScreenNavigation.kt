@@ -2,22 +2,17 @@ package com.oguzdogdu.walliescompose.features.splash
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import kotlinx.serialization.Serializable
+import com.oguzdogdu.walliescompose.navigation.Screens
 
-@Serializable
-data object SplashScreenRoute
 
-fun NavController.navigateToSplashScreen(
-    navOptions: NavOptionsBuilder.() -> Unit = {}
-) = navigate(SplashScreenRoute,navOptions)
+fun NavController.navigateToSplashScreen() = navigate(Screens.SplashScreenRoute)
 
 fun NavGraphBuilder.splashScreen(
     goToLoginFlow: () -> Unit,
     goToContentScreen: () -> Unit
 ) {
-    composable<SplashScreenRoute> {
+    composable<Screens.SplashScreenRoute> {
         SplashScreenRoute(goToLoginFlow = {
             goToLoginFlow.invoke()
         }, goToContentScreen = {

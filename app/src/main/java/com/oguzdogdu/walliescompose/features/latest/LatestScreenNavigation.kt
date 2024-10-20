@@ -6,15 +6,12 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import kotlinx.serialization.Serializable
-
-@Serializable
-data object LatestScreenNavigationRoute
+import com.oguzdogdu.walliescompose.navigation.Screens
 
 fun NavController.navigateToLatestScreen(
     navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    navigate(route = LatestScreenNavigationRoute) {
+    navigate(route = Screens.LatestScreenNavigationRoute) {
         navOptions()
     }
 }
@@ -25,7 +22,7 @@ fun NavGraphBuilder.latestScreen(
     onLatestClick: (String?) -> Unit,
     onBackClick: () -> Unit
 ) {
-    composable<LatestScreenNavigationRoute> {
+    composable<Screens.LatestScreenNavigationRoute> {
         transitionScope.LatestScreenRoute(
             animatedVisibilityScope = this,
             onLatestClick = { id ->

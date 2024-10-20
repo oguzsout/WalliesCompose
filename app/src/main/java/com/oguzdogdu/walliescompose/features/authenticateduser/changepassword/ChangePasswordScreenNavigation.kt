@@ -4,15 +4,12 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import kotlinx.serialization.Serializable
-
-@Serializable
-data object ChangePasswordScreenRoute
+import com.oguzdogdu.walliescompose.navigation.Screens
 
 fun NavController.navigateToChangePasswordScreen(
     navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    navigate(route = ChangePasswordScreenRoute) {
+    navigate(route = Screens.ChangePasswordScreenRoute) {
         navOptions()
     }
 }
@@ -20,7 +17,7 @@ fun NavController.navigateToChangePasswordScreen(
 fun NavGraphBuilder.changePasswordScreen(
     navigateBack: () -> Unit,
 ) {
-    composable<ChangePasswordScreenRoute> {
+    composable<Screens.ChangePasswordScreenRoute> {
         ChangePasswordScreenRoute(navigateBack = {
             navigateBack.invoke()
         })

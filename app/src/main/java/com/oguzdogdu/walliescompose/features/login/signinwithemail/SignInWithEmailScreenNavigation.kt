@@ -4,15 +4,12 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import kotlinx.serialization.Serializable
-
-@Serializable
-data object SignInWithEmailScreenNavigationRoute
+import com.oguzdogdu.walliescompose.navigation.Screens
 
 fun NavController.navigateToSignInWithEmailScreen(
     navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    navigate(route = SignInWithEmailScreenNavigationRoute) {
+    navigate(route = Screens.SignInWithEmailScreenNavigationRoute) {
         navOptions()
     }
 }
@@ -23,7 +20,7 @@ fun NavGraphBuilder.signInWithEmailScreen(
     navigateToForgotPassword: () -> Unit,
     navigateToSignUpScreen: () -> Unit,
 ) {
-    composable<SignInWithEmailScreenNavigationRoute>{
+    composable<Screens.SignInWithEmailScreenNavigationRoute>{
         SignInWithEmailScreenRoute(
             navigateToHome = { navigateToHome.invoke() },
             navigateToSignUpScreen = { navigateToSignUpScreen.invoke() },

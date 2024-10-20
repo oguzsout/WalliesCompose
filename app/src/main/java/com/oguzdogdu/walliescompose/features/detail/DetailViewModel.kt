@@ -10,6 +10,7 @@ import com.oguzdogdu.walliescompose.domain.repository.WallpaperRepository
 import com.oguzdogdu.walliescompose.domain.wrapper.onFailure
 import com.oguzdogdu.walliescompose.domain.wrapper.onLoading
 import com.oguzdogdu.walliescompose.domain.wrapper.onSuccess
+import com.oguzdogdu.walliescompose.navigation.Screens
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +41,7 @@ class DetailViewModel@Inject constructor(
     private val _setWallpaperPlace = MutableStateFlow("")
     val setWallpaperPlace = _setWallpaperPlace.asStateFlow()
 
-     val id: String = checkNotNull(savedStateHandle.toRoute<DetailScreenRoute>().photoId)
+     val id: String = checkNotNull(savedStateHandle.toRoute<Screens.DetailScreenRoute>().photoId)
 
     fun handleScreenEvents(event: DetailScreenEvent) {
         when (event) {

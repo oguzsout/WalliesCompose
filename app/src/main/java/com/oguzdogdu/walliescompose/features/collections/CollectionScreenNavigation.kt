@@ -4,19 +4,16 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import kotlinx.serialization.Serializable
-
-@Serializable
-data object CollectionScreenNavigationRoute
+import com.oguzdogdu.walliescompose.navigation.Screens
 
 fun NavController.navigateToCollectionScreen(
     navOptions: NavOptions? = null,
 ) {
-    navigate(route = CollectionScreenNavigationRoute, navOptions)
+    navigate(route = Screens.CollectionScreenNavigationRoute, navOptions)
 }
 
 fun NavGraphBuilder.collectionScreen(onCollectionClick: (String, String) -> Unit) {
-    composable<CollectionScreenNavigationRoute> {
+    composable<Screens.CollectionScreenNavigationRoute> {
         CollectionsScreenRoute(
             onCollectionClick = {id,title ->
             onCollectionClick.invoke(id,title)

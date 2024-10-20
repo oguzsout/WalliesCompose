@@ -4,15 +4,12 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
-import kotlinx.serialization.Serializable
-
-@Serializable
-data object AuthenticatedUserScreenRoute
+import com.oguzdogdu.walliescompose.navigation.Screens
 
 fun NavController.navigateToAuthenticatedUserScreen(
     navOptions: NavOptionsBuilder.() -> Unit = {}
 ) {
-    navigate(route = AuthenticatedUserScreenRoute) {
+    navigate(route = Screens.AuthenticatedUserScreenRoute) {
         navOptions()
     }
  }
@@ -25,7 +22,7 @@ fun NavGraphBuilder.authenticatedUserScreen(
     navigateToChangeEmail: () -> Unit,
 
     ) {
-    composable<AuthenticatedUserScreenRoute> {
+    composable<Screens.AuthenticatedUserScreenRoute> {
         AuthenticatedUserScreenRoute(
             navigateBack = {
                 navigateBack.invoke()
