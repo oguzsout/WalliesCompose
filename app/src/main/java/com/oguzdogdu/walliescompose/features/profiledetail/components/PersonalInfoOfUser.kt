@@ -1,6 +1,8 @@
 package com.oguzdogdu.walliescompose.features.profiledetail.components
 
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -40,17 +43,31 @@ fun PersonalInfoOfUser(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (profileDetailState?.userDetails?.name?.isNotEmpty() == true) {
-            Text(
-                text = profileDetailState.userDetails.name,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                fontSize = 20.sp,
-                fontFamily = bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            Spacer(modifier = modifier.size(4.dp))
+            Row(
+                modifier = Modifier.animateContentSize(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = profileDetailState.userDetails.name,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    fontSize = 20.sp,
+                    fontFamily = bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                AnimatedVisibility(visible = profileDetailState.userDetails.verification?.isNotEmpty() == true) {
+                    UserVerificationBadge(
+                        visible = true,
+                        petalColor = colorResource(R.color.lush_green),
+                        centerColor = Color.White,
+                        checkmarkColor = Color.White
+                    )
+                }
+                Spacer(modifier = Modifier.size(4.dp))
+            }
         }
         if (profileDetailState?.userDetails?.bio?.isNotEmpty() == true) {
             Text(
@@ -122,6 +139,7 @@ fun PersonalInfoOfUserPreview() {
             totalCollections = null,
             instagram = null,
             twitter = null,
+            verification = "",
             portfolioList = emptyList(),
             portfolio = null,
             forHire = false

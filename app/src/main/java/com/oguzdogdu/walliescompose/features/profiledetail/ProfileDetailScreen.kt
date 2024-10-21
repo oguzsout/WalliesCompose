@@ -158,9 +158,7 @@ fun ProfileDetailScreenRoute(
                 is ProfileDetailUIState.Loading -> {
                     LoadingState(modifier = modifier)
                 }
-                is ProfileDetailUIState.Error -> {
-
-                }
+                is ProfileDetailUIState.Error -> {}
                 is ProfileDetailUIState.ReadyForShown -> ProfileDetailScreen(
                     profileDetailState = stateOfProfileDetail,
                     userPhotosState = stateOfProfilePhotoList,

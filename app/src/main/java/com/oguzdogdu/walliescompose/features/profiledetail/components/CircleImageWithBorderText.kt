@@ -147,6 +147,7 @@ fun CircleImageWithBorderAndTextPreview() {
             username = null,
             totalPhotos = null,
             totalCollections = null,
+            verification = "",
             instagram = null,
             twitter = null,
             portfolioList = emptyList(),
