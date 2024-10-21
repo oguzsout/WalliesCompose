@@ -17,6 +17,7 @@ data class UserDetails(
     val username: String?,
     val totalPhotos: Int?,
     val totalCollections: Int?,
+    val verification: String?,
     val instagram: String?,
     val twitter: String?,
     val portfolioList: List<String>,
