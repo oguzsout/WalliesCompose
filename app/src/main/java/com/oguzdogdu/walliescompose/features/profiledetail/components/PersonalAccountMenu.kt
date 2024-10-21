@@ -315,6 +315,7 @@ fun PersonalAccountMenuPreview() {
             totalCollections = null,
             instagram = null,
             twitter = null,
+            verification = "",
             portfolioList = emptyList(),
             portfolio = null,
             forHire = false

@@ -96,6 +96,7 @@ fun InteractionCountOfUserPreview() {
                 totalPhotos = null,
                 totalCollections = null,
                 instagram = null,
+                verification = "",
                 twitter = null,
                 portfolioList = emptyList(),
                 portfolio = null,
