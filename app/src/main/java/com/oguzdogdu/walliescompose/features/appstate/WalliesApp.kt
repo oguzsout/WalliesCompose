@@ -92,11 +92,7 @@ fun WalliesApp(
                 )
             },
             snackbarHost = {
-                CustomSnackbar(snackbarModel = snackbarModel, onDismiss = {
-                    coroutineScope.launch {
-                        snackbarModel = null
-                    }
-                })
+                CustomSnackbar(snackbarModel = snackbarModel)
             }
         ) { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {

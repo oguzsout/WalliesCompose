@@ -72,9 +72,9 @@ sealed class MessageContent {
 @Composable
 fun CustomSnackbar(
     snackbarModel: SnackbarModel?,
-    onDismiss: suspend () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var isVisible by remember { mutableStateOf(false) }
     val errorColor = colorResource(R.color.red)
     val successColor = colorResource(R.color.lush_green)
     var snackbarBackgroundColor by remember { mutableStateOf<Color?>(null) }
@@ -84,8 +84,15 @@ fun CustomSnackbar(
         is MessageContent.PlainString -> messageContent.text
         null -> ""
     }
+
     LaunchedEffect(snackbarModel) {
-        if (snackbarModel != null) {
+        isVisible = when {
+            snackbarModel != null -> true
+            else -> false
+        }
+    }
+    LaunchedEffect(isVisible) {
+        if (isVisible && snackbarModel != null) {
             launch {
                 snackbarBackgroundColor = when (snackbarModel.type) {
                     MessageType.ERROR -> errorColor
@@ -96,14 +103,13 @@ fun CustomSnackbar(
                 snackbarModel.let {
                     kotlinx.coroutines.delay(it.duration.duration)
                     animate(
-                            1f,
-                            0f,
-                            animationSpec = tween(1000, easing = EaseOutBounce)
-                        ) { value, _ ->
-                            foldProgress = value
-                        }
-
-                    onDismiss()
+                        1f,
+                        0f,
+                        animationSpec = tween(1000, easing = EaseOutBounce)
+                    ) { value, _ ->
+                        foldProgress = value
+                    }
+                    isVisible = false
                 }
             }
             launch {
@@ -120,7 +126,7 @@ fun CustomSnackbar(
 
         Box(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(8.dp)
                 .graphicsLayer {
                     rotationX = 90f * (1f - foldProgress)
                     transformOrigin = TransformOrigin(0.5f, 1f)
