@@ -111,9 +111,7 @@ fun FavoritesScreenRoute(
             )
         }
     }, snackbarHost = {
-        CustomSnackbar(snackbarModel = snackbarModel, onDismiss = {
-            coroutineScope.launch { snackbarModel = null }
-        })
+        CustomSnackbar(snackbarModel = snackbarModel)
     }) { paddingValues ->
         Column(
             modifier = Modifier

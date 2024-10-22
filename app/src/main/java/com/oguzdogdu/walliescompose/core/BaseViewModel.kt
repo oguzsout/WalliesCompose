@@ -5,14 +5,18 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.onSuccess
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -29,7 +33,7 @@ abstract class BaseViewModel<State : ViewState, Event : ViewEvent, Effect : View
     private val _eventChannel: Channel<Event> = Channel(Channel.BUFFERED)
     val eventChannel = _eventChannel.receiveAsFlow()
 
-     val currentState: State
+    val currentState: State
         get() = _state.value
 
     fun <T> sendApiCall(
@@ -43,7 +47,7 @@ abstract class BaseViewModel<State : ViewState, Event : ViewEvent, Effect : View
             try {
                 request()
                     .onStart {
-                       onLoading(true)
+                        onLoading(true)
                     }
                     .catch { exception ->
                         onLoading(false)
@@ -65,11 +69,9 @@ abstract class BaseViewModel<State : ViewState, Event : ViewEvent, Effect : View
         }
     }
 
-     fun setState(state: State) {
+    fun setState(state: State) {
         viewModelScope.launch {
-            _state.update {
-                state
-            }
+            _state.update { state }
         }
     }
 
@@ -82,21 +84,14 @@ abstract class BaseViewModel<State : ViewState, Event : ViewEvent, Effect : View
     fun sendEvent(event: Event) {
         viewModelScope.launch {
             _eventChannel
-                .trySend(event)
-                .onSuccess {
-                 collectEvents()
-            }
+                .send(event)
+                .run {
+                    eventChannel.collect {
+                        handleEvents(it)
+                    }
+                }
         }
     }
 
-     private fun collectEvents() {
-        viewModelScope.launch {
-            eventChannel
-                .collectLatest { event ->
-                handleEvents(event)
-            }
-        }
-    }
-
-    protected open fun handleEvents(event: Event) {}
+     open fun handleEvents(event: Event) {}
 }

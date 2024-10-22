@@ -11,7 +11,10 @@ sealed class Screens {
     data object ChangeEmailScreenRoute : Screens()
 
     @Serializable
-    data object ChangeNameAndSurnameScreenRoute : Screens()
+    data class ChangeNameAndSurnameScreenRoute(
+        val name: String? = null,
+        val surname: String? = null
+    ) : Screens()
 
     @Serializable
     data object ChangePasswordScreenRoute : Screens()

@@ -2,16 +2,11 @@ package com.oguzdogdu.walliescompose.features.authenticateduser.changenameandsur
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import com.oguzdogdu.walliescompose.navigation.Screens
 
-fun NavController.navigateToChangeNameAndASurnameScreen(
-    navOptions: NavOptionsBuilder.() -> Unit = {}
-) {
-    navigate(route = Screens.ChangeNameAndSurnameScreenRoute) {
-        navOptions()
-    }
+fun NavController.navigateToChangeNameAndASurnameScreen(name:String?, surname: String?) {
+    navigate(route = Screens.ChangeNameAndSurnameScreenRoute(name = name, surname = surname))
 }
 
 fun NavGraphBuilder.changeNameAndSurnameScreen(
