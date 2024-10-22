@@ -80,7 +80,7 @@ fun AuthenticatedUserScreenRoute(
     viewModel: AuthenticatedUserViewModel = hiltViewModel(),
     navigateBack: () -> Unit,
     navigateToLogin: () -> Unit,
-    navigateToChangeNameAndSurname: () -> Unit,
+    navigateToChangeNameAndSurname: (String,String) -> Unit,
     navigateToChangePassword: () -> Unit,
     navigateToChangeEmail: () -> Unit,
 ) {
@@ -176,7 +176,10 @@ fun AuthenticatedUserScreenRoute(
                         )
                     )
                 }, onChangeNameAndSurnameClick = {
-                    navigateToChangeNameAndSurname.invoke()
+                    navigateToChangeNameAndSurname.invoke(
+                        userState.name.orEmpty(),
+                        userState.surname.orEmpty()
+                    )
                 }, onChangePasswordClick = {
                     navigateToChangePassword.invoke()
                 }, onChangeEmailClick = {

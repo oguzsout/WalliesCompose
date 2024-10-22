@@ -147,8 +147,8 @@ fun NavGraphBuilder.navigationHomeGraph(
                         inclusive = true
                     }
                 }
-            }, navigateToChangeNameAndSurname = {
-                navHostController.navigateToChangeNameAndASurnameScreen()
+            }, navigateToChangeNameAndSurname = { name, surname ->
+                navHostController.navigateToChangeNameAndASurnameScreen(name, surname)
             }, navigateToChangePassword = {
                 navHostController.navigateToChangePasswordScreen()
             }, navigateToChangeEmail = {
