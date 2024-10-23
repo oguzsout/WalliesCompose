@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.ui.theme.medium
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlin.math.min
 
 @Stable
@@ -70,8 +70,9 @@ sealed class MessageContent {
 }
 
 @Composable
-fun CustomSnackbar(
+fun AnimatableSnackbar(
     snackbarModel: SnackbarModel?,
+    onSnackbarDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var isVisible by remember { mutableStateOf(false) }
@@ -85,45 +86,37 @@ fun CustomSnackbar(
         null -> ""
     }
 
-    LaunchedEffect(snackbarModel) {
-        isVisible = when {
-            snackbarModel != null -> true
-            else -> false
-        }
-    }
-    LaunchedEffect(isVisible) {
-        if (isVisible && snackbarModel != null) {
-            launch {
-                snackbarBackgroundColor = when (snackbarModel.type) {
-                    MessageType.ERROR -> errorColor
-                    MessageType.SUCCESS -> successColor
-                }
+    LaunchedEffect(key1 = snackbarModel) {
+        if (snackbarModel != null) {
+            isVisible = true
+            snackbarBackgroundColor = when (snackbarModel.type) {
+                MessageType.ERROR -> errorColor
+                MessageType.SUCCESS -> successColor
             }
-            launch {
-                snackbarModel.let {
-                    kotlinx.coroutines.delay(it.duration.duration)
-                    animate(
-                        1f,
-                        0f,
-                        animationSpec = tween(1000, easing = EaseOutBounce)
-                    ) { value, _ ->
-                        foldProgress = value
-                    }
-                    isVisible = false
-                }
+
+            animate(
+                0f,
+                1f,
+                animationSpec = tween(1000, easing = EaseOutBounce)
+            ) { value, _ ->
+                foldProgress = value
             }
-            launch {
-                animate(
-                    0f,
-                    1f,
-                    animationSpec = tween(1000, easing = EaseOutBounce)
-                ) { value, _ ->
-                    foldProgress = value
-                }
+
+            delay(snackbarModel.duration.duration)
+
+            animate(
+                1f,
+                0f,
+                animationSpec = tween(1000, easing = EaseOutBounce)
+            ) { value, _ ->
+                foldProgress = value
             }
+            isVisible = false
+            onSnackbarDismiss()
         }
     }
 
+    if (isVisible) {
         Box(
             modifier = Modifier
                 .padding(8.dp)
@@ -159,7 +152,7 @@ fun CustomSnackbar(
                         }
                         if (snackbarModel?.message != null) {
                             Text(
-                                text = message ,
+                                text = message,
                                 color = Color.White,
                                 fontSize = 14.sp,
                                 maxLines = 3,
@@ -173,3 +166,4 @@ fun CustomSnackbar(
             )
         }
     }
+}

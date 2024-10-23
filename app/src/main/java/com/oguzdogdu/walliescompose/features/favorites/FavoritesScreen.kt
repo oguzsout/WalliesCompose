@@ -58,14 +58,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.data.common.ImageLoadingState
-import com.oguzdogdu.walliescompose.features.appstate.CustomSnackbar
+import com.oguzdogdu.walliescompose.features.appstate.AnimatableSnackbar
 import com.oguzdogdu.walliescompose.features.appstate.SnackbarModel
 import com.oguzdogdu.walliescompose.features.favorites.effect.FavoriteScreenEffect
 import com.oguzdogdu.walliescompose.features.favorites.event.FavoriteScreenEvent
 import com.oguzdogdu.walliescompose.features.favorites.state.FavoriteScreenState
 import com.oguzdogdu.walliescompose.ui.theme.regular
 import com.oguzdogdu.walliescompose.util.shareExternal
-import kotlinx.coroutines.launch
 
 typealias onFavoritesScreenEvent = (FavoriteScreenEvent) -> Unit
 @Composable
@@ -111,7 +110,9 @@ fun FavoritesScreenRoute(
             )
         }
     }, snackbarHost = {
-        CustomSnackbar(snackbarModel = snackbarModel)
+        AnimatableSnackbar(snackbarModel = snackbarModel, onSnackbarDismiss = {
+            snackbarModel = null
+        })
     }) { paddingValues ->
         Column(
             modifier = Modifier

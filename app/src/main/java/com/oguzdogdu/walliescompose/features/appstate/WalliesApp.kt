@@ -7,9 +7,7 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -47,7 +45,6 @@ import com.oguzdogdu.walliescompose.util.NetworkMonitor
 import com.oguzdogdu.walliescompose.util.currentRouteClassName
 import com.oguzdogdu.walliescompose.util.routeClassName
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -92,7 +89,10 @@ fun WalliesApp(
                 )
             },
             snackbarHost = {
-                CustomSnackbar(snackbarModel = snackbarModel)
+                AnimatableSnackbar(snackbarModel = snackbarModel, onSnackbarDismiss = {
+                    snackbarModel = null
+                }
+                )
             }
         ) { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {

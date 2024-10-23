@@ -32,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,7 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oguzdogdu.walliescompose.R
-import com.oguzdogdu.walliescompose.features.appstate.CustomSnackbar
+import com.oguzdogdu.walliescompose.features.appstate.AnimatableSnackbar
 import com.oguzdogdu.walliescompose.features.appstate.SnackbarModel
 import com.oguzdogdu.walliescompose.ui.theme.medium
 
@@ -112,7 +113,8 @@ fun ChangeNameAndSurnameScreenRoute(
                 snackbarModel = snackbarModel,
                 onPersonalInfoEditScreenEvent = { event ->
                     viewModel.sendEvent(event)
-                }
+                },
+                onDismissSnackbar = { snackbarModel = null }
             )
         }
     }
@@ -123,6 +125,7 @@ fun ChangeEmailScreenContent(
     initialState: EditPersonalInfoState,
     snackbarModel: SnackbarModel?,
     onPersonalInfoEditScreenEvent: onPersonalInfoEditScreenEvent,
+    onDismissSnackbar: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var name by remember { mutableStateOf("") }
@@ -131,6 +134,7 @@ fun ChangeEmailScreenContent(
     var isSurnameFocused by remember { mutableStateOf(false) }
     val nameInteractionSource = remember { MutableInteractionSource() }
     val surnameInteractionSource = remember { MutableInteractionSource() }
+    val snackbar by rememberUpdatedState(snackbarModel)
 
     LaunchedEffect(initialState) {
         if (initialState.name?.isNotEmpty() == true or (initialState.surname?.isNotEmpty() == true)) {
@@ -254,7 +258,7 @@ fun ChangeEmailScreenContent(
                 .align(Alignment.BottomCenter),
             verticalArrangement = Arrangement.Center
         ) {
-            CustomSnackbar(snackbarModel = snackbarModel)
+            AnimatableSnackbar(snackbarModel = snackbar, onSnackbarDismiss = onDismissSnackbar)
             Button(
                 onClick = {
                     onPersonalInfoEditScreenEvent.invoke(
@@ -290,6 +294,7 @@ fun ChangeNameAndSurnamePreview() {
     ChangeEmailScreenContent(
         snackbarModel = null,
         initialState = EditPersonalInfoState("Muhammet", "Küdür"),
-        onPersonalInfoEditScreenEvent = { }
+        onPersonalInfoEditScreenEvent = { },
+        onDismissSnackbar = { }
     )
 }
