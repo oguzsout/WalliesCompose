@@ -9,7 +9,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.shrinkOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,11 +19,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,6 +36,7 @@ import androidx.compose.material3.CardColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -70,6 +74,7 @@ import com.oguzdogdu.walliescompose.ui.theme.bold
 import com.oguzdogdu.walliescompose.ui.theme.medium
 import com.oguzdogdu.walliescompose.util.MenuRow
 import com.oguzdogdu.walliescompose.util.ReusableMenuRow
+import com.oguzdogdu.walliescompose.util.resolveImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import okhttp3.internal.immutableListOf
@@ -326,18 +331,9 @@ fun AuthenticatedUserWelcomeCard(
                 },
                 label = ""
             ) { image ->
-                AsyncImage(
-                    model = image,
-                    contentScale = ContentScale.FillBounds,
-                    contentDescription = "Profile Image",
-                    modifier = Modifier
-                        .size(96.dp)
-                        .clip(CircleShape)
-                        .clickable {
-                            if (userInfoState.isAuthenticatedWithFirebase) {
-                                onChangeProfilePhotoClick.invoke(true)
-                            }
-                        }
+                EditableProfileImage(
+                    profileImage = image,
+                    onChangeProfilePhotoClick = onChangeProfilePhotoClick
                 )
             }
             Spacer(modifier = Modifier.size(8.dp))
@@ -365,6 +361,65 @@ fun AuthenticatedUserWelcomeCard(
         }
     }
 }
+
+@Composable
+fun EditableProfileImage(
+    profileImage: String?,
+    onChangeProfilePhotoClick: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.wrapContentWidth().height(150.dp),
+    ) {
+        AsyncImage(
+            model = resolveImage(
+                profileImage = profileImage,
+                uri = null,
+                defaultImage = R.drawable.ic_default_avatar
+            ),
+            contentScale = ContentScale.FillBounds,
+            contentDescription = "Profile Image",
+            modifier = Modifier
+                .size(136.dp)
+                .clip(CircleShape)
+                .border(
+                    border = BorderStroke(
+                        width = 2.dp,
+                        color = Color.Gray
+                    ), shape = CircleShape
+                )
+                .align(Alignment.TopCenter)
+        )
+            OutlinedButton(
+                onClick = { onChangeProfilePhotoClick(true) },
+                modifier = Modifier.wrapContentSize().align(Alignment.BottomCenter).height(32.dp),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp),
+                elevation = ButtonDefaults.elevatedButtonElevation(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Row(
+                    modifier = Modifier.wrapContentSize(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(space = 8.dp, alignment = Alignment.CenterHorizontally)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_photo),
+                        contentDescription = "Photo Icon",
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.edit),
+                        fontSize = 16.sp,
+                        fontFamily = medium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
+            }
+        }
+    }
+
 
 @Composable
 fun EditProfileInformationContent(
