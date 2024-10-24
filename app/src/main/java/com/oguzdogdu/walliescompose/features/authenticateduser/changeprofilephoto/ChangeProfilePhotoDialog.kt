@@ -53,6 +53,7 @@ import coil.compose.AsyncImage
 import com.oguzdogdu.walliescompose.R
 import com.oguzdogdu.walliescompose.features.authenticateduser.UserInfoState
 import com.oguzdogdu.walliescompose.ui.theme.medium
+import com.oguzdogdu.walliescompose.util.resolveImage
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -135,6 +136,7 @@ fun BottomSheetContent(
     onChangeProfilePhotoButtonClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+
     Column(
         modifier = modifier
             .padding(8.dp)
@@ -162,8 +164,12 @@ fun BottomSheetContent(
             label = ""
         ) { uri ->
             AsyncImage(
-                model = uri ?: userInfoState.profileImage,
-                contentScale = ContentScale.None,
+                model = resolveImage(
+                    profileImage = userInfoState.profileImage,
+                    uri = uri,
+                    defaultImage = R.drawable.ic_default_avatar
+                ),
+                contentScale = ContentScale.FillBounds,
                 contentDescription = "Profile Image",
                 modifier = modifier
                     .size(160.dp)
