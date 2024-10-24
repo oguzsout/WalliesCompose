@@ -160,4 +160,5 @@
     <string name="landscape">yatay </string>
     <string name="add_favorites">Resim favorilere eklendi </string>
     <string name="delete_favorites">Resim favorilerden silindi </string>
+    <string name="edit">Düzenle </string>
 </resources>
